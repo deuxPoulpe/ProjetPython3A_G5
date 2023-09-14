@@ -81,7 +81,7 @@ class World:
 			self.grid[x][y].append(bob)     #Place le Bob dans le world
 
 
-	def affichage_iso(self):
+	def affichage_iso(self , update_interval):
 		# Dimensions de la fenêtre
 		window_width = 900
 		window_height = 700
@@ -96,8 +96,8 @@ class World:
 		red = (255, 0, 0)
 
 		
-		cell_width = 40
-		cell_height = 20
+		cell_width = 4
+		cell_height = 2
 
 		# Position de départ pour dessiner la grille
 		start_x = 450 
@@ -106,7 +106,6 @@ class World:
 		running = True
 		clock = pygame.time.Clock()
 
-		update_interval = 500
 		last_update_time = pygame.time.get_ticks() 
 
 		while running:
@@ -127,7 +126,7 @@ class World:
 
 					# Dessine les Bobs s'ils sont présents dans la case
 					if any(isinstance(element, Bob) for element in self.grid[i][j]):
-						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), 10)
+						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), 1)
 
 			pygame.display.flip()
 
@@ -150,8 +149,8 @@ class World:
 
 
 
-world1 = World(10)
+world1 = World(100)
 for i in range(10):
 	world1.spawn("bob")
 
-world1.affichage_iso()
+world1.affichage_iso(100)
