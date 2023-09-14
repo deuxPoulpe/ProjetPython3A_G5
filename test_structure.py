@@ -96,8 +96,8 @@ class World:
 		red = (255, 0, 0)
 
 		
-		cell_width = 4
-		cell_height = 2
+		cell_width = 400 // self.size
+		cell_height = 200 // self.size
 
 		# Position de départ pour dessiner la grille
 		start_x = 450 
@@ -150,7 +150,7 @@ class World:
 
 
 world1 = World(100)
-for i in range(10):
+for i in range(100):
 	world1.spawn("bob")
 
 world1.affichage_iso(100)
