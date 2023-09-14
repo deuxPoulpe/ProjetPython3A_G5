@@ -83,8 +83,8 @@ class World:
 
 	def affichage_iso(self , update_interval):
 		# Dimensions de la fenêtre
-		window_width = 900
-		window_height = 700
+		window_width = 1280
+		window_height = 720
 
 		# Initialisation de Pygame
 		pygame.init()
@@ -95,13 +95,14 @@ class World:
 		black = (0, 0, 0)
 		red = (255, 0, 0)
 
-		
-		cell_width = 400 // self.size
-		cell_height = 200 // self.size
+		ratio = 100 // self.size
+
+		cell_width = 1.5*ratio*4
+		cell_height = 1.5*ratio*2
 
 		# Position de départ pour dessiner la grille
-		start_x = 450 
-		start_y = 150
+		start_x = window_width // 2 
+		start_y = window_height * (1/10)
 
 		running = True
 		clock = pygame.time.Clock()
@@ -118,15 +119,22 @@ class World:
 			for i in range(self.size):
 				for j in range(self.size):
 					# Calcul des coordonnées isométriques
-					x = start_x + (i - j) * cell_width
-					y = start_y + (i + j) * cell_height
+					x = start_x + (i - j) * cell_width	
+					y = start_y + (i + j) * cell_height 
 
 					# Dessine une case vide
-					pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
+					lozenge_points = [
+					(x + cell_width // 2, y + cell_height * 1.5),
+					(x + cell_width * 1.5, y + cell_height // 2,),
+					(x + cell_width // 2, y - cell_height // 2),
+					(x - cell_width // 2, y + cell_height // 2,),					
+					]
+					# pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
+					pygame.draw.polygon(screen, black, lozenge_points,1)
 
 					# Dessine les Bobs s'ils sont présents dans la case
 					if any(isinstance(element, Bob) for element in self.grid[i][j]):
-						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), 1)
+						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
 
 			pygame.display.flip()
 
@@ -149,8 +157,8 @@ class World:
 
 
 
-world1 = World(100)
-for i in range(100):
+world1 = World(50)
+for i in range(2):
 	world1.spawn("bob")
 
-world1.affichage_iso(100)
+world1.affichage_iso(200)
