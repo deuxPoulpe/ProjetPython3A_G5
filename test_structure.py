@@ -1,4 +1,6 @@
 import random
+import pygame
+import time
 
 # Classe représentant un Bob
 class Bob:
@@ -78,6 +80,67 @@ class World:
 			self.bobs.append(bob)   #Ajoute le Bob créé dans la liste de tout les Bobs
 			self.grid[x][y].append(bob)     #Place le Bob dans le world
 
+
+	def affichage_iso(self):
+		# Dimensions de la fenêtre
+		window_width = 900
+		window_height = 700
+
+		# Initialisation de Pygame
+		pygame.init()
+		screen = pygame.display.set_mode((window_width, window_height))
+		pygame.display.set_caption("Grille Isométrique")
+
+		green = (0, 102, 51)
+		black = (0, 0, 0)
+		red = (255, 0, 0)
+
+		
+		cell_width = 40
+		cell_height = 20
+
+		# Position de départ pour dessiner la grille
+		start_x = 450 
+		start_y = 150
+
+		running = True
+		clock = pygame.time.Clock()
+
+		update_interval = 500
+		last_update_time = pygame.time.get_ticks() 
+
+		while running:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					running = False
+
+			screen.fill(green)
+
+			for i in range(self.size):
+				for j in range(self.size):
+					# Calcul des coordonnées isométriques
+					x = start_x + (i - j) * cell_width
+					y = start_y + (i + j) * cell_height
+
+					# Dessine une case vide
+					pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
+
+					# Dessine les Bobs s'ils sont présents dans la case
+					if any(isinstance(element, Bob) for element in self.grid[i][j]):
+						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), 10)
+
+			pygame.display.flip()
+
+			current_time = pygame.time.get_ticks()
+			if current_time - last_update_time >= update_interval:
+				for bob in self.bobs:
+					bob.move()
+				last_update_time = current_time
+			clock.tick(60)
+
+
+	pygame.quit()
+
 #####################################################################################
 #																					#
 #									Zone de Teste									#
@@ -85,21 +148,10 @@ class World:
 #####################################################################################
 
 
-world1 = World(20)
-for i in range(20):
+
+
+world1 = World(10)
+for i in range(10):
 	world1.spawn("bob")
 
-# world1.affichage()
-
-# world1.bobs[random.randint(0,len(world1.bobs)-1)].kill()
-
-# print("=======================================")
-# world1.affichage()
-
-while True:
-	
-	world1.affichage()
-	print("=======================================")
-	for bob in world1.bobs:
-		bob.move()
-	input()
+world1.affichage_iso()
