@@ -80,70 +80,86 @@ class World:
 			self.bobs.append(bob)   #Ajoute le Bob créé dans la liste de tout les Bobs
 			self.grid[x][y].append(bob)     #Place le Bob dans le world
 
+	def move_all_bobs(self): 	#Fonction qui appelle la fonction .move() de tout les bobs dans world
+		for bob in self.bobs:
+			bob.move()
 
-	def affichage_iso(self , update_interval):
-		# Dimensions de la fenêtre
-		window_width = 1280
-		window_height = 720
+	def tick_update(self): #Fonction appelé a chaque tick (tick_interval en seconde) 
+		self.move_all_bobs()
+		
 
-		# Initialisation de Pygame
-		pygame.init()
-		screen = pygame.display.set_mode((window_width, window_height))
-		pygame.display.set_caption("Grille Isométrique")
 
+	def affichage_grid_iso(self , screen , start_x , start_y , cell_width , cell_height , ratio):
 		green = (0, 102, 51)
 		black = (0, 0, 0)
 		red = (255, 0, 0)
+		for i in range(self.size):
+			for j in range(self.size):
+				# Calcul des coordonnées isométriques
+				x = start_x + (i - j) * cell_width	
+				y = start_y + (i + j) * cell_height 
 
-		ratio = 100 // self.size
+				# Dessine une case vide
+				lozenge_points = [
+				(x + cell_width // 2, y + cell_height * 1.5),
+				(x + cell_width * 1.5, y + cell_height // 2,),
+				(x + cell_width // 2, y - cell_height // 2),
+				(x - cell_width // 2, y + cell_height // 2,),					
+				]
+				# pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
+				pygame.draw.polygon(screen, black, lozenge_points,1)
 
-		cell_width = 1.5*ratio*4
-		cell_height = 1.5*ratio*2
+				# Dessine les Bobs s'ils sont présents dans la case
+				if any(isinstance(element, Bob) for element in self.grid[i][j]):
+					pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
 
-		# Position de départ pour dessiner la grille
-		start_x = window_width // 2 
-		start_y = window_height * (1/10)
 
-		running = True
-		clock = pygame.time.Clock()
 
-		last_update_time = pygame.time.get_ticks() 
+def pygame_screen(world , tick_interval):
+	
+	# Dimensions de la fenêtre
+	window_width = 1280
+	window_height = 720
 
-		while running:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					running = False
+	# Initialisation de Pygame
+	pygame.init()
+	screen = pygame.display.set_mode((window_width, window_height))
+	pygame.display.set_caption("Simulation of Bobs")
 
-			screen.fill(green)
+	green = (0, 102, 51)
+	black = (0, 0, 0)
+	red = (255, 0, 0)
 
-			for i in range(self.size):
-				for j in range(self.size):
-					# Calcul des coordonnées isométriques
-					x = start_x + (i - j) * cell_width	
-					y = start_y + (i + j) * cell_height 
+	ratio = 100 // world1.size
 
-					# Dessine une case vide
-					lozenge_points = [
-					(x + cell_width // 2, y + cell_height * 1.5),
-					(x + cell_width * 1.5, y + cell_height // 2,),
-					(x + cell_width // 2, y - cell_height // 2),
-					(x - cell_width // 2, y + cell_height // 2,),					
-					]
-					# pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
-					pygame.draw.polygon(screen, black, lozenge_points,1)
+	cell_width = 1.5*ratio*4
+	cell_height = 1.5*ratio*2
 
-					# Dessine les Bobs s'ils sont présents dans la case
-					if any(isinstance(element, Bob) for element in self.grid[i][j]):
-						pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
+	# Position de départ pour dessiner la grille
+	start_x = window_width // 2 
+	start_y = window_height * (1/10)
 
-			pygame.display.flip()
+	running = True
+	clock = pygame.time.Clock()
+	# tick_interval = 200
+	last_update_time = pygame.time.get_ticks() 
 
-			current_time = pygame.time.get_ticks()
-			if current_time - last_update_time >= update_interval:
-				for bob in self.bobs:
-					bob.move()
-				last_update_time = current_time
-			clock.tick(60)
+	while running:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				running = False
+
+		screen.fill(green)
+
+		world.affichage_grid_iso(screen , start_x , start_y , cell_width , cell_height , ratio)
+
+		pygame.display.flip()
+
+		current_time = pygame.time.get_ticks()
+		if current_time - last_update_time >= tick_interval:
+			world.tick_update()
+			last_update_time = current_time
+		clock.tick(60)
 
 
 	pygame.quit()
@@ -154,11 +170,10 @@ class World:
 #																					#
 #####################################################################################
 
+if __name__ == "__main__":
 
+	world1 = World(100)
+	for i in range(50):
+		world1.spawn("bob")
 
-
-world1 = World(50)
-for i in range(2):
-	world1.spawn("bob")
-
-world1.affichage_iso(200)
+	pygame_screen(world1 , 100)
