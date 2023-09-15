@@ -91,8 +91,10 @@ class World:
 
 	def affichage_grid_iso(self , screen , start_x , start_y , cell_width , cell_height , ratio):
 		green = (0, 102, 51)
-		black = (0, 0, 0)
+		black = (0, 70, 51)
 		red = (255, 0, 0)
+		sprite_image = pygame.image.load("assets/bob.png")
+		sprite_image = pygame.transform.scale(sprite_image, (ratio*5, ratio*5))
 		for i in range(self.size):
 			for j in range(self.size):
 				# Calcul des coordonnées isométriques
@@ -107,11 +109,22 @@ class World:
 				(x - cell_width // 2, y + cell_height // 2,),					
 				]
 				# pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
-				pygame.draw.polygon(screen, black, lozenge_points,1)
+				# pygame.draw.polygon(screen, black, lozenge_points,1)
 
 				# Dessine les Bobs s'ils sont présents dans la case
 				if any(isinstance(element, Bob) for element in self.grid[i][j]):
-					pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
+					# pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
+					bob = next((element for element in self.grid[i][j] if isinstance(element, Bob)), None)
+					if bob:
+						# Utilisez la position du Bob pour dessiner le sprite
+						sprite_x = x + cell_width // 2 - ratio * 2.5
+						sprite_y = y + cell_height // 2 - ratio * 3
+
+						# Dessinez l'image du sprite à la position calculée
+						screen.blit(sprite_image, (sprite_x, sprite_y))
+
+				pygame.draw.polygon(screen, black, lozenge_points,1)
+
 
 
 
@@ -172,8 +185,8 @@ def pygame_screen(world , tick_interval):
 
 if __name__ == "__main__":
 
-	world1 = World(100)
-	for i in range(50):
+	world1 = World(50)
+	for i in range(10):
 		world1.spawn("bob")
 
 	pygame_screen(world1 , 100)
