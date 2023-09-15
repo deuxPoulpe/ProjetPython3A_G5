@@ -186,8 +186,8 @@ def pygame_screen(world , tick_interval):
 		if dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
 			current_mouse_pos = pygame.mouse.get_pos()
 			if drag_start:
-				new_x = current_mouse_pos[0] - drag_start[0]
-				new_y = current_mouse_pos[1] - drag_start[1]
+				new_x = drag_start[0] - current_mouse_pos[0] 
+				new_y = drag_start[1] - current_mouse_pos[1]
 				camera_x += new_x
 				camera_y += new_y
 				drag_start = current_mouse_pos
@@ -216,7 +216,7 @@ def pygame_screen(world , tick_interval):
 if __name__ == "__main__":
 
 
-	world1 = World(50)
+	world1 = World(100)
 	for i in range(10):
 		world1.spawn("bob")
 
