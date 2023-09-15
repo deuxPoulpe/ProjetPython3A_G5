@@ -1,6 +1,9 @@
 import random
 import pygame
-import time
+camera_x = 0
+camera_y = 0
+zoom_factor = 100
+zoom_speed = 10
 
 # Classe représentant un Bob
 class Bob:
@@ -89,47 +92,54 @@ class World:
 		
 
 
-	def affichage_grid_iso(self , screen , start_x , start_y , cell_width , cell_height , ratio):
+	def affichage_grid_iso(self, screen, start_x, start_y, cell_width, cell_height, ratio):
 		green = (0, 102, 51)
-		black = (0, 70, 51)
+		black = (0, 0, 0)
 		red = (255, 0, 0)
 		sprite_image = pygame.image.load("assets/bob.png")
-		sprite_image = pygame.transform.scale(sprite_image, (ratio*5, ratio*5))
+		sprite_image = pygame.transform.scale(sprite_image, (ratio * 5, ratio * 5))
+
+		# Calculez le coin supérieur gauche de la grille en fonction de la caméra
+		grid_start_x = start_x - camera_x
+		grid_start_y = start_y - camera_y
+
 		for i in range(self.size):
 			for j in range(self.size):
 				# Calcul des coordonnées isométriques
-				x = start_x + (i - j) * cell_width	
-				y = start_y + (i + j) * cell_height 
+				x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
+				y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
 
 				# Dessine une case vide
 				lozenge_points = [
-				(x + cell_width // 2, y + cell_height * 1.5),
-				(x + cell_width * 1.5, y + cell_height // 2,),
-				(x + cell_width // 2, y - cell_height // 2),
-				(x - cell_width // 2, y + cell_height // 2,),					
+					(x + cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 * 1.5),
+					(x + cell_width * zoom_factor / 100 * 1.5, y + cell_height * zoom_factor / 100 / 2,),
+					(x + cell_width * zoom_factor / 100 / 2, y - cell_height * zoom_factor / 100 / 2),
+					(x - cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 / 2,),
 				]
-				# pygame.draw.rect(screen, black, (x, y, cell_width, cell_height), 1)
-				# pygame.draw.polygon(screen, black, lozenge_points,1)
-
 				# Dessine les Bobs s'ils sont présents dans la case
 				if any(isinstance(element, Bob) for element in self.grid[i][j]):
-					# pygame.draw.circle(screen, red, (x + cell_width // 2, y + cell_height // 2), ratio*2)
 					bob = next((element for element in self.grid[i][j] if isinstance(element, Bob)), None)
 					if bob:
-						# Utilisez la position du Bob pour dessiner le sprite
-						sprite_x = x + cell_width // 2 - ratio * 2.5
-						sprite_y = y + cell_height // 2 - ratio * 3
+						sprite_x = x 
+						sprite_y = y - cell_height * zoom_factor / 200
 
-						# Dessinez l'image du sprite à la position calculée
-						screen.blit(sprite_image, (sprite_x, sprite_y))
+						sprite_width = sprite_image.get_width() * zoom_factor / 100
+						sprite_height = sprite_image.get_height() * zoom_factor / 100
 
-				pygame.draw.polygon(screen, black, lozenge_points,1)
+						screen.blit(pygame.transform.scale(sprite_image, (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
+
+				pygame.draw.polygon(screen, black, lozenge_points, 1)
 
 
 
 
 def pygame_screen(world , tick_interval):
-	
+
+	global zoom_factor, camera_x, camera_y
+
+	dragging = False  
+	drag_start = None
+
 	# Dimensions de la fenêtre
 	window_width = 1280
 	window_height = 720
@@ -140,10 +150,8 @@ def pygame_screen(world , tick_interval):
 	pygame.display.set_caption("Simulation of Bobs")
 
 	green = (0, 102, 51)
-	black = (0, 0, 0)
-	red = (255, 0, 0)
 
-	ratio = 100 // world1.size
+	ratio = 100 // world.size
 
 	cell_width = 1.5*ratio*4
 	cell_height = 1.5*ratio*2
@@ -154,13 +162,35 @@ def pygame_screen(world , tick_interval):
 
 	running = True
 	clock = pygame.time.Clock()
-	# tick_interval = 200
-	last_update_time = pygame.time.get_ticks() 
+	last_update_time = pygame.time.get_ticks()
 
 	while running:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
+
+			if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:  #zoom avant
+				zoom_factor += zoom_speed
+			elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:  #zoom arrière
+				zoom_factor -= zoom_speed
+				if zoom_factor < 10:  
+					zoom_factor = 10
+
+			if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+				dragging = True
+				drag_start = pygame.mouse.get_pos()
+			elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+				dragging = False
+				drag_start = None
+
+		if dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
+			current_mouse_pos = pygame.mouse.get_pos()
+			if drag_start:
+				new_x = current_mouse_pos[0] - drag_start[0]
+				new_y = current_mouse_pos[1] - drag_start[1]
+				camera_x += new_x
+				camera_y += new_y
+				drag_start = current_mouse_pos
 
 		screen.fill(green)
 
@@ -184,6 +214,7 @@ def pygame_screen(world , tick_interval):
 #####################################################################################
 
 if __name__ == "__main__":
+
 
 	world1 = World(50)
 	for i in range(10):
