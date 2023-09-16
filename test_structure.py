@@ -3,7 +3,7 @@ import pygame
 camera_x = 0
 camera_y = 0
 zoom_factor = 100
-zoom_speed = 10
+zoom_speed = 50
 
 # Classe représentant un Bob
 class Bob:
@@ -93,11 +93,10 @@ class World:
 
 
 	def affichage_grid_iso(self, screen, start_x, start_y, cell_width, cell_height, ratio):
-		green = (0, 102, 51)
-		black = (0, 0, 0)
-		red = (255, 0, 0)
+		
+		black = (0, 80, 51)
 		sprite_image = pygame.image.load("assets/bob.png")
-		sprite_image = pygame.transform.scale(sprite_image, (ratio * 5, ratio * 5))
+
 
 		# Calculez le coin supérieur gauche de la grille en fonction de la caméra
 		grid_start_x = start_x - camera_x
@@ -117,14 +116,14 @@ class World:
 					(x - cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 / 2,),
 				]
 				# Dessine les Bobs s'ils sont présents dans la case
-				if any(isinstance(element, Bob) for element in self.grid[i][j]):
+				if any(element for element in self.grid[i][j]):
 					bob = next((element for element in self.grid[i][j] if isinstance(element, Bob)), None)
 					if bob:
-						sprite_x = x 
-						sprite_y = y - cell_height * zoom_factor / 200
+						sprite_x = x + cell_width / 1.5
+						sprite_y = y - cell_height * zoom_factor / 400
 
-						sprite_width = sprite_image.get_width() * zoom_factor / 100
-						sprite_height = sprite_image.get_height() * zoom_factor / 100
+						sprite_width = sprite_image.get_width() * zoom_factor / 400
+						sprite_height = sprite_image.get_height() * zoom_factor / 400
 
 						screen.blit(pygame.transform.scale(sprite_image, (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
 
@@ -146,12 +145,13 @@ def pygame_screen(world , tick_interval):
 
 	# Initialisation de Pygame
 	pygame.init()
-	screen = pygame.display.set_mode((window_width, window_height))
+	screen = pygame.display.set_mode((window_width, window_height),pygame.RESIZABLE)
 	pygame.display.set_caption("Simulation of Bobs")
 
 	green = (0, 102, 51)
+	black = (0, 0, 0)
 
-	ratio = 100 // world.size
+	ratio = 1
 
 	cell_width = 1.5*ratio*4
 	cell_height = 1.5*ratio*2
@@ -168,6 +168,9 @@ def pygame_screen(world , tick_interval):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
+			elif event.type == pygame.VIDEORESIZE:
+				screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
+
 
 			if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:  #zoom avant
 				zoom_factor += zoom_speed
@@ -194,6 +197,7 @@ def pygame_screen(world , tick_interval):
 
 		screen.fill(green)
 
+		screen.blit(pygame.font.Font(None, 20).render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
 		world.affichage_grid_iso(screen , start_x , start_y , cell_width , cell_height , ratio)
 
 		pygame.display.flip()
@@ -202,7 +206,11 @@ def pygame_screen(world , tick_interval):
 		if current_time - last_update_time >= tick_interval:
 			world.tick_update()
 			last_update_time = current_time
-		clock.tick(60)
+
+		
+
+
+		clock.tick()
 
 
 	pygame.quit()
@@ -217,7 +225,7 @@ if __name__ == "__main__":
 
 
 	world1 = World(100)
-	for i in range(10):
+	for i in range(1000):
 		world1.spawn("bob")
 
 	pygame_screen(world1 , 100)
