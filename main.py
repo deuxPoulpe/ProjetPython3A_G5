@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 	# choose_simulation()
 
-	run_simulation(50, 20, 100)
+	run_simulation(100, 20, 1)
 
 
 	

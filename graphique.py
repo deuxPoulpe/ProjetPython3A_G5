@@ -40,25 +40,61 @@ class Affichage_graphique:
 		floor.draw(screen)
 
 		
+	def affichage_bob_food(self, screen):
+
+		
+
+		cell_width = 1.5*4
+		cell_height = 1.5*2
+
+		start_x = 1280 // 2 
+		start_y = 720 * (1/10)	
+
+		# Calculez le coin supérieur gauche de la grille en fonction de la caméra
+		grid_start_x = start_x - camera_x
+		grid_start_y = start_y - camera_y
+
+	
+		for bob in self.world.getBobs():
+
+			i,j = bob.getPos()
+
+			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
+			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
+
+			sprite_x = x + cell_width / 1.5 * zoom_factor / 400
+			sprite_y = y - cell_height * zoom_factor / 400
+
+			sprite_width = bob.getSprite().get_width() * zoom_factor / 400
+			sprite_height = bob.getSprite().get_height() * zoom_factor / 400
+
+			screen.blit(pygame.transform.scale(bob.getSprite(), (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
+
+
+		for food in self.world.getFoods():
+			i,j = food.getPos()
+
+			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
+			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
+
+			food_x = x + 2*cell_width * zoom_factor / 400
+			food_y = y + 2* cell_height * zoom_factor / 400
+			pygame.draw.circle(screen, (0,0,0), (int(food_x), int(food_y)), 8*zoom_factor / 400)
+			
+
+
+				
 
 
 	def affichage_grid_iso(self, screen):
 
 		size = self.world.getSize()
-		grid = self.world.getGrid()
 
-		window_width = 1280
-		window_height = 720
-		
-		green = (0, 80, 51)
-		black = (0, 0, 0)
-		# sprite_image = pygame.image.load("./ProjetPython3A_G5/assets/bob.png")
-		sprite_image = pygame.image.load("C:/Users/unPoulpe/Desktop/InsaCVL2023/ProjetPython/test/assets/bob2.png")
-
+	
 		cell_width = 1.5*4
 		cell_height = 1.5*2
-		start_x = window_width // 2 
-		start_y = window_height * (1/10)	
+		start_x = 1280 // 2 
+		start_y = 720 * (1/10)	
 
 		# Calculez le coin supérieur gauche de la grille en fonction de la caméra
 		grid_start_x = start_x - camera_x
@@ -80,6 +116,8 @@ class Affichage_graphique:
 
 		pygame.draw.polygon(screen, (0, 0, 0), base, 0)
 
+		grid_to_draw = []
+
 
 		for i in range(size):
 			for j in range(size):
@@ -90,32 +128,17 @@ class Affichage_graphique:
 				# Dessine une case vide
 				case = [
 					(x + cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 * 1.5),
-					(x + cell_width * zoom_factor / 100 * 1.5, y + cell_height * zoom_factor / 100 / 2,),
+					(x + cell_width * zoom_factor / 100 * 1.5, y + cell_height * zoom_factor / 100 / 2),
 					(x + cell_width * zoom_factor / 100 / 2, y - cell_height * zoom_factor / 100 / 2),
-					(x - cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 / 2,),
+					(x - cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 / 2)
 				]
 
 				pygame.draw.polygon(screen, (0, 120, 51), case, 0)
-
-				if any(element for element in grid[i][j]):
-					bob = next((element for element in grid[i][j] if isinstance(element, Bob)), None)
-					food = next((element for element in grid[i][j] if isinstance(element, Food)), None)
-					if food:
-						food_x = x + 2*cell_width * zoom_factor / 400
-						food_y = y + 2* cell_height * zoom_factor / 400
-						pygame.draw.circle(screen, black, (int(food_x), int(food_y)), 8*zoom_factor / 400)
-					if bob:
-						sprite_x = x + cell_width / 1.5 * zoom_factor / 400
-						sprite_y = y - cell_height * zoom_factor / 400
-
-						sprite_width = sprite_image.get_width() * zoom_factor / 400
-						sprite_height = sprite_image.get_height() * zoom_factor / 400
-
-						screen.blit(pygame.transform.scale(sprite_image, (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
-
-					
-
 				pygame.draw.polygon(screen, (0, 51, 51), case, 1)
+
+
+
+				
 
 
 
@@ -138,12 +161,13 @@ class Affichage_graphique:
 		clock = pygame.time.Clock()
 		last_update_time = pygame.time.get_ticks()
 
+		font = pygame.font.Font(None, 20)
+
 
 
 		while running:
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-					print("pause")
 					pause = True
 					while pause:
 						for event in pygame.event.get():
@@ -206,19 +230,19 @@ class Affichage_graphique:
 
 			screen.fill((135,206,250))
 
-
 			self.affichage_grid_iso(screen)
+			self.affichage_bob_food(screen)
 			
 			# self.affichage_grid_iso_sprite(screen)
 
 
 
-			screen.blit(pygame.font.Font(None, 20).render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
-			screen.blit(pygame.font.Font(None, 20).render(f"TICK: {self.world.tick}", True, black), (10, 30))
-			screen.blit(pygame.font.Font(None, 20).render(f"DAYS: {self.world.tick//100}", True, black), (10, 50))
-			screen.blit(pygame.font.Font(None, 20).render(f"TICK TIME: {tick_interval/1000}s", True, black), (10, 70))
-			screen.blit(pygame.font.Font(None, 20).render(f"POPULATION: {len(self.world.bobs)}", True, black), (10, 90))
-			screen.blit(pygame.font.Font(None, 20).render(f"TIME: {pygame.time.get_ticks()/1000}s", True, black), (10, 110))
+			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
+			screen.blit(font.render(f"TICK: {self.world.tick}", True, black), (10, 30))
+			screen.blit(font.render(f"DAYS: {self.world.tick//100}", True, black), (10, 50))
+			screen.blit(font.render(f"TICK TIME: {tick_interval/1000}s", True, black), (10, 70))
+			screen.blit(font.render(f"POPULATION: {len(self.world.bobs)}", True, black), (10, 90))
+			screen.blit(font.render(f"TIME: {pygame.time.get_ticks()/1000}s", True, black), (10, 110))
 			
 			
 
@@ -244,7 +268,7 @@ class Affichage_graphique:
 		ax.plot(range(len(self.world.population_data)), self.world.population_data, label = "Population")
 		ax.plot(range(len(self.world.food_data)), self.world.food_data, label = "Food")
 		ax.legend()
-		plt.xlabel('Days')
+		plt.xlabel('Ticks')
 		plt.title('Bob Population / Food evolution Over Time')
 		plt.grid(True)
 		plt.show()

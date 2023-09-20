@@ -1,5 +1,6 @@
 import random
 from food import Food
+import pygame
 
 class Bob:
 	def __init__(self, x, y,world, velocity=1, mass=1, perception=0, memory_space=0, energy=100, maxEnergy=200):
@@ -13,6 +14,7 @@ class Bob:
 		self.remembered_food = []
 		self.world = world
 		self.maxEnergy = maxEnergy
+		self.sprite = pygame.image.load("C:/Users/unPoulpe/Desktop/InsaCVL2023/ProjetPython/test/assets/bob2.png")
 
 	def __str__(self):
 		return str(print("Bob", self.x, self.y, self.velocity, self.mass, self.perception, self.memory_space, self.energy))
@@ -65,6 +67,8 @@ class Bob:
 		return (self.x,self.y) #Retourne la position du Bob
 	def getMaxEnergy(self):
 		return self.maxEnergy
+	def getSprite(self):
+		return self.sprite
 	
 	def update_tick(self):
 		if self.move():

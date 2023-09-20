@@ -22,3 +22,5 @@ class Food:
 	
 	def getFoodValue(self):
 		return self.food_value
+	def getPos(self):
+		return (self.x,self.y)

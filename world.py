@@ -22,6 +22,10 @@ class World:
 		return self.grid
 	def getSize(self):
 		return self.size
+	def getBobs(self):
+		return self.bobs
+	def getFoods(self):
+		return self.foods
 
 
 	def addBobtokill(self,bob):
