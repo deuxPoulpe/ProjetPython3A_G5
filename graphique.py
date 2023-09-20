@@ -126,11 +126,15 @@ class Affichage_graphique:
 				y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)		
 
 				# Dessine une case vide
+
+				const_x = cell_width * zoom_factor / 100 / 2
+				const_y = cell_height * zoom_factor / 100 / 2
+
 				case = [
-					(x + cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 * 1.5),
-					(x + cell_width * zoom_factor / 100 * 1.5, y + cell_height * zoom_factor / 100 / 2),
-					(x + cell_width * zoom_factor / 100 / 2, y - cell_height * zoom_factor / 100 / 2),
-					(x - cell_width * zoom_factor / 100 / 2, y + cell_height * zoom_factor / 100 / 2)
+					(x + const_x, y + cell_height * zoom_factor / 100 * 1.5),
+					(x + cell_width * zoom_factor / 100 * 1.5, y + const_y),
+					(x + const_x, y - const_y),
+					(x - const_x, y + const_y)
 				]
 
 				pygame.draw.polygon(screen, (0, 120, 51), case, 0)
@@ -194,7 +198,6 @@ class Affichage_graphique:
 					if zoom_factor < 10:  
 						zoom_factor = 10
 			
-				#write a fonction that change tick_interval if i presse arrow left or right
 				if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
 					if tick_interval > 100:
 						tick_interval -= 100
@@ -233,8 +236,6 @@ class Affichage_graphique:
 			self.affichage_grid_iso(screen)
 			self.affichage_bob_food(screen)
 			
-			# self.affichage_grid_iso_sprite(screen)
-
 
 
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
@@ -253,15 +254,13 @@ class Affichage_graphique:
 				self.world.tick_update()
 				last_update_time = current_time
 
-			
-			
-			
-
-
+	
 			clock.tick()
 
 
 		pygame.quit()
+
+
 
 	def graph(self):
 		fig , ax = plt.subplots()
