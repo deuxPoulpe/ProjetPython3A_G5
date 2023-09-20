@@ -1,8 +1,6 @@
 import pygame
 import os
 import matplotlib.pyplot as plt
-from bob import Bob
-from food import Food
 from tiles import Tile
 
 camera_x = 0
@@ -22,7 +20,7 @@ class Affichage_graphique:
 		window_width = 1280
 		window_height = 720
 
-		cell_size = 40
+		cell_size = 12
 
 
 
@@ -103,18 +101,19 @@ class Affichage_graphique:
 		size_grid = size - 1
 
 		#cree a base for the grid
+		offset = cell_height * size_grid * zoom_factor / 300
+
 		base = [
 			(grid_start_x + cell_width * zoom_factor / 100 / 2, grid_start_y + cell_height * zoom_factor / 100 * 1.5),
 			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100),
-			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100 + cell_height * size_grid * zoom_factor / 300),
-			(grid_start_x + cell_width * zoom_factor / 100 / 2 , grid_start_y + size_grid * 2 * cell_height * zoom_factor / 100  + cell_height * size_grid * zoom_factor / 300),
-			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2 + cell_height * size_grid * zoom_factor / 300),
-			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2)
-			
+			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100 + offset),
+			(grid_start_x + cell_width * zoom_factor / 100 / 2 , grid_start_y + 2 * size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 * 1.5 + offset),
+			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2 + offset),
+			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2)		
 		]
 
 
-		pygame.draw.polygon(screen, (0, 0, 0), base, 0)
+		pygame.draw.polygon(screen, (26, 13, 0), base, 0)
 
 		grid_to_draw = []
 
