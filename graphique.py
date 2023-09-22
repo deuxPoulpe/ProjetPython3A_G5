@@ -60,13 +60,15 @@ class Affichage_graphique:
 			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
 			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
 
-			sprite_x = x + cell_width / 1.5 * zoom_factor / 400
-			sprite_y = y - cell_height * zoom_factor / 400
+			if x < screen.get_width() and y < screen.get_height():
 
-			sprite_width = bob.getSprite().get_width() * zoom_factor / 400
-			sprite_height = bob.getSprite().get_height() * zoom_factor / 400
+				sprite_x = x + cell_width / 1.5 * zoom_factor / 400
+				sprite_y = y - cell_height * zoom_factor / 400
 
-			screen.blit(pygame.transform.scale(bob.getSprite(), (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
+				sprite_width = bob.getSprite().get_width() * zoom_factor / 400
+				sprite_height = bob.getSprite().get_height() * zoom_factor / 400
+
+				screen.blit(pygame.transform.scale(bob.getSprite(), (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
 
 
 		for food in self.world.getFoods():
@@ -75,9 +77,11 @@ class Affichage_graphique:
 			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
 			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
 
-			food_x = x + 2*cell_width * zoom_factor / 400
-			food_y = y + 2* cell_height * zoom_factor / 400
-			pygame.draw.circle(screen, (0,0,0), (int(food_x), int(food_y)), 8*zoom_factor / 400)
+			if x < screen.get_width() and y < screen.get_height():
+
+				food_x = x + 2*cell_width * zoom_factor / 400
+				food_y = y + 2* cell_height * zoom_factor / 400
+				pygame.draw.circle(screen, (0,0,0), (int(food_x), int(food_y)), 8*zoom_factor / 400)
 			
 
 
@@ -104,7 +108,7 @@ class Affichage_graphique:
 		offset = cell_height * size_grid * zoom_factor / 300
 
 		base = [
-			(grid_start_x + cell_width * zoom_factor / 100 / 2, grid_start_y + cell_height * zoom_factor / 100 * 1.5),
+			(grid_start_x + cell_width * zoom_factor / 100 / 2, grid_start_y - cell_height * zoom_factor / 200),
 			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100),
 			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100 + offset),
 			(grid_start_x + cell_width * zoom_factor / 100 / 2 , grid_start_y + 2 * size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 * 1.5 + offset),
@@ -120,24 +124,29 @@ class Affichage_graphique:
 
 		for i in range(size):
 			for j in range(size):
+
 				# Calcul des coordonnées isométriques
 				x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
-				y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)		
+				y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)	
 
-				# Dessine une case vide
+				if x < screen.get_width() and y < screen.get_height():
+		
+	
 
-				const_x = cell_width * zoom_factor / 100 / 2
-				const_y = cell_height * zoom_factor / 100 / 2
+					# Dessine une case vide
 
-				case = [
-					(x + const_x, y + cell_height * zoom_factor / 100 * 1.5),
-					(x + cell_width * zoom_factor / 100 * 1.5, y + const_y),
-					(x + const_x, y - const_y),
-					(x - const_x, y + const_y)
-				]
+					const_x = cell_width * zoom_factor / 100 / 2
+					const_y = cell_height * zoom_factor / 100 / 2
 
-				pygame.draw.polygon(screen, (0, 120, 51), case, 0)
-				pygame.draw.polygon(screen, (0, 51, 51), case, 1)
+					case = [
+						(x + const_x, y + cell_height * zoom_factor / 100 * 1.5),
+						(x + cell_width * zoom_factor / 100 * 1.5, y + const_y),
+						(x + const_x, y - const_y),
+						(x - const_x, y + const_y)
+					]
+
+					pygame.draw.polygon(screen, (0, 120, 51), case, 0)
+					pygame.draw.polygon(screen, (0, 51, 51), case, 1)
 
 
 
@@ -167,7 +176,7 @@ class Affichage_graphique:
 		font = pygame.font.Font(None, 20)
 
 
-
+		
 		while running:
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -235,7 +244,6 @@ class Affichage_graphique:
 			self.affichage_grid_iso(screen)
 			self.affichage_bob_food(screen)
 			
-
 
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
 			screen.blit(font.render(f"TICK: {self.world.tick}", True, black), (10, 30))
