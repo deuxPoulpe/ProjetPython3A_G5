@@ -129,27 +129,6 @@ class Affichage_graphique:
 		pygame.draw.polygon(screen, (26, 13, 0), base, 0)
 		pygame.draw.polygon(screen, (0, 120, 51), floor, 0)
 
-
-		# for i in range(size):
-		# 	for j in range(size):
-
-		# 		# Calcul des coordonnées isométriques
-		# 		x = grid_start_x + (i - j) * const_x
-		# 		y = grid_start_y + (i + j) * const_y
-
-		# 		if x < screen.get_width() and y < screen.get_height():
-		
-		# 			# Dessine une case vide
-
-		# 			case = [
-		# 				(x,y),
-		# 				(x + const_x, y + const_y),
-		# 				(x , y + 2*const_y),
-		# 				(x - const_x, y + const_y),
-		# 			]
-
-		# 			pygame.draw.polygon(screen, (0, 51, 51), case, 2)
-
 		for k in range(size+1):
 			#cree les lignes de la grille
 			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
@@ -186,23 +165,17 @@ class Affichage_graphique:
 
 		font = pygame.font.Font(None, 20)
 
-
+		rendering = True
+		pause = False
 		
 		while running:
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-					pause = True
-					while pause:
-						for event in pygame.event.get():
-							if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-								pause = False
-								break
-							elif event.type == pygame.QUIT:
-								pause = False
-								running = False
-								break
-							elif event.type == pygame.VIDEORESIZE:
-								screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
+					if pause:
+						pause = False
+					else:
+						pause = True
+					
 
 				if event.type == pygame.QUIT:
 					running = False
@@ -239,6 +212,14 @@ class Affichage_graphique:
 					dragging = False
 					drag_start = None
 
+				#desactive l'affichage si tab est pressé
+				if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+					if rendering:
+						rendering = False
+					else:
+						rendering = True
+				
+
 			if dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
 				current_mouse_pos = pygame.mouse.get_pos()
 				if drag_start:
@@ -249,11 +230,13 @@ class Affichage_graphique:
 					drag_start = current_mouse_pos
 
 			
-
+				
+		
 			screen.fill((135,206,250))
 
-			self.affichage_grid_iso(screen)
-			self.affichage_bob_food(screen)
+			if rendering:
+				self.affichage_grid_iso(screen)
+				self.affichage_bob_food(screen)
 			
 
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
@@ -267,10 +250,11 @@ class Affichage_graphique:
 
 			pygame.display.flip()
 
-			current_time = pygame.time.get_ticks()
-			if current_time - last_update_time >= tick_interval:
-				self.world.tick_update()
-				last_update_time = current_time
+			if not pause:
+				current_time = pygame.time.get_ticks()
+				if current_time - last_update_time >= tick_interval:
+					self.world.tick_update()
+					last_update_time = current_time
 
 	
 			clock.tick()

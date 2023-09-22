@@ -14,10 +14,10 @@ class Food:
 		if value <= self.food_value:
 			self.food_value -= value
 			if self.food_value <= 0:
-				self.kill()
+				self.world.kill_food(self)
 			return value
 		else:
-			self.kill()
+			self.world.kill_food(self)
 			return self.food_value
 	
 	def getFoodValue(self):

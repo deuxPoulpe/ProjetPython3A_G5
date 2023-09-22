@@ -35,6 +35,10 @@ class World:
 		self.bobs.remove(bob)
 		self.grid[bob.getPos()[0]][bob.getPos()[1]].remove(bob)
 
+	def kill_food(self,food):
+		self.foods.remove(food)
+		self.grid[food.getPos()[0]][food.getPos()[1]].remove(food)
+
 
 	def change_size(self, new_size):
 		del_list = []
@@ -42,14 +46,25 @@ class World:
 		for bob in self.bobs:
 			if bob.getPos()[0] >= new_size or bob.getPos()[1] >= new_size:
 				del_list.append(bob)
+
+		for food in self.foods:
+			if food.getPos()[0] >= new_size or food.getPos()[1] >= new_size:
+				del_list.append(food)
 			
-		for bob in del_list:
-			self.kill_bob(bob)
+		for element in del_list:
+			if isinstance(element, Bob):
+				self.kill_bob(element)
+			elif isinstance(element, Food):
+				self.kill_food(element)
 		
+
+
 		self.grid = [[[] for _ in range(new_size)] for _ in range(new_size)]
 		self.size = new_size 
 		for bob in self.bobs:
 			self.grid[bob.getPos()[0]][bob.getPos()[1]].append(bob)
+		for food in self.foods:
+			self.grid[food.getPos()[0]][food.getPos()[1]].append(food)
 
 	def spawn(self,mob,nb):  #Fonction qui fait spawn de maniere aléatoire un Bob
 		if mob == "bob":
@@ -88,8 +103,8 @@ class World:
 			for food in self.foods:
 				foodtoremove.append(food)
 			for food in foodtoremove:
-				food.kill()			
-			self.spawn("food",100)
+				self.kill_food(food)		
+			self.spawn("food",120)
 
 		self.population_data.append(len(self.bobs))
 		self.food_data.append(len(self.foods))	
