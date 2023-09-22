@@ -89,7 +89,7 @@ class World:
 				foodtoremove.append(food)
 			for food in foodtoremove:
 				food.kill()			
-			self.spawn("food",50)
+			self.spawn("food",100)
 
 		self.population_data.append(len(self.bobs))
 		self.food_data.append(len(self.foods))	

@@ -40,8 +40,6 @@ class Affichage_graphique:
 		
 	def affichage_bob_food(self, screen):
 
-		
-
 		cell_width = 1.5*4
 		cell_height = 1.5*2
 
@@ -52,18 +50,21 @@ class Affichage_graphique:
 		grid_start_x = start_x - camera_x
 		grid_start_y = start_y - camera_y
 
+		const_x = cell_width * zoom_factor / 100 
+		const_y = cell_height * zoom_factor / 100
+
 	
 		for bob in self.world.getBobs():
 
 			i,j = bob.getPos()
 
-			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
-			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
+			x = grid_start_x + (i - j) * const_x
+			y = grid_start_y + (i + j) * const_y
 
 			if x < screen.get_width() and y < screen.get_height():
 
-				sprite_x = x + cell_width / 1.5 * zoom_factor / 400
-				sprite_y = y - cell_height * zoom_factor / 400
+				sprite_x = x - const_x / 3
+				sprite_y = y + const_y / 4
 
 				sprite_width = bob.getSprite().get_width() * zoom_factor / 400
 				sprite_height = bob.getSprite().get_height() * zoom_factor / 400
@@ -74,13 +75,13 @@ class Affichage_graphique:
 		for food in self.world.getFoods():
 			i,j = food.getPos()
 
-			x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
-			y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)
+			x = grid_start_x + (i - j) * const_x
+			y = grid_start_y + (i + j) * const_y
 
 			if x < screen.get_width() and y < screen.get_height():
 
-				food_x = x + 2*cell_width * zoom_factor / 400
-				food_y = y + 2* cell_height * zoom_factor / 400
+				food_x = x 
+				food_y = y + const_y
 				pygame.draw.circle(screen, (0,0,0), (int(food_x), int(food_y)), 8*zoom_factor / 400)
 			
 
@@ -102,51 +103,61 @@ class Affichage_graphique:
 		grid_start_x = start_x - camera_x
 		grid_start_y = start_y - camera_y
 
-		size_grid = size - 1
+		const_x = cell_width * zoom_factor / 100 
+		const_y = cell_height * zoom_factor / 100
 
 		#cree a base for the grid
-		offset = cell_height * size_grid * zoom_factor / 300
+		offset = const_y * size / 3
 
 		base = [
-			(grid_start_x + cell_width * zoom_factor / 100 / 2, grid_start_y - cell_height * zoom_factor / 200),
-			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100),
-			(grid_start_x + size_grid * cell_width * zoom_factor / 100 + cell_width * zoom_factor / 100 * 1.5, grid_start_y + cell_height * zoom_factor / 100 / 2 + size_grid * cell_height * zoom_factor / 100 + offset),
-			(grid_start_x + cell_width * zoom_factor / 100 / 2 , grid_start_y + 2 * size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 * 1.5 + offset),
-			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2 + offset),
-			(grid_start_x - cell_width * zoom_factor / 100 / 2 - size_grid * cell_width * zoom_factor / 100, grid_start_y + size_grid * cell_height * zoom_factor / 100 + cell_height * zoom_factor / 100 / 2)		
+			(grid_start_x, grid_start_y),
+			(grid_start_x + const_x * size, grid_start_y + const_y * size),
+			(grid_start_x + const_x * size, grid_start_y + const_y * size + offset),
+			(grid_start_x , grid_start_y + const_y * size * 2 + offset),
+			(grid_start_x - const_x * size, grid_start_y + const_y * size + offset),
+			(grid_start_x - const_x * size, grid_start_y + const_y * size),
+		]
+
+		floor = [
+			(grid_start_x, grid_start_y),
+			(grid_start_x + const_x * size, grid_start_y + const_y * size),
+			(grid_start_x , grid_start_y + const_y * size * 2),
+			(grid_start_x - const_x * size, grid_start_y + const_y * size),
 		]
 
 
 		pygame.draw.polygon(screen, (26, 13, 0), base, 0)
+		pygame.draw.polygon(screen, (0, 120, 51), floor, 0)
 
-		grid_to_draw = []
 
+		# for i in range(size):
+		# 	for j in range(size):
 
-		for i in range(size):
-			for j in range(size):
+		# 		# Calcul des coordonnées isométriques
+		# 		x = grid_start_x + (i - j) * const_x
+		# 		y = grid_start_y + (i + j) * const_y
 
-				# Calcul des coordonnées isométriques
-				x = grid_start_x + (i - j) * (cell_width * zoom_factor / 100)
-				y = grid_start_y + (i + j) * (cell_height * zoom_factor / 100)	
-
-				if x < screen.get_width() and y < screen.get_height():
+		# 		if x < screen.get_width() and y < screen.get_height():
 		
-	
+		# 			# Dessine une case vide
 
-					# Dessine une case vide
+		# 			case = [
+		# 				(x,y),
+		# 				(x + const_x, y + const_y),
+		# 				(x , y + 2*const_y),
+		# 				(x - const_x, y + const_y),
+		# 			]
 
-					const_x = cell_width * zoom_factor / 100 / 2
-					const_y = cell_height * zoom_factor / 100 / 2
+		# 			pygame.draw.polygon(screen, (0, 51, 51), case, 2)
 
-					case = [
-						(x + const_x, y + cell_height * zoom_factor / 100 * 1.5),
-						(x + cell_width * zoom_factor / 100 * 1.5, y + const_y),
-						(x + const_x, y - const_y),
-						(x - const_x, y + const_y)
-					]
+		for k in range(size+1):
+			#cree les lignes de la grille
+			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
+			pygame.draw.line(screen, (0, 51, 51), (grid_start_x - const_x*k, grid_start_y + const_y*k), (grid_start_x + const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
 
-					pygame.draw.polygon(screen, (0, 120, 51), case, 0)
-					pygame.draw.polygon(screen, (0, 51, 51), case, 1)
+
+
+
 
 
 
