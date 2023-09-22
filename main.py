@@ -5,7 +5,6 @@ from main_menu import Menu
 import multiprocessing
 import pygame
 
-from tiles import Tile
 
 def run_simulation(world_size, initial_bob_count, tick_interval):
 	world = World(world_size)
@@ -42,7 +41,6 @@ def choose_simulation():
 
 
 if __name__ == "__main__":
-
 
 	# choose_simulation()
 

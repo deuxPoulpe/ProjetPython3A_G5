@@ -47,16 +47,13 @@ class Bob:
 		
 
 	def eat(self):
-		if any(isinstance(_, Food) for _ in self.world.grid[self.x][self.y]):
-			for food in self.world.grid[self.x][self.y]:
+		if any(isinstance(_, Food) for _ in self.world.getGrid()[self.x][self.y]):
+			for food in self.world.getGrid()[self.x][self.y]:
 				if isinstance(food, Food):
 					if self.energy + food.food_value > self.maxEnergy:
 						self.energy += food.beEaten(self.maxEnergy - self.energy)
 					else:
 						self.energy += food.beEaten(food.getFoodValue())
-
-
-
 					break
 
 	def self_reproduce(self):

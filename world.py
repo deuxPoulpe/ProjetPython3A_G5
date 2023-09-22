@@ -26,6 +26,18 @@ class World:
 		return self.bobs
 	def getFoods(self):
 		return self.foods
+	def getPopulationData(self):
+		return self.population_data
+	def getFoodData(self):
+		return self.food_data
+	def getTick(self):
+		return self.tick
+	
+	def addPopulationData(self, data):
+		self.population_data.append(data)
+	def addFoodData(self, data):
+		self.food_data.append(data)
+	
 
 
 	def addBobtokill(self,bob):

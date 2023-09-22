@@ -15,7 +15,6 @@ class Affichage_graphique:
 		
 	def affichage_grid_iso_sprite(self, screen):
 		size = self.world.getSize()
-		grid = self.world.getGrid()
 
 		window_width = 1280
 		window_height = 720
@@ -134,8 +133,70 @@ class Affichage_graphique:
 			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
 			pygame.draw.line(screen, (0, 51, 51), (grid_start_x - const_x*k, grid_start_y + const_y*k), (grid_start_x + const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
 
+	def input_box(self, screen):
+		pygame.init()
+		clock = pygame.time.Clock()
+		
+		# Configuration de la boîte de saisie
+		  # Centrez la boîte de texte		base_font = pygame.font.Font(None, 32)
+		base_font = pygame.font.Font(None, 32)		
 
+		user_text = ''
+		# Texte descriptif
+		description_text = f"Entrez une nouvelle taille de grille (actuelle: {self.world.getSize()}):"
+		erreur_text = "Erreur: la taille doit être un entier positif"
+		description_surface = base_font.render(description_text, True, (0, 0, 0))
+		erreur_text_surface = base_font.render(erreur_text, True, (255, 0, 0))
+		
 
+		erreur = False
+		while True:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+				elif event.type == pygame.VIDEORESIZE:
+					screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+					return None
+		
+		
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_RETURN:
+						try:
+							user_input = int(user_text)
+							return user_input  # Renvoie l'entier saisi
+						except ValueError:
+							user_text = ''
+							erreur = True
+							pass  # Ne fait rien si la saisie n'est pas un entier
+		
+					elif event.key == pygame.K_BACKSPACE:
+						user_text = user_text[:-1]
+					elif len(user_text) < 8:
+						user_text += event.unicode
+			input_rect = pygame.Rect((screen.get_width()) // 2 - 55 , screen.get_height()//2.5, 110, 32)
+			description_rect = description_surface.get_rect(center=(screen.get_width() // 2, screen.get_height()//3))
+			erreur_text_rect = erreur_text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height()//2))
+
+			screen.fill((135,206,250))
+			self.affichage_grid_iso(screen)
+			self.affichage_bob_food(screen)
+			#color with opacity
+			pygame.draw.rect(screen, (200,200,200), input_rect,border_radius=10)
+		
+		
+			text_surface = base_font.render(user_text, True, (0, 0, 0))
+			screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+
+			
+		
+			# Afficher le texte descriptif
+			screen.blit(description_surface, description_rect)
+			if erreur:
+				screen.blit(erreur_text_surface, erreur_text_rect)
+		
+			pygame.display.flip()
+			clock.tick(60)
 
 
 
@@ -218,6 +279,12 @@ class Affichage_graphique:
 						rendering = False
 					else:
 						rendering = True
+
+				if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
+					new_size = self.input_box(screen)
+					if new_size:
+						self.world.change_size(new_size)
+						
 				
 
 			if dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
@@ -229,7 +296,8 @@ class Affichage_graphique:
 					camera_y += new_y
 					drag_start = current_mouse_pos
 
-			
+
+		
 				
 		
 			screen.fill((135,206,250))
@@ -240,10 +308,10 @@ class Affichage_graphique:
 			
 
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
-			screen.blit(font.render(f"TICK: {self.world.tick}", True, black), (10, 30))
-			screen.blit(font.render(f"DAYS: {self.world.tick//100}", True, black), (10, 50))
+			screen.blit(font.render(f"TICK: {self.world.getTick()}", True, black), (10, 30))
+			screen.blit(font.render(f"DAYS: {self.world.getTick()//100}", True, black), (10, 50))
 			screen.blit(font.render(f"TICK TIME: {tick_interval/1000}s", True, black), (10, 70))
-			screen.blit(font.render(f"POPULATION: {len(self.world.bobs)}", True, black), (10, 90))
+			screen.blit(font.render(f"POPULATION: {len(self.world.getBobs())}", True, black), (10, 90))
 			screen.blit(font.render(f"TIME: {pygame.time.get_ticks()/1000}s", True, black), (10, 110))
 			
 			
@@ -266,8 +334,8 @@ class Affichage_graphique:
 
 	def graph(self):
 		fig , ax = plt.subplots()
-		ax.plot(range(len(self.world.population_data)), self.world.population_data, label = "Population")
-		ax.plot(range(len(self.world.food_data)), self.world.food_data, label = "Food")
+		ax.plot(range(len(self.world.getPopulationData())), self.world.getPopulationData(), label = "Population")
+		ax.plot(range(len(self.world.getFoodData())), self.world.getFoodData(), label = "Food")
 		ax.legend()
 		plt.xlabel('Ticks')
 		plt.title('Bob Population / Food evolution Over Time')
