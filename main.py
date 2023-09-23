@@ -6,8 +6,8 @@ import multiprocessing
 import pygame
 
 
-def run_simulation(world_size, initial_bob_count, tick_interval):
-	world = World(world_size)
+def run_simulation(world_size, initial_bob_count, food_per_day, food_value, maxEnergy, tick_interval):
+	world = World(world_size, food_per_day, food_value, maxEnergy)
 	world.spawn("bob", initial_bob_count)
 	graphique = Affichage_graphique(world)
 	graphique.run(tick_interval)
@@ -23,10 +23,10 @@ def choose_simulation():
 
 		# Créez une liste de paramètres pour chaque simulation
 		simulation_params = [
-			(50, 50, 1),  # world_size, initial_bob_count, tick_interval
-			(50, 50, 1),
-			(50, 50, 1),
-			(50, 50, 1)
+			(50, 50, 50, 200, 200, 1),  # world_size, initial_bob_count, tick_interval
+			(50, 50, 50, 200, 200, 1),
+			(50, 50, 50, 200, 200, 1),
+			(50, 50, 50, 200, 200, 1)
 			
 		]
 		
@@ -36,7 +36,7 @@ def choose_simulation():
 			pool.starmap(run_simulation, simulation_params)
 	else:
 		pygame.quit()
-		run_simulation(50, 50, 1)
+		run_simulation(50, 50, 50, 200, 200, 1)
 
 
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
 	# choose_simulation()
 
-	run_simulation(100, 100, 1)
+	run_simulation(50, 50, 50, 200, 200, 1)
 
 
 	

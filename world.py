@@ -6,13 +6,16 @@ from food import Food
 
 # Classe représentant le monde
 class World:
-	def __init__(self, size=100):
+	def __init__(self, size=100, food_per_day=120, food_value=200, maxEnergy=1000):
 		self.size = size
 		self.grid = [[[] for _ in range(size)] for _ in range(size)]
 		self.bobs = []
 		self.foods = []
 		self.tick = 0
 		self.bobtokill = []
+		self.food_per_day = food_per_day
+		self.food_value = food_value
+		self.maxEnergy = maxEnergy
 
 		self.population_data = []
 		self.food_data = []
@@ -83,20 +86,20 @@ class World:
 			for _ in range(nb):
 				x = random.randint(0,self.size-1)
 				y = random.randint(0,self.size-1)
-				bob = Bob(x,y,self)
+				bob = Bob(x,y,self,maxEnergy = self.maxEnergy)
 				self.bobs.append(bob)   #Ajoute le Bob créé dans la liste de tout les Bobs
 				self.grid[x][y].append(bob)     #Place le Bob dans le world
 		elif mob == "food":
 			for _ in range(nb):
 				x = random.randint(0,self.size-1)
 				y = random.randint(0,self.size-1)
-				food = Food(x,y,self)
+				food = Food(x,y,self,self.food_value)
 				self.grid[x][y].append(food)
 				self.foods.append(food)
 		elif mob == "self_reproduce":
 			x = nb[0]
 			y = nb[1]
-			bob = Bob(x,y,self,int((1/4)*self.bobs[0].getMaxEnergy()))
+			bob = Bob(x,y,self,energy=int((1/4)*self.bobs[0].getMaxEnergy()),maxEnergy = self.maxEnergy)
 			self.bobs.append(bob)
 			self.grid[x][y].append(bob)
 
@@ -116,7 +119,7 @@ class World:
 				foodtoremove.append(food)
 			for food in foodtoremove:
 				self.kill_food(food)		
-			self.spawn("food",120)
+			self.spawn("food",	self.food_per_day)
 
 		self.population_data.append(len(self.bobs))
 		self.food_data.append(len(self.foods))	

@@ -13,29 +13,7 @@ class Affichage_graphique:
 	def __init__(self,world):
 		self.world = world
 		
-	def affichage_grid_iso_sprite(self, screen):
-		size = self.world.getSize()
-
-		window_width = 1280
-		window_height = 720
-
-		cell_size = 12
-
-
-
-		grid_start_x = window_width // 2 - camera_x
-		grid_start_y = window_height * (1/10) - camera_y
-
-		floor = pygame.sprite.Group()
-		for i in range(size):
-			for j in range(size):
-				x = grid_start_x + (i - j) * cell_size // 2 * zoom_factor / 100
-				y = grid_start_y + (i + j) * cell_size // 4 * zoom_factor / 100
-				floor.add(Tile(x, y, cell_size* zoom_factor / 100))
-
-		floor.update()
-		floor.draw(screen)
-
+	
 		
 	def affichage_bob_food(self, screen):
 
