@@ -1,7 +1,5 @@
 import pygame
-import os
 import matplotlib.pyplot as plt
-from tiles import Tile
 
 camera_x = 0
 camera_y = 0
@@ -194,6 +192,7 @@ class Affichage_graphique:
 		# Initialisation de Pygame
 		pygame.init()
 		screen = pygame.display.set_mode((1280, 720),pygame.RESIZABLE)
+		
 		pygame.display.set_caption("Simulation of Bobs")
 
 		black = (0, 0, 0)	
@@ -214,8 +213,7 @@ class Affichage_graphique:
 						pause = False
 					else:
 						pause = True
-					
-
+	
 				if event.type == pygame.QUIT:
 					running = False
 				elif event.type == pygame.VIDEORESIZE:

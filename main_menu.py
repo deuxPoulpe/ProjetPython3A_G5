@@ -1,59 +1,93 @@
 import pygame
+import pygame_menu
+from world import World
+from graphique import Affichage_graphique
 
 class Menu:
 
-        
-    def main_menu(self):
-
-        pygame.init()
-        screen = pygame.display.set_mode((800, 700))
-        pygame.display.set_caption("Button Example")
-
-        single_button = Button((800 - 230) // 2, 200, 230, 50, "Single Simulation", (200, 200, 200),screen)
-        multi_button = Button((800 - 215) // 2, 300, 215, 50, "Multi Simulation", (200, 200, 200),screen)
+	def __init__(self):
+		self.world_size_input = None
+		self.initial_bob_count_input = None
+		self.food_per_day_input = None
+		self.food_value_input = None
+		self.max_energy_input = None
+		self.tick_interval_input = None
 
 
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                single_button.handle_event(event)
-                multi_button.handle_event(event)
+	def run_simulation(self):
+		pygame.quit()
 
-            screen.fill((255,255,255))
+		world_size = int(self.world_size_input.get_value())
+		initial_bob_count = int(self.initial_bob_count_input.get_value())
+		food_per_day = int(self.food_per_day_input.get_value())
+		food_value = int(self.food_value_input.get_value())
+		maxEnergy = int(self.max_energy_input.get_value())
+		tick_interval = int(self.tick_interval_input.get_value())
 
-            single_button.draw()
-            multi_button.draw()
+		world = World(world_size, food_per_day, food_value, maxEnergy)
+		world.spawn("bob", initial_bob_count)
+		graphique = Affichage_graphique(world)
+		graphique.run(tick_interval)
+		graphique.graph()
 
-            pygame.display.flip()
 
-            if single_button.clicked:
-                return False
-            elif multi_button.clicked:
-                return True 
+	def main_menu(self):
 
-class Button:
-    def __init__(self, x, y, width, height, text, color,screen):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.color = color
-        self.clicked = False
-        self.screen = screen
+		
+		pygame.init()
 
-    def draw_text(self,text, x, y, color=(0,0,0)):
-        text_surface = pygame.font.Font(None, 36).render(text, True, color)
-        self.screen.blit(text_surface, (x, y))
+		mytheme = pygame_menu.themes.THEME_DARK.copy()
+		mytheme.widget_font = pygame_menu.font.FONT_FRANCHISE
+		mytheme.title_bar_style = pygame_menu.widgets.MENUBAR_STYLE_UNDERLINE
 
-    def draw(self):
-        pygame.draw.rect(self.screen, self.color, self.rect)
-        self.draw_text(self.text, self.rect.x + 10, self.rect.y + 10, (255,255,255) if self.clicked else (0,0,0))
 
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                self.clicked = True
-        elif event.type == pygame.MOUSEBUTTONUP:
-            self.clicked = False
+		screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+		pygame.display.set_caption("Simulation of Bobs")
 
+		menu = pygame_menu.Menu(
+			height=720,
+			theme=mytheme,
+			title='Simulation of Bobs',
+			width=1280
+		)
+
+
+		def on_resize():
+			menu.resize(screen.get_size()[0], screen.get_size()[1])
+
+
+	
+		self.world_size_input = menu.add.text_input('World Size: ', default="50", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		self.initial_bob_count_input = menu.add.text_input('Initial Bob Count: ', default="50", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		self.food_per_day_input = menu.add.text_input('Food Per Day: ', default="50", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		self.food_value_input = menu.add.text_input('Food Value: ', default="200", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		self.max_energy_input = menu.add.text_input('Max Energy: ', default="200", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		self.tick_interval_input = menu.add.text_input('Tick Interval (ms): ', default="1", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+
+		
+		menu.add.button('Start Single Simulation', self.run_simulation)
+
+		menu.add.button('Exit', pygame_menu.events.EXIT)
+		menu.enable()
+		on_resize()
+
+		while True:
+			events = pygame.event.get()
+			for event in events:
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					break
+				if event.type == pygame.VIDEORESIZE:
+					screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
+					on_resize()
+
+			# Draw the menu
+			screen.fill((25, 0, 50))
+
+			menu.update(events)
+			menu.draw(screen)
+			
+
+			pygame.display.flip()
 
 
