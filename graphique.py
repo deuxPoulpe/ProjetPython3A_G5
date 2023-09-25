@@ -220,7 +220,7 @@ class Affichage_graphique:
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
 			screen.blit(font.render(f"TICK: {self.world.getTick()}", True, black), (10, 30))
 			screen.blit(font.render(f"DAYS: {self.world.getTick()//self.world.getTickDays()}", True, black), (10, 50))
-			screen.blit(font.render(f"TICK TIME: {tick_interval/1000}s", True, black), (10, 70))
+			screen.blit(font.render(f"TICK TIME: {tick_interval} it", True, black), (10, 70))
 			screen.blit(font.render(f"POPULATION: {len(self.world.getBobs())}", True, black), (10, 90))
 			screen.blit(font.render(f"TIME: {pygame.time.get_ticks()/1000}s", True, black), (10, 110))
 			
@@ -243,12 +243,23 @@ class Affichage_graphique:
 
 
 	def graph(self):
-		fig , ax = plt.subplots()
-		ax.plot(range(len(self.world.getPopulationData())), self.world.getPopulationData(), label = "Population")
-		ax.plot(range(len(self.world.getFoodData())), self.world.getFoodData(), label = "Food")
-		ax.legend()
-		plt.xlabel('Ticks')
-		plt.title('Bob Population / Food evolution Over Time')
-		plt.grid(True)
+		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
+
+		# Premier graphique
+		ax1.plot(range(len(self.world.getPopulationData())), self.world.getPopulationData(), label="Population")
+		ax1.legend()
+		ax1.set_ylabel('Population')
+		ax1.set_title('Bob Population Over Time')
+		ax1.grid(True)
+
+		# Deuxième graphique
+		ax2.plot(range(len(self.world.getFoodData())), self.world.getFoodData(), label="Food", color='orange')
+		ax2.legend()
+		ax2.set_xlabel('Ticks')
+		ax2.set_ylabel('Food')
+		ax2.set_title('Bob Food Over Time')
+		ax2.grid(True)
+
+		plt.tight_layout()
 		plt.show()
 

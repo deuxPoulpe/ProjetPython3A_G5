@@ -62,7 +62,7 @@ class Menu:
 		food_per_day_input = menu.add.text_input('Food Per Day: ', default="200", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
 		food_value_input = menu.add.text_input('Food Value: ', default="100", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
 		max_energy_input = menu.add.text_input('Max Energy: ', default="200", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
-		tick_interval_input = menu.add.text_input('Tick Interval (ms): ', default="1", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
+		tick_interval_input = menu.add.text_input('Tick Interval (iteration): ', default="1", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
 		tick_days_input = menu.add.text_input('Tick Days: ', default="100", maxchar=4, input_type=pygame_menu.locals.INPUT_INT)
 		
 		start_simu = menu.add.button("Start Single Simulation", run_simulation)
