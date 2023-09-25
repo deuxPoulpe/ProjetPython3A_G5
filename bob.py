@@ -14,7 +14,7 @@ class Bob:
 		self.remembered_food = []
 		self.world = world
 		self.maxEnergy = maxEnergy
-		self.sprite = pygame.image.load("C:/Users/unPoulpe/Desktop/InsaCVL2023/ProjetPython/test/assets/bob2.png")
+		self.sprite = pygame.image.load("assets/bob.png")
 
 	def __str__(self):
 		return str(print("Bob", self.x, self.y, self.velocity, self.mass, self.perception, self.memory_space, self.energy))

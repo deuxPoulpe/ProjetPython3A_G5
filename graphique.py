@@ -40,10 +40,10 @@ class Affichage_graphique:
 			if x < screen.get_width() and y < screen.get_height():
 
 				sprite_x = x - const_x / 3
-				sprite_y = y + const_y / 4
+				sprite_y = y + const_y / 5
 
-				sprite_width = bob.getSprite().get_width() * zoom_factor / 400
-				sprite_height = bob.getSprite().get_height() * zoom_factor / 400
+				sprite_width = bob.getSprite().get_width() * zoom_factor / 350
+				sprite_height = bob.getSprite().get_height() * zoom_factor / 350
 
 				screen.blit(pygame.transform.scale(bob.getSprite(), (int(sprite_width), int(sprite_height))), (sprite_x, sprite_y))
 
@@ -60,7 +60,8 @@ class Affichage_graphique:
 				food_y = y + const_y
 				# variable color en fonction de la valeur nutritive de food plus la valeur est grande plus la couleur sera violet/bleu moins il en a rouge
 				color = (255 - food.getFoodValue() * 255 / self.world.getFoodValue() , 0, food.getFoodValue() * 255 / self.world.getFoodValue())
-				pygame.draw.circle(screen, color, (int(food_x), int(food_y)), 8*zoom_factor / 400)
+				# pygame.draw.circle(screen, color, (int(food_x), int(food_y)), 8*zoom_factor / 400)
+				pygame.gfxdraw.filled_circle(screen, int(food_x), int(food_y), 8*zoom_factor // 400, color)
 			
 
 
@@ -104,13 +105,15 @@ class Affichage_graphique:
 		]
 
 
-		pygame.draw.polygon(screen, (26, 13, 0), base, 0)
-		pygame.draw.polygon(screen, (0, 120, 51), floor, 0)
+		pygame.gfxdraw.filled_polygon(screen, base, (26, 13, 0))
+		pygame.gfxdraw.filled_polygon(screen, floor, (0, 120, 51))
+
+		
 
 		for k in range(size+1):
 			#cree les lignes de la grille
-			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 1)
-			pygame.draw.line(screen, (0, 51, 51), (grid_start_x - const_x*k, grid_start_y + const_y*k), (grid_start_x + const_x*(size - k), grid_start_y + const_y*k + const_y*size), 1)
+			pygame.gfxdraw.line(screen, int(grid_start_x + const_x*k), int(grid_start_y + const_y*k), int(grid_start_x - const_x*(size - k)), int(grid_start_y + const_y*k + const_y*size), (0, 51, 51))
+			pygame.gfxdraw.line(screen, int(grid_start_x - const_x*k), int(grid_start_y + const_y*k), int(grid_start_x + const_x*(size - k)), int(grid_start_y + const_y*k + const_y*size), (0, 51, 51))
 
 	
 
@@ -192,12 +195,7 @@ class Affichage_graphique:
 					else:
 						rendering = True
 
-				if event.type == pygame.KEYDOWN and event.key == pygame.K_u:
-					new_size = self.input_box(screen)
-					if new_size:
-						self.world.change_size(new_size)
-						
-				
+					
 
 			if dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
 				current_mouse_pos = pygame.mouse.get_pos()
