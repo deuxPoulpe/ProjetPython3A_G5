@@ -1,10 +1,11 @@
 import pygame
 import matplotlib.pyplot as plt
+import pygame_menu
 
 camera_x = 0
 camera_y = 0
 zoom_factor = 100
-zoom_speed = 50
+zoom_speed = 10
 
 
 class Affichage_graphique:
@@ -57,7 +58,9 @@ class Affichage_graphique:
 
 				food_x = x 
 				food_y = y + const_y
-				pygame.draw.circle(screen, (0,0,0), (int(food_x), int(food_y)), 8*zoom_factor / 400)
+				# variable color en fonction de la valeur nutritive de food plus la valeur est grande plus la couleur sera violet/bleu moins il en a rouge
+				color = (255 - food.getFoodValue() * 255 / self.world.getFoodValue() , 0, food.getFoodValue() * 255 / self.world.getFoodValue())
+				pygame.draw.circle(screen, color, (int(food_x), int(food_y)), 8*zoom_factor / 400)
 			
 
 
@@ -106,81 +109,10 @@ class Affichage_graphique:
 
 		for k in range(size+1):
 			#cree les lignes de la grille
-			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
-			pygame.draw.line(screen, (0, 51, 51), (grid_start_x - const_x*k, grid_start_y + const_y*k), (grid_start_x + const_x*(size - k), grid_start_y + const_y*k + const_y*size), 2)
+			pygame.draw.line(screen, (0, 51, 51), (grid_start_x + const_x*k, grid_start_y + const_y*k), (grid_start_x - const_x*(size - k), grid_start_y + const_y*k + const_y*size), 1)
+			pygame.draw.line(screen, (0, 51, 51), (grid_start_x - const_x*k, grid_start_y + const_y*k), (grid_start_x + const_x*(size - k), grid_start_y + const_y*k + const_y*size), 1)
 
-	def input_box(self, screen):
-		pygame.init()
-		clock = pygame.time.Clock()
-		
-		# Configuration de la boîte de saisie
-		  # Centrez la boîte de texte		base_font = pygame.font.Font(None, 32)
-		base_font = pygame.font.Font(None, 32)		
-
-		user_text = ''
-		# Texte descriptif
-		description_text = f"Entrez une nouvelle taille de grille (actuelle: {self.world.getSize()}):"
-		erreur_text = "Erreur: la taille doit être un entier positif"
-		description_surface = base_font.render(description_text, True, (0, 0, 0))
-		erreur_text_surface = base_font.render(erreur_text, True, (255, 0, 0))
-		
-
-		erreur = False
-		while True:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					pygame.quit()
-				elif event.type == pygame.VIDEORESIZE:
-					screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-					return None
-		
-		
-				if event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_RETURN:
-						try:
-							user_input = int(user_text)
-							return user_input  # Renvoie l'entier saisi
-						except ValueError:
-							user_text = ''
-							erreur = True
-							pass  # Ne fait rien si la saisie n'est pas un entier
-		
-					elif event.key == pygame.K_BACKSPACE:
-						user_text = user_text[:-1]
-					elif len(user_text) < 8:
-						user_text += event.unicode
-			input_rect = pygame.Rect((screen.get_width()) // 2 - 55 , screen.get_height()//2.5, 110, 32)
-			description_rect = description_surface.get_rect(center=(screen.get_width() // 2, screen.get_height()//3))
-			erreur_text_rect = erreur_text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height()//2))
-
-			screen.fill((135,206,250))
-			self.affichage_grid_iso(screen)
-			self.affichage_bob_food(screen)
-			#color with opacity
-			pygame.draw.rect(screen, (200,200,200), input_rect,border_radius=10)
-		
-		
-			text_surface = base_font.render(user_text, True, (0, 0, 0))
-			screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
-
-			
-		
-			# Afficher le texte descriptif
-			screen.blit(description_surface, description_rect)
-			if erreur:
-				screen.blit(erreur_text_surface, erreur_text_rect)
-		
-			pygame.display.flip()
-			clock.tick(60)
-
-
-
-
-				
-
-
-
+	
 
 	def run(self , tick_interval):
 		global zoom_factor, camera_x, camera_y, zoom_speed
@@ -219,6 +151,8 @@ class Affichage_graphique:
 				elif event.type == pygame.VIDEORESIZE:
 					screen = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
 
+				if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+					self.pause_menu(screen)
 
 				if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:  #zoom avant
 					zoom_factor += zoom_speed
@@ -226,6 +160,8 @@ class Affichage_graphique:
 					zoom_factor -= zoom_speed
 					if zoom_factor < 10:  
 						zoom_factor = 10
+				if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+					self.world.save()
 			
 				if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
 					if tick_interval > 100:
@@ -285,7 +221,7 @@ class Affichage_graphique:
 
 			screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, black), (10, 10))
 			screen.blit(font.render(f"TICK: {self.world.getTick()}", True, black), (10, 30))
-			screen.blit(font.render(f"DAYS: {self.world.getTick()//100}", True, black), (10, 50))
+			screen.blit(font.render(f"DAYS: {self.world.getTick()//self.world.getTickDays()}", True, black), (10, 50))
 			screen.blit(font.render(f"TICK TIME: {tick_interval/1000}s", True, black), (10, 70))
 			screen.blit(font.render(f"POPULATION: {len(self.world.getBobs())}", True, black), (10, 90))
 			screen.blit(font.render(f"TIME: {pygame.time.get_ticks()/1000}s", True, black), (10, 110))

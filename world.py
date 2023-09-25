@@ -1,12 +1,12 @@
 import random
 from bob import Bob
 from food import Food
-
-
+import pygame
+import datetime
 
 # Classe représentant le monde
 class World:
-	def __init__(self, size=100, food_per_day=120, food_value=200, maxEnergy=1000):
+	def __init__(self, size=100, food_per_day=200, food_value=100, maxEnergy=200, tickDays=100):
 		self.size = size
 		self.grid = [[[] for _ in range(size)] for _ in range(size)]
 		self.bobs = []
@@ -16,6 +16,7 @@ class World:
 		self.food_per_day = food_per_day
 		self.food_value = food_value
 		self.maxEnergy = maxEnergy
+		self.tickDays = tickDays
 
 		self.population_data = []
 		self.food_data = []
@@ -35,6 +36,10 @@ class World:
 		return self.food_data
 	def getTick(self):
 		return self.tick
+	def getFoodValue(self):
+		return self.food_value
+	def getTickDays(self):
+		return self.tickDays
 	
 	def addPopulationData(self, data):
 		self.population_data.append(data)
@@ -113,7 +118,7 @@ class World:
 			self.kill_bob(bob)
 		self.bobtokill = []
 
-		if self.tick % 100 == 0:
+		if self.tick % self.tickDays == 0:
 			foodtoremove = []
 			for food in self.foods:
 				foodtoremove.append(food)
@@ -125,6 +130,27 @@ class World:
 		self.food_data.append(len(self.foods))	
 
 		self.tick += 1
+
+
+	def save(self):
+		#fonction that sav into a file all the stat of the simulation
+		current_datetime = datetime.datetime.now()
+		formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+		file_name = f"save_{formatted_datetime}"
+
+		save = open(file_name,"w")
+		save.write("World size : " + str(self.size) + "\n")
+		save.write("bobs : " + str(self.bobs) + "\n")
+		save.write("Food per day : " + str(self.food_per_day) + "\n")
+		save.write("Food value : " + str(self.food_value) + "\n")
+		save.write("Max energy : " + str(self.maxEnergy) + "\n")
+		save.write("Tick days : " + str(self.tickDays) + "\n")
+		save.write("Population data : " + str(self.population_data) + "\n")
+		save.write("Food data : " + str(self.food_data) + "\n")
+		save.write("Tick : " + str(self.tick) + "\n")
+		save.close()
+		pygame.quit()
+
 		
 
 
