@@ -3,14 +3,14 @@ import pygame
 from world import World
 
 class Bob:
-    def __init__(self, energy = 100, velocity = 1, mass = 1, perception = 0, max_energy = 200, position = (x,y), world):
+    def __init__(self, x, y, world ,energy = 100, velocity = 1, mass = 1, perception = 0, max_energy = 200,):
         self.energy = energy
         self.velocity = velocity
         self.mass = mass
         self.perception = perception
         self.memory_space = []
         self.max_energy = max_energy
-        self.position = position
+        self.position = (x,y)
         self.en_fuite = False
         self.world = world
 
@@ -23,14 +23,19 @@ class Bob:
     
 
     def move(self): #fonction de déplacement du bob
+        pass
 
     def eat(self):
+        pass
 
 
     def die(self):
+        pass
         
     def self_reproduction(self):
+        pass
         
     def reproduction(self):
+        pass
 
     
