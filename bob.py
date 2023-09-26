@@ -23,3 +23,14 @@ class Bob:
     
 
     def move(self): #fonction de déplacement du bob
+
+    def eat(self):
+
+
+    def die(self):
+        
+    def self_reproduction(self):
+        
+    def reproduction(self):
+
+    
