@@ -1,12 +1,13 @@
 import os
+import pygame
 
 class World:
 	def __init__(self,argDict):
 		self.argDict = argDict
 		self.bobs = []
 		self.foods = []
-		self.spriteBob = ""
-		self.spriteFood = ""
+		self.spriteBob = pygame.image.load(os.path.join("assets","bob.png"))
+		# self.spriteFood = pygame.image.load(os.path.join("assets","food.png"))
 		self.tick = 0
 		self.population_bob = []
 		self.population_food = []
@@ -26,7 +27,7 @@ class World:
 
 	#getters
 	def getSize(self):
-		return 
+		return self.argDict["size"]
 	def getPopulationBob(self):
 		return self.population_bob
 	def getPopulationFood(self):

@@ -1,4 +1,5 @@
 from world import World
+from display import Display
 
 
 if __name__ == "__main__":
@@ -8,3 +9,5 @@ if __name__ == "__main__":
 		"nbFood" : 200,
 		"dayTick" : 100
 	})
+
+	Display(world).main_loop()
