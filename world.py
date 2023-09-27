@@ -44,4 +44,27 @@ class World:
 	#setter
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
-	
+
+
+	#methods
+
+	def kill_bob(self,bob):
+		pass
+
+	def kill_food(self,food):
+		pass
+
+	def update_tick(self):
+		pass
+
+	def spawn_bob(self,nb):
+		pass
+
+	def spawn_food(self,nb):
+		pass
+
+	def spawn_reproduce(self,mother_bob):
+		pass
+
+	def save(self):
+		pass

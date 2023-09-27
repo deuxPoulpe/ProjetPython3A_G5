@@ -88,6 +88,7 @@ class Display:
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		clock = pygame.time.Clock()
+		font = pygame.font.Font(None, 20)
 
 		running = True
 		while running:
@@ -98,10 +99,15 @@ class Display:
 				
 				self.zoom(event)
 				self.start_drag(event)
-
+				
 			self.camera()
 			self.screen.fill((135,206,250))
 			self.draw_world()
+
+
+			self.screen.blit(font.render(f"FPS: {int(clock.get_fps())}", True, (0,0,0)), (10, 10))
+
+
 			pygame.display.flip()
 
 

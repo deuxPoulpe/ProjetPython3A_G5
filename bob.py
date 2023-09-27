@@ -28,6 +28,8 @@ class Bob:
     def eat(self):
         pass
 
+    def in_case(self):
+        pass
 
     def die(self):
         pass
