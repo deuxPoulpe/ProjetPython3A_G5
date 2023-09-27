@@ -36,6 +36,10 @@ class World:
 		return self.tick
 	def getArgDict(self):
 		return self.argDict
+	def getBobs(self):
+		return self.bobs
+	def getFoods(self):
+		return self.foods
 
 	#setter
 	def setArgDict(self,newArgDict):
