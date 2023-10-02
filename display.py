@@ -13,7 +13,7 @@ class Display:
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-		self.floor_display = pygame.Surface((32 * world.get_size(), 20 * world.get_size()))
+		self.floor_display = pygame.Surface((32 * world.get_size(), 18 * world.get_size()))
 		self.world = world
 		self.camera_x = 0
 		self.camera_y = 0
@@ -26,10 +26,16 @@ class Display:
 
 		self.grass = pygame.image.load(os.path.join("assets/tiles", "tile_028.png")).convert()
 		self.dirt = pygame.image.load(os.path.join("assets/tiles", "tile_000.png")).convert()
+		self.close_water = pygame.image.load(os.path.join("assets/tiles", "tile_020.png")).convert()
 		self.water = pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert()
 		self.grass.set_colorkey((0, 0, 0))
 		self.dirt.set_colorkey((0, 0, 0))
 		self.water.set_colorkey((0, 0, 0))
+		self.close_water.set_colorkey((0, 0, 0))
+
+		self.previous_zoom_factor = self.zoom_factor  # Store the zoom level of the last frame
+		self.needs_rescaling = True
+		
 
 
 	
@@ -83,6 +89,10 @@ class Display:
 			if self.zoom_factor < 10:  
 				self.zoom_factor = 10
 
+		if self.previous_zoom_factor != self.zoom_factor:
+			self.needs_rescaling = True
+			self.previous_zoom_factor = self.zoom_factor
+
 	def start_drag(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 			self.dragging = True
@@ -99,7 +109,7 @@ class Display:
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
 
-	def generate_terrain(self,size, scale=0.05, octaves=10, persistence=0.5, lacunarity=2.0, z_min=0, z_max=5):
+	def generate_terrain(self ,size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=10):
 
 		terrain = np.zeros((size, size))
 		random_seed = random.randint(0, 1024)
@@ -113,14 +123,13 @@ class Display:
 										lacunarity=lacunarity
 				)
 
-		# Normalisation du terrain pour le ramener entre z_min et z_max
 		terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
 		terrain = np.round(terrain).astype(int)
 
 		return terrain
 
 
-	def draw_isometric_grid(self):
+	def draw_sprite_world(self):
 		size = self.world.get_size()
 		self.floor.empty()
 
@@ -129,26 +138,33 @@ class Display:
 		start_x = self.floor_display.get_size()[0] // 2
 		start_y = self.floor_display.get_size()[1] // 20
 
+		if self.world.get_argDict()["custom_terrain"]:
 		
-		for i in range(size):
-			for j in range(size):
-				if grid[i][j] == 5 or grid[i][j] == 4:
-					water = Tile(0,0, self.water)
-					water.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 + 27)
-					self.floor.add(water)
-				else:
+			for i in range(size):
+				for j in range(size):
+					if grid[i][j] == 0 or grid[i][j] == 1:
+						water = Tile(0,0, self.water)
+						water.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
+						self.floor.add(water)
+					elif grid[i][j] == 2:
+						tile = Tile(0,0, self.close_water)
+						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 18)
+						self.floor.add(tile)
+					else:
+						tile = Tile(0,0, self.grass)
+						dirt = Tile(0,0, self.dirt)
+						dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]-2))
+						dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]-1))
+						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])
+						self.floor.add(dirt)
+						self.floor.add(tile)
+		else:
+			for i in range(size):
+				for j in range(size):
 					tile = Tile(0,0, self.grass)
-					dirt = Tile(0,0, self.dirt)
-					dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 + 9 * (grid[i][j]+1))
-					tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 + 9 * grid[i][j])
-					self.floor.add(dirt)
+					tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4)
 					self.floor.add(tile)
-					
-				
 
-					
-		
-		
 		self.floor.draw(self.floor_display)		
 		self.floor_display.set_colorkey((0, 0, 0))
 
@@ -157,13 +173,18 @@ class Display:
 		self.screen.fill((135,206,250))
 		# self.draw_world()
 
+		if self.needs_rescaling:
+				
+			self.floor_display_temp = pygame.Surface((6*self.zoom_factor, 3*self.zoom_factor))
+			self.floor_display_temp.set_colorkey((0, 0, 0))
+			pygame.transform.scale(self.floor_display, (6*self.zoom_factor, 3*self.zoom_factor), self.floor_display_temp)
 
-		floor_display_temp = pygame.transform.scale(self.floor_display, (6*self.zoom_factor, 3*self.zoom_factor))
+			self.needs_rescaling = False
 
-		grid_x = -self.camera_x + self.screen_width // 2 - floor_display_temp.get_size()[0] // 2
-		grid_y = -self.camera_y + self.screen_height // 2 - floor_display_temp.get_size()[1] // 2
+		grid_x = -self.camera_x + self.screen_width // 2 - self.floor_display_temp.get_size()[0] // 2
+		grid_y = -self.camera_y + self.screen_height // 2 - self.floor_display_temp.get_size()[1] // 2
 		
-		self.screen.blit(floor_display_temp, ( grid_x , grid_y))
+		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		
 	def main_loop(self):
 		pygame.init()
@@ -172,7 +193,7 @@ class Display:
 		font = pygame.font.Font(None, 20)
 
 		running = True
-		self.draw_isometric_grid()
+		self.draw_sprite_world()
 		
 		while running:
 

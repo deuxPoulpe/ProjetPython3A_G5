@@ -22,6 +22,7 @@ class World:
 	# 	"size" : size (100),
 	# 	"nbFood" : nbFood (200),
 	# 	"dayTick" : dayTick (100),
+	# 	"custom_terrain" : True,   #si True ajoute un bruite a la generation de terrain
 	# }
 
 
@@ -40,6 +41,8 @@ class World:
 		return self.bobs
 	def get_foods(self):
 		return self.foods
+	def get_argDict(self):
+		return self.argDict
 
 	#setter
 	def setArgDict(self,newArgDict):
