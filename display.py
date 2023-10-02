@@ -22,6 +22,7 @@ class Display:
 		self.dragging = False
 		self.drag_pos = None
 		self.floor = pygame.sprite.Group()
+		self.view_factor = 10
 
 
 		self.assets = {
@@ -118,6 +119,20 @@ class Display:
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
 
+
+	def view(self,event):
+		if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+			if self.view_factor < 30:
+				self.view_factor += 1
+				self.needs_rescaling = True
+		elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+			if self.view_factor > 5:
+				self.view_factor -= 1
+				self.needs_rescaling = True
+			
+
+		
+
 	def generate_terrain(self ,size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=20):
 
 		terrain = np.zeros((size, size))
@@ -198,10 +213,13 @@ class Display:
 		# self.draw_world()
 
 		if self.needs_rescaling:
+
+			scale_x = 20*self.zoom_factor / 3
+			scale_y = self.view_factor*self.zoom_factor / 3
 				
-			self.floor_display_temp = pygame.Surface((6*self.zoom_factor, 3*self.zoom_factor))
+			self.floor_display_temp = pygame.Surface((scale_x, scale_y))
 			self.floor_display_temp.set_colorkey((0, 0, 0))
-			pygame.transform.scale(self.floor_display, (6*self.zoom_factor, 3*self.zoom_factor), self.floor_display_temp)
+			pygame.transform.scale(self.floor_display, (scale_x, scale_y), self.floor_display_temp)
 
 			self.needs_rescaling = False
 
@@ -230,6 +248,7 @@ class Display:
 				
 				self.zoom(event)
 				self.start_drag(event)
+				self.view(event)
 				
 			self.camera()
 
