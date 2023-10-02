@@ -5,7 +5,7 @@ from noise import snoise2
 
 
 
-def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=10):
+def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=100):
 
     terrain = np.zeros((size, size))
     random_seed = random.randint(0, 1024)
