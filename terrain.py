@@ -54,7 +54,7 @@ class Terrain:
 				for x, y in courbe:
 					terrain[int(x)][int(y)] = 0
 			
-				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe)
+				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe, depth=4)
 
 
 		for i in range(random.randint(size , size*2)):
