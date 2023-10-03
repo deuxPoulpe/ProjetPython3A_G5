@@ -31,15 +31,28 @@ class Terrain:
 		terrain = np.add(terrain, 2)
 		terrain = np.round(terrain).astype(int)
 
-		self.terrain = terrain.copy()
+
+		def bezier_curve(p0, p1, p2, t):
+			x = int(round((1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]))
+			y = int(round((1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]))
+			return x, y
+		
+		def trace_courbe_bezier(p0, p1, p2):
+			return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
+		
 
 		if self.generate_river:
-			co1 = (random.randint(0,size-1),random.randint(0,size-1))
-			co2 = (random.randint(0,size-1),random.randint(0,size-1))
-			ligne = self.trace_line(co1,co2)
-			for i in ligne:
-				terrain[i[0]][i[1]] = 0
-			self.terrain = self.smooth_around_line(terrain, ligne)
+			p0 = (random.randint(0, size-1), random.randint(0, size-1))
+			p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
+			p2 = (random.randint(0, size-1), random.randint(0, size-1))
+			
+			courbe = trace_courbe_bezier(p0, p1, p2)			
+			for x, y in courbe:
+				terrain[int(x)][int(y)] = 0
+			
+			self.terrain = self.smooth_around_line(terrain, courbe)
+		else:
+			self.terrain = terrain.copy()
 
 		for i in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
@@ -49,16 +62,14 @@ class Terrain:
 
 		
 
-	def smooth_around_line(self, terrain, ligne, depth=3):
+	def smooth_around_line(self, terrain, ligne, depth=4):
 		smoothed_terrain = terrain.copy()
 		
 		for x, y in ligne:
 			for dx in range(-depth, depth+1):
 				for dy in range(-depth, depth+1):
 					dist = np.sqrt(dx*dx + dy*dy)
-					if dist == 0:
-						continue
-					
+				
 					xi, yi = x + dx, y + dy
 					if 0 <= xi < terrain.shape[0] and 0 <= yi < terrain.shape[1]:
 						factor = (dist / depth)**2
@@ -66,44 +77,6 @@ class Terrain:
 		
 		return smoothed_terrain
 
-
-	def trace_line(self, start, end):
-		x1, y1 = start
-		x2, y2 = end
-		dx = x2 - x1
-		dy = y2 - y1
-
-		pente = abs(dy) > abs(dx)
-		if pente:
-			x1, y1 = y1, x1
-			x2, y2 = y2, x2
-			dx, dy = dy, dx
-
-		if x2 < x1:
-			x1, x2 = x2, x1
-			y1, y2 = y2, y1
-
-		delta_error = abs(dy)
-		error = 0
-		y = y1
-		y_step = 1 if y1 < y2 else -1
-
-		line = []
-		for x in range(x1, x2 + 1):
-			if pente:
-				line.extend([(x, y), (x, y+1), (x, y-1), (x+1, y), (x-1, y)])
-
-			else:
-				line.extend([(x, y), (x, y+1), (x, y-1), (x+1, y), (x-1, y)])
-
-
-			error += delta_error
-			if (error << 1) > dx:
-				y += y_step
-				error -= dx
-
-		return line
-	
 
 	def get_terrain(self):
 		return self.terrain
