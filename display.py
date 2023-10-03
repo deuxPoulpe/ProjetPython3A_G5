@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from noise import snoise2
 import random
+from terrain import Terrain
 
 
 class Display:
@@ -34,6 +35,7 @@ class Display:
 			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_019.png")).convert(),
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
 			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
+			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
 			"plants": []			
 		}
 
@@ -115,43 +117,16 @@ class Display:
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
 
-	
-
-		
-
-	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=10):
-
-		terrain = np.zeros((size, size))
-		plant_to_add = np.zeros((size, size))
-		random_seed = random.randint(0, 1024)
-		
-		for x in range(size):
-			for y in range(size):
-				terrain[x][y] = snoise2(x*scale + random_seed, 
-										y*scale + random_seed,
-										octaves=octaves, 
-										persistence=persistence, 
-										lacunarity=lacunarity
-				)
-
-		terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
-		terrain = np.round(terrain).astype(int)
-
-
-		for i in range(random.randint(size , size*2)):
-			x = random.randint(0,size-1)
-			y = random.randint(0,size-1)
-			plant_to_add[x][y] = 1
-
-		return terrain, plant_to_add
 
 
 	def draw_sprite_world(self):
 		size = self.world.get_size()
 		self.floor.empty()
 
-		grid = self.generate_terrain(self.world.get_size())[0]
-		plant_to_add = self.generate_terrain(self.world.get_size())[1]
+
+		terrain = Terrain(size, self.world.get_argDict()["generate_river"])
+		grid = terrain.get_terrain()
+		plant_to_add = terrain.get_plant_to_add()
 
 		start_x = self.floor_display.get_size()[0] // 2
 		start_y = self.floor_display.get_size()[1] - 16 * (self.world.get_size()+1)
@@ -161,9 +136,12 @@ class Display:
 			for i in range(size):
 				for j in range(size):
 					for k in range(grid[i][j] + 1):
-						dirt = Tile(0,0, self.assets["dirt"])
-						dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
-						self.floor.add(dirt)
+						if k < grid[i][j] - 1:
+							under_tile = Tile(0,0, self.assets["stone"])
+						else:
+							under_tile = Tile(0,0, self.assets["dirt"])
+						under_tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
+						self.floor.add(under_tile)
 							
 					if grid[i][j] <= 1:
 						tile = Tile(0,0, self.assets["water"])

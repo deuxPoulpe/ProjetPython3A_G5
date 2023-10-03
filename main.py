@@ -9,6 +9,7 @@ if __name__ == "__main__":
 		"nbFood" : 200,
 		"dayTick" : 100,
 		"custom_terrain" : True,
+		"generate_river" : True,
 	})
 
 	Display(world).main_loop()
