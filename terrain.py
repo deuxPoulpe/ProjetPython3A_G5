@@ -5,9 +5,10 @@ from noise import snoise2
 
 class Terrain:
 
-	def __init__(self,size,bool_river):
+	def __init__(self,size,bool_river,number_of_river):
 		self.size = size
 		self.generate_river	= bool_river
+		self.number_of_river = number_of_river
 		self.plant_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))
 		self.generate_terrain(size)	
@@ -28,8 +29,10 @@ class Terrain:
 				)
 
 		terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
-		terrain = np.add(terrain, 2)
+		terrain = np.add(terrain, 3)
 		terrain = np.round(terrain).astype(int)
+
+		self.terrain = terrain
 
 
 		def bezier_curve(p0, p1, p2, t):
@@ -42,17 +45,17 @@ class Terrain:
 		
 
 		if self.generate_river:
-			p0 = (random.randint(0, size-1), random.randint(0, size-1))
-			p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
-			p2 = (random.randint(0, size-1), random.randint(0, size-1))
+			for _ in range(self.number_of_river):
+				p0 = (random.randint(0, size-1), random.randint(0, size-1))
+				p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
+				p2 = (random.randint(0, size-1), random.randint(0, size-1))
+				
+				courbe = trace_courbe_bezier(p0, p1, p2)			
+				for x, y in courbe:
+					terrain[int(x)][int(y)] = 0
 			
-			courbe = trace_courbe_bezier(p0, p1, p2)			
-			for x, y in courbe:
-				terrain[int(x)][int(y)] = 0
-			
-			self.terrain = self.smooth_around_line(terrain, courbe)
-		else:
-			self.terrain = terrain.copy()
+				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe)
+
 
 		for i in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)

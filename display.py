@@ -124,7 +124,7 @@ class Display:
 		self.floor.empty()
 
 
-		terrain = Terrain(size, self.world.get_argDict()["generate_river"])
+		terrain = Terrain(size, self.world.get_argDict()["generate_river"], self.world.get_argDict()["number_of_river"])
 		grid = terrain.get_terrain()
 		plant_to_add = terrain.get_plant_to_add()
 

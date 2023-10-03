@@ -9,6 +9,7 @@ if __name__ == "__main__":
 		"nbFood" : 200,
 		"dayTick" : 100,
 		"custom_terrain" : True,
+		"number_of_river" : 2,
 		"generate_river" : True,
 	})
 
