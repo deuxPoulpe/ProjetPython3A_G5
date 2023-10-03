@@ -13,40 +13,37 @@ class Display:
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-		self.floor_display = pygame.Surface((32 * world.get_size(), 22 * world.get_size()))
+		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 108))
+
 		self.world = world
-		self.camera_x = 0
-		self.camera_y = 0
+		
 		self.zoom_factor = 100
 		self.zoom_speed = 50
+		self.previous_zoom_factor = self.zoom_factor 
+		self.needs_rescaling = True
+
+		self.camera_x = 0
+		self.camera_y = 0
 		self.dragging = False
 		self.drag_pos = None
+
 		self.floor = pygame.sprite.Group()
-
-
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")).convert(),
 			"dirt": pygame.image.load(os.path.join("assets/tiles", "tile_003.png")).convert(),
-			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_020.png")).convert(),
+			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_019.png")).convert(),
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
+			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
 			"plants": []			
 		}
 
-
 		for k in range(0, 12):
-			self.assets["plants"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{k+41}.png")).convert())
+			self.assets["plants"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{k+41}.png")))
 			self.assets["plants"][k].set_colorkey((0, 0, 0))
 		
 		for key in self.assets:
 			if key != "plants":
 				self.assets[key].set_colorkey((0, 0, 0))
-
-
-		self.previous_zoom_factor = self.zoom_factor  # Store the zoom level of the last frame
-		self.needs_rescaling = True
-		
-
-
 	
 
 	def draw_world(self):
@@ -122,7 +119,7 @@ class Display:
 
 		
 
-	def generate_terrain(self ,size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=20):
+	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=10):
 
 		terrain = np.zeros((size, size))
 		plant_to_add = np.zeros((size, size))
@@ -157,40 +154,39 @@ class Display:
 		plant_to_add = self.generate_terrain(self.world.get_size())[1]
 
 		start_x = self.floor_display.get_size()[0] // 2
-		start_y = self.floor_display.get_size()[1] // 5
+		start_y = self.floor_display.get_size()[1] - 16 * (self.world.get_size()+1)
 
 		if self.world.get_argDict()["custom_terrain"]:
 		
 			for i in range(size):
 				for j in range(size):
-					for k in range(grid[i][j]):
+					for k in range(grid[i][j] + 1):
 						dirt = Tile(0,0, self.assets["dirt"])
-						dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * k)
+						dirt.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
 						self.floor.add(dirt)
 							
 					if grid[i][j] <= 1:
-						water = Tile(0,0, self.assets["water"])
-						water.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
-						self.floor.add(water)
+						tile = Tile(0,0, self.assets["water"])
+						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
 					elif grid[i][j] == 2:
 						tile = Tile(0,0, self.assets["close_water"])
 						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 18)
-						self.floor.add(tile)
 					else:
 						tile = Tile(0,0, self.assets["grass"])
 						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])
-						self.floor.add(tile)
+
+					self.floor.add(tile)
 
 					if plant_to_add[i][j]== 1 and grid[i][j] > 2:
-						tile = Tile(0,0, self.assets["plants"][random.randint(0,11)])
-						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
-						self.floor.add(tile)
-
+						plant = Tile(0,0, self.assets["plants"][random.randint(0,11)])
+						plant.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
+						self.floor.add(plant)			
+					
 
 		else:
 			for i in range(size):
 				for j in range(size):
-					tile = Tile(0,0, self.grass)
+					tile = Tile(0,0, self.assets["clean_grass"])
 					tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4)
 					self.floor.add(tile)
 
