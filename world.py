@@ -1,5 +1,8 @@
 import os
 import pygame
+from terrain import Terrain
+
+
 
 class World:
 	def __init__(self,argDict):
@@ -11,6 +14,11 @@ class World:
 		self.tick = 0
 		self.population_bob = []
 		self.population_food = []
+		if self.argDict["custom_terrain"]:
+			self.terrain = Terrain(self.argDict["size"], self.argDict["generate_river"], self.argDict["number_of_river"])
+		else:
+			self.terrain = None
+
 
 		assert all([type(argDict["size"]) == int ,
 		type(argDict["nbFood"]) == int ,
@@ -43,6 +51,8 @@ class World:
 		return self.foods
 	def get_argDict(self):
 		return self.argDict
+	def get_terrain(self):
+		return self.terrain
 
 	#setter
 	def setArgDict(self,newArgDict):

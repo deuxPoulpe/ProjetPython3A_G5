@@ -3,10 +3,7 @@ import pygame_menu
 from tiles import Tile
 import os
 import matplotlib.pyplot as plt
-import numpy as np
-from noise import snoise2
 import random
-from terrain import Terrain
 
 
 class Display:
@@ -117,48 +114,55 @@ class Display:
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
 
+	def draw_empty_world(self,start_x,start_y,i,j,grid):
+		for k in range(grid[i][j] + 1):
+			if k < grid[i][j] - 1:
+				under_tile = Tile(0,0, self.assets["stone"])
+			else:
+				under_tile = Tile(0,0, self.assets["dirt"])
+			under_tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
+			self.floor.add(under_tile)
 
+	def draw_surface_world(self,start_x,start_y,i,j,grid):
+		if grid[i][j] <= 1:
+			tile = Tile(0,0, self.assets["water"])
+			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
+		elif grid[i][j] == 2:
+			tile = Tile(0,0, self.assets["close_water"])
+			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 18)
+		else:
+			tile = Tile(0,0, self.assets["grass"])
+			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])
 
-	def draw_sprite_world(self):
+		self.floor.add(tile)
+
+	def draw_plants_world(self,start_x,start_y,i,j,grid,plant_to_add):
+		if plant_to_add[i][j]== 1 and grid[i][j] > 2:
+			plant = Tile(0,0, self.assets["plants"][random.randint(0,11)])
+			plant.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
+			self.floor.add(plant)		
+
+	def draw_better_world(self):
 		size = self.world.get_size()
 		self.floor.empty()
 
 
-		terrain = Terrain(size, self.world.get_argDict()["generate_river"], self.world.get_argDict()["number_of_river"])
-		grid = terrain.get_terrain()
-		plant_to_add = terrain.get_plant_to_add()
+		
 
 		start_x = self.floor_display.get_size()[0] // 2
 		start_y = self.floor_display.get_size()[1] - 16 * (self.world.get_size()+1)
 
-		if self.world.get_argDict()["custom_terrain"]:
+		terrain = self.world.get_terrain()
+
+		if terrain:
+			grid = terrain.get_terrain()
+			plant_to_add = terrain.get_plant_to_add()
 		
 			for i in range(size):
 				for j in range(size):
-					for k in range(grid[i][j] + 1):
-						if k < grid[i][j] - 1:
-							under_tile = Tile(0,0, self.assets["stone"])
-						else:
-							under_tile = Tile(0,0, self.assets["dirt"])
-						under_tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
-						self.floor.add(under_tile)
-							
-					if grid[i][j] <= 1:
-						tile = Tile(0,0, self.assets["water"])
-						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
-					elif grid[i][j] == 2:
-						tile = Tile(0,0, self.assets["close_water"])
-						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 18)
-					else:
-						tile = Tile(0,0, self.assets["grass"])
-						tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])
-
-					self.floor.add(tile)
-
-					if plant_to_add[i][j]== 1 and grid[i][j] > 2:
-						plant = Tile(0,0, self.assets["plants"][random.randint(0,11)])
-						plant.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
-						self.floor.add(plant)			
+					# self.draw_empty_world(start_x,start_y,i,j,grid)
+					self.draw_surface_world(start_x,start_y,i,j,grid)
+					# self.draw_plants_world(start_x,start_y,i,j,grid,plant_to_add)		
 					
 
 		else:
@@ -198,7 +202,7 @@ class Display:
 		font = pygame.font.Font(None, 20)
 
 		running = True
-		self.draw_sprite_world()
+		self.draw_better_world()
 		
 		while running:
 
