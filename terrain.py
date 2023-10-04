@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from noise import snoise2
+from math import sin
 
 class Terrain:
 
@@ -14,7 +15,7 @@ class Terrain:
 		self.generate_terrain(size)	
 		
 
-	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=10):
+	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
 
 		terrain = np.zeros((size, size))
 		random_seed = random.randint(0, 1024)
@@ -43,6 +44,9 @@ class Terrain:
 		def trace_courbe_bezier(p0, p1, p2):
 			return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
 		
+		def ondulation(courbe, amplitude=10, frequence=0.2):
+			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+		
 
 		if self.generate_river:
 			for _ in range(self.number_of_river):
@@ -50,9 +54,13 @@ class Terrain:
 				p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
 				p2 = (random.randint(0, size-1), random.randint(0, size-1))
 				
-				courbe = trace_courbe_bezier(p0, p1, p2)			
+				courbe = trace_courbe_bezier(p0, p1, p2)
+				courbe = ondulation(courbe)			
 				for x, y in courbe:
-					terrain[int(x)][int(y)] = 0
+					try:
+						self.terrain[int(x)][int(y)] = 0
+					except:
+						pass
 			
 				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe, depth=4)
 

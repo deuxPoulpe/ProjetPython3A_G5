@@ -154,15 +154,22 @@ class Display:
 
 		terrain = self.world.get_terrain()
 
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Génération du terrain en cours ...", True, (255,255,255)),
+					 (self.screen_width/2 - 100, self.screen_height/2))
+		pygame.display.flip()
+
 		if terrain:
 			grid = terrain.get_terrain()
 			plant_to_add = terrain.get_plant_to_add()
 		
 			for i in range(size):
 				for j in range(size):
-					# self.draw_empty_world(start_x,start_y,i,j,grid)
+					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
-					# self.draw_plants_world(start_x,start_y,i,j,grid,plant_to_add)		
+					self.draw_plants_world(start_x,start_y,i,j,grid,plant_to_add)
+
+				
+
 					
 
 		else:
@@ -198,6 +205,7 @@ class Display:
 	def main_loop(self):
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
+		self.screen.fill((135,206,250))
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
 
