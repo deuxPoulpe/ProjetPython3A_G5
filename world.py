@@ -5,8 +5,9 @@ from terrain import Terrain
 
 
 class World:
-	def __init__(self,argDict):
+	def __init__(self,argDict,terrain_config_dict):
 		self.argDict = argDict
+		self.terrain_config = terrain_config_dict
 		self.bobs = {}
 		self.foods = {}
 		self.spriteBob = pygame.image.load(os.path.join("assets","bob.png"))
@@ -15,7 +16,7 @@ class World:
 		self.population_bob = []
 		self.population_food = []
 		if self.argDict["custom_terrain"]:
-			self.terrain = Terrain(self.argDict["size"], self.argDict["generate_river"], self.argDict["number_of_river"])
+			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
 			self.terrain = None
 

@@ -6,13 +6,19 @@ from math import sin
 
 class Terrain:
 
-	def __init__(self,size,bool_river,number_of_river):
+	def __init__(self,size,config_dict):
 		self.size = size
-		self.generate_river	= bool_river
-		self.number_of_river = number_of_river
+		self.generate_river	= config_dict["generate_river"]
+		self.number_of_river = config_dict["number_of_river"]
+		self.generate_lake = config_dict["generate_lake"]
+		self.number_of_river = config_dict["number_of_river"]
+		self.size_of_lake = config_dict["size_of_lake"]
+
+
 		self.plant_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))
-		self.generate_terrain(size)	
+
+		self.generate_terrain(size,z_max = config_dict["max_height"])	
 		
 
 	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
@@ -44,7 +50,7 @@ class Terrain:
 		def trace_courbe_bezier(p0, p1, p2):
 			return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
 		
-		def ondulation(courbe, amplitude=10, frequence=0.2):
+		def ondulation(courbe, amplitude=9, frequence=0.2):
 			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
 		
 
@@ -63,6 +69,12 @@ class Terrain:
 						pass
 			
 				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe, depth=4)
+
+		if self.generate_lake:
+			for _ in range(self.number_of_river):
+				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
+				self.terrain[lake[0][0]][lake[0][1]] = 0
+				self.terrain = self.smooth_around_line(self.terrain.copy(), lake, self.size_of_lake)
 
 
 		for i in range(random.randint(size , size*2)):

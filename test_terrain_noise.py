@@ -7,7 +7,7 @@ from math import cos
 
 
 
-def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=20):
+def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
 
 	terrain = np.zeros((size, size))
 	random_seed = random.randint(0, 1024)
@@ -31,16 +31,19 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 				p0 = (random.randint(0, size-1), random.randint(0, size-1))
 				p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
 				p2 = (random.randint(0, size-1), random.randint(0, size-1))
-				
-				courbe = trace_courbe_bezier(p0, p1, p2)	
-				courbe = ondulation(courbe)		
+
+				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
+
+				courbe = lake
+				# courbe = trace_courbe_bezier(p0, p1, p2)	
+				# courbe = ondulation(courbe)		
 				for x, y in courbe:
 					try:
 						terrain[int(x)][int(y)] = 0
 					except:
 						pass
 			
-				terrain = smooth_around_line(terrain, courbe, depth=7)
+				terrain = smooth_around_line(terrain, courbe, depth=30)
 
 	return terrain
 

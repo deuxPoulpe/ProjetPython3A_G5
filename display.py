@@ -29,7 +29,7 @@ class Display:
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")).convert(),
 			"dirt": pygame.image.load(os.path.join("assets/tiles", "tile_003.png")).convert(),
-			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_019.png")).convert(),
+			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_019.png")),
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
 			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
 			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
@@ -146,8 +146,6 @@ class Display:
 		size = self.world.get_size()
 		self.floor.empty()
 
-
-		
 
 		start_x = self.floor_display.get_size()[0] // 2
 		start_y = self.floor_display.get_size()[1] - 16 * (self.world.get_size()+1)
