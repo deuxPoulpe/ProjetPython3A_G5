@@ -38,6 +38,8 @@ class World:
 	#getters
 	def get_size(self):
 		return self.argDict["size"]
+	def get_terrain_config(self):
+		return self.terrain_config
 	def get_populationBob(self):
 		return self.population_bob
 	def get_populationFood(self):

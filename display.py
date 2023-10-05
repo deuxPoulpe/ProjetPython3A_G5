@@ -8,12 +8,13 @@ import random
 
 class Display:
 	def __init__(self,world):
+		self.world = world
+
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 108))
 
-		self.world = world
+		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 117))
 		
 		self.zoom_factor = 100
 		self.zoom_speed = 50
@@ -124,12 +125,12 @@ class Display:
 			self.floor.add(under_tile)
 
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
-		if grid[i][j] <= 1:
+		if grid[i][j] == 0:
 			tile = Tile(0,0, self.assets["water"])
-			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 15)
-		elif grid[i][j] == 2:
+			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 7)
+		elif grid[i][j] == 1:
 			tile = Tile(0,0, self.assets["close_water"])
-			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 18)
+			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9)
 		else:
 			tile = Tile(0,0, self.assets["grass"])
 			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])

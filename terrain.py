@@ -11,7 +11,7 @@ class Terrain:
 		self.generate_river	= config_dict["generate_river"]
 		self.number_of_river = config_dict["number_of_river"]
 		self.generate_lake = config_dict["generate_lake"]
-		self.number_of_river = config_dict["number_of_river"]
+		self.number_of_lake = config_dict["number_of_lake"]
 		self.size_of_lake = config_dict["size_of_lake"]
 
 
@@ -36,7 +36,7 @@ class Terrain:
 				)
 
 		terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
-		terrain = np.add(terrain, 3)
+		terrain = np.add(terrain, 2)
 		terrain = np.round(terrain).astype(int)
 
 		self.terrain = terrain
@@ -71,7 +71,7 @@ class Terrain:
 				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe, depth=4)
 
 		if self.generate_lake:
-			for _ in range(self.number_of_river):
+			for _ in range(self.number_of_lake):
 				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
 				self.terrain[lake[0][0]][lake[0][1]] = 0
 				self.terrain = self.smooth_around_line(self.terrain.copy(), lake, self.size_of_lake)

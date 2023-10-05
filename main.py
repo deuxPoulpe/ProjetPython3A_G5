@@ -7,11 +7,11 @@ if __name__ == "__main__":
 
 	terrain_config = {
 		"number_of_river" : 1,
-		"generate_river" : False,
+		"generate_river" : True,
 		"generate_lake" : True,
-		"number_of_lake" : 1,
-		"size_of_lake" : 50,
-		"max_height" : 10,
+		"number_of_lake" : 2,
+		"size_of_lake" : 20,
+		"max_height" : 7,
 		}
 
 	world = World({
