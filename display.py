@@ -34,15 +34,20 @@ class Display:
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
 			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
 			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
-			"plants": []			
+			"plants": [],
+			"rocks" : []			
 		}
 
 		for k in range(0, 12):
 			self.assets["plants"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{k+41}.png")))
 			self.assets["plants"][k].set_colorkey((0, 0, 0))
+
+		for l in range(0, 11):
+			self.assets["rocks"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{l+70}.png")))
+			self.assets["rocks"][l].set_colorkey((0, 0, 0))
 		
 		for key in self.assets:
-			if key != "plants":
+			if key != "plants" and key != "rocks":
 				self.assets[key].set_colorkey((0, 0, 0))
 	
 
@@ -137,11 +142,17 @@ class Display:
 
 		self.floor.add(tile)
 
-	def draw_plants_world(self,start_x,start_y,i,j,grid,plant_to_add):
-		if plant_to_add[i][j]== 1 and grid[i][j] > 2:
+	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
+		if decoration_to_add[i][j]== 1 and grid[i][j] > 2:
 			plant = Tile(0,0, self.assets["plants"][random.randint(0,11)])
 			plant.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
-			self.floor.add(plant)		
+			self.floor.add(plant)
+		elif decoration_to_add[i][j] == 2:
+			rock = Tile(0,0, self.assets["rocks"][random.randint(0,10)])
+			rock.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 8)
+			self.floor.add(rock)
+
+			pass
 
 	def draw_better_world(self):
 		size = self.world.get_size()
@@ -159,13 +170,13 @@ class Display:
 
 		if terrain:
 			grid = terrain.get_terrain()
-			plant_to_add = terrain.get_plant_to_add()
+			decoration_to_add = terrain.get_decoration_to_add()
 		
 			for i in range(size):
 				for j in range(size):
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
-					self.draw_plants_world(start_x,start_y,i,j,grid,plant_to_add)
+					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
 
 				
 

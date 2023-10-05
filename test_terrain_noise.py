@@ -25,7 +25,6 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 	terrain = np.add(terrain, 2)
 	terrain = np.round(terrain).astype(int)
 
-
 	# ligne aleatoire
 	for _ in range(1):
 				p0 = (random.randint(0, size-1), random.randint(0, size-1))
@@ -35,15 +34,15 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
 
 				courbe = lake
-				# courbe = trace_courbe_bezier(p0, p1, p2)	
-				# courbe = ondulation(courbe)		
+				courbe = trace_courbe_bezier(p0, p1, p2)	
+				courbe = ondulation(courbe)		
 				for x, y in courbe:
 					try:
 						terrain[int(x)][int(y)] = 0
 					except:
 						pass
 			
-				terrain = smooth_around_line(terrain, courbe, depth=30)
+				terrain = smooth_around_line(terrain, courbe, depth=4)
 
 	return terrain
 

@@ -11,7 +11,7 @@ if __name__ == "__main__":
 		"generate_lake" : True,
 		"number_of_lake" : 2,
 		"size_of_lake" : 20,
-		"max_height" : 7,
+		"max_height" : 4,
 		}
 
 	world = World({

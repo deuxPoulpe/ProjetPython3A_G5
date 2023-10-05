@@ -15,7 +15,7 @@ class Terrain:
 		self.size_of_lake = config_dict["size_of_lake"]
 
 
-		self.plant_to_add = np.zeros((size, size))
+		self.decoration_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))
 
 		self.generate_terrain(size,z_max = config_dict["max_height"])	
@@ -53,6 +53,10 @@ class Terrain:
 		def ondulation(courbe, amplitude=9, frequence=0.2):
 			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
 		
+		for _ in range(random.randint(size , size*2)):
+			x = random.randint(0,size-1)
+			y = random.randint(0,size-1)
+			self.decoration_to_add[x][y] = 1
 
 		if self.generate_river:
 			for _ in range(self.number_of_river):
@@ -72,15 +76,21 @@ class Terrain:
 
 		if self.generate_lake:
 			for _ in range(self.number_of_lake):
-				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
+				lake = [(random.randint(0, size-1), random.randint(0, size-1))]			
 				self.terrain[lake[0][0]][lake[0][1]] = 0
 				self.terrain = self.smooth_around_line(self.terrain.copy(), lake, self.size_of_lake)
 
+				for k in range(random.randint(1, self.size_of_lake)):
+					rand_x = random.randint(-1,1)*k
+					rand_y = random.randint(-1,1)*k
+					if self.terrain[lake[0][0]+rand_x][lake[0][1]+rand_y] == 0:
+						try:
+							self.decoration_to_add[lake[0][0]+rand_x][lake[0][1]+rand_y] = 2
+						except:
+							pass
 
-		for i in range(random.randint(size , size*2)):
-			x = random.randint(0,size-1)
-			y = random.randint(0,size-1)
-			self.plant_to_add[x][y] = 1
+
+		
 
 
 		
@@ -103,5 +113,5 @@ class Terrain:
 
 	def get_terrain(self):
 		return self.terrain
-	def get_plant_to_add(self):
-		return self.plant_to_add
+	def get_decoration_to_add(self):
+		return self.decoration_to_add
