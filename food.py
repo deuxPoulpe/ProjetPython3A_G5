@@ -11,9 +11,9 @@ class Food:
 
 
     #getters
-    def getValue(self):
+    def get_value(self):
         return self.value
-    def getPos(self):
+    def get_pos(self):
         return self.pos
     
 

@@ -83,11 +83,11 @@ class Terrain:
 				for k in range(random.randint(1, self.size_of_lake)):
 					rand_x = random.randint(-1,1)*k
 					rand_y = random.randint(-1,1)*k
-					if self.terrain[lake[0][0]+rand_x][lake[0][1]+rand_y] == 0:
-						try:
+					try:
+						if self.terrain[lake[0][0]+rand_x][lake[0][1]+rand_y] == 0:
 							self.decoration_to_add[lake[0][0]+rand_x][lake[0][1]+rand_y] = 2
-						except:
-							pass
+					except:
+						pass
 
 
 		
