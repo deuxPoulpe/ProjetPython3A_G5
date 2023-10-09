@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from noise import snoise2
+from noise import pnoise2
+
 from math import sin
 from math import cos
 
@@ -10,11 +12,11 @@ from math import cos
 def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
 
 	terrain = np.zeros((size, size))
-	random_seed = random.randint(0, 1024)
+	random_seed = random.randint(0, 1900000)
 	
 	for x in range(size):
 		for y in range(size):
-			terrain[x][y] = snoise2(x*scale + random_seed, 
+			terrain[x][y] = pnoise2(x*scale + random_seed, 
 									y*scale + random_seed,
 									octaves=octaves, 
 									persistence=persistence, 
@@ -35,7 +37,8 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 
 				courbe = lake
 				courbe = trace_courbe_bezier(p0, p1, p2)	
-				courbe = ondulation(courbe)		
+				courbe = ondulation(courbe)	
+				courbe = add_points(add_points(add_points(courbe)))	
 				for x, y in courbe:
 					try:
 						terrain[int(x)][int(y)] = 0
@@ -46,7 +49,20 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 
 	return terrain
 
+def add_points(courbe):
+			
+	new_courbe = [courbe[0]]
+	for i in range(1, len(courbe)):
+		previous_point  = courbe[i - 1]
+		current_point  = courbe[i]
+		
+		x = (previous_point[0] + current_point[0]) // 2
+		y = (previous_point[1] + current_point[1]) // 2
+		mid_point = (x, y)
+		
+		new_courbe.extend([mid_point, current_point])
 
+	return new_courbe
 
 def bezier_curve(p0, p1, p2, t):
 			x = int(round((1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]))
@@ -86,5 +102,5 @@ def display_terrain(terrain):
 	plt.colorbar()
 	plt.show()
 
-terrain = generate_terrain(100)
+terrain = generate_terrain(500)
 display_terrain(terrain)

@@ -53,6 +53,21 @@ class Terrain:
 		def ondulation(courbe, amplitude=9, frequence=0.2):
 			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
 		
+		def add_points(courbe):
+			
+			new_courbe = [courbe[0]]
+			for i in range(1, len(courbe)):
+				previous_point  = courbe[i - 1]
+				current_point  = courbe[i]
+				
+				x = (previous_point[0] + current_point[0]) // 2
+				y = (previous_point[1] + current_point[1]) // 2
+				mid_point = (x, y)
+				
+				new_courbe.extend([mid_point, current_point])
+
+			return new_courbe
+		
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
 			y = random.randint(0,size-1)
@@ -65,7 +80,8 @@ class Terrain:
 				p2 = (random.randint(0, size-1), random.randint(0, size-1))
 				
 				courbe = trace_courbe_bezier(p0, p1, p2)
-				courbe = ondulation(courbe)			
+				courbe = ondulation(courbe)		
+				courbe = add_points(add_points(add_points(courbe)))
 				for x, y in courbe:
 					try:
 						self.terrain[int(x)][int(y)] = 0
@@ -76,8 +92,15 @@ class Terrain:
 
 		if self.generate_lake:
 			for _ in range(self.number_of_lake):
-				lake = [(random.randint(0, size-1), random.randint(0, size-1))]			
-				self.terrain[lake[0][0]][lake[0][1]] = 0
+				center_lake = (random.randint(0, size-1), random.randint(0, size-1))
+				lake = [center_lake, (center_lake[0]+random.randint(-2,2), center_lake[1]+random.randint(-2,2))]	
+				try:
+					for x, y in lake:
+						self.terrain[int(x)][int(y)] = 0
+				except:
+					pass
+		
+
 				self.terrain = self.smooth_around_line(self.terrain.copy(), lake, self.size_of_lake)
 
 				for k in range(random.randint(1, self.size_of_lake)):
