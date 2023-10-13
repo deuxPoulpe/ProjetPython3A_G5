@@ -201,11 +201,11 @@ class Display:
 
 		terrain = self.world.get_terrain()
 
-		if terrain:
+		if not terrain:
 			for key in self.world.get_bobs():
 				for bob in self.world.get_bobs()[key]:
 					i,j = bob.get_pos()
-					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8, start_y + (i + j) * 8 - 13))	
+					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8 , start_y + (i + j) * 8 - 13 ))	
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
@@ -216,17 +216,19 @@ class Display:
 			self.floor_display_temp = pygame.Surface((scale_x, scale_y))
 			self.floor_display_temp.set_colorkey((0, 0, 0))
 			pygame.transform.scale(self.floor_display, (scale_x, scale_y), self.floor_display_temp)
-
-			self.sprite_display = pygame.transform.scale(self.sprite_display, (scale_x, scale_y))
-			self.sprite_display.set_colorkey((0, 0, 0))
+			# self.floor_display_temp = pygame.transform.chop(self.floor_display_temp, (0, 0, 20, 20)) 
 
 
 			self.needs_rescaling = False
+			self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
+			self.sprite_display_temp.set_colorkey((0, 0, 0))
+			pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
 
 	
 	def render(self):
 		self.screen.fill((135,206,250))
 		self.sprite_display.fill((0,0,0))
+
 		self.draw_bobs()
 
 
@@ -237,7 +239,7 @@ class Display:
 
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
-		self.screen.blit(self.sprite_display, ( grid_x , grid_y))
+		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
 		
 		
 	def main_loop(self):

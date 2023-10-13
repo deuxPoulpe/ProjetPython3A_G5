@@ -1,5 +1,6 @@
 from world import World
 from display import Display
+from bob import Bob
 
 
 if __name__ == "__main__":
@@ -18,9 +19,9 @@ if __name__ == "__main__":
 		"size" : 100,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : True,
+		"custom_terrain" : False,
 		}, terrain_config)
-	print(world.get_terrain().get_generation_point())
+	
 
 	Display(world).main_loop()
 

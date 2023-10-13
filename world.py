@@ -11,8 +11,6 @@ class World:
 		self.terrain_config = terrain_config_dict
 		self.bobs = {}
 		self.foods = {}
-		self.spriteBob = pygame.image.load(os.path.join("assets","bob.png"))
-		self.spriteFood = pygame.image.load(os.path.join("assets","food.png"))
 		self.tick = 0
 		self.population_bob = []
 		self.population_food = []
