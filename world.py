@@ -1,5 +1,6 @@
 import os
 import pygame
+import pickle
 from terrain import Terrain
 from bob import Bob
 
@@ -84,7 +85,11 @@ class World:
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
 		self.bobs[new_born_pos].append(new_born)
-		
 
-	def save(self):
-		pass
+
+	def save(self,filename,*args):
+		with open(filename, 'wb') as output:
+			for i in args:
+				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
+				print("saved",i)
+		output.close()
