@@ -14,6 +14,8 @@ class Terrain:
 		self.number_of_lake = config_dict["number_of_lake"]
 		self.size_of_lake = config_dict["size_of_lake"]
 
+		self.generation_point = {}
+
 
 		self.decoration_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))
@@ -74,10 +76,12 @@ class Terrain:
 			self.decoration_to_add[x][y] = 1
 
 		if self.generate_river:
-			for _ in range(self.number_of_river):
+			for k in range(self.number_of_river):
 				p0 = (random.randint(0, size-1), random.randint(0, size-1))
 				p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
 				p2 = (random.randint(0, size-1), random.randint(0, size-1))
+
+				self.generation_point[f"river_{k}"] = [p0,p1,p2]
 				
 				courbe = trace_courbe_bezier(p0, p1, p2)
 				courbe = ondulation(courbe)		
@@ -91,9 +95,10 @@ class Terrain:
 				self.terrain = self.smooth_around_line(self.terrain.copy(), courbe, depth=4)
 
 		if self.generate_lake:
-			for _ in range(self.number_of_lake):
+			for k in range(self.number_of_lake):
 				center_lake = (random.randint(0, size-1), random.randint(0, size-1))
-				lake = [center_lake, (center_lake[0]+random.randint(-2,2), center_lake[1]+random.randint(-2,2))]	
+				lake = [center_lake, (center_lake[0]+random.randint(-2,2), center_lake[1]+random.randint(-2,2))]
+				self.generation_point[f"lake_{k}"] = lake
 				try:
 					for x, y in lake:
 						self.terrain[int(x)][int(y)] = 0
@@ -138,3 +143,5 @@ class Terrain:
 		return self.terrain
 	def get_decoration_to_add(self):
 		return self.decoration_to_add
+	def get_generation_point(self):
+		return self.generation_point

@@ -1,6 +1,5 @@
 import random
 import pygame
-from world import World
 
 class Bob:
 	def __init__(self, x, y, world ,energy = 100, velocity = 1, mass = 1, perception = 0, max_energy = 200,):

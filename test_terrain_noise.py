@@ -44,7 +44,7 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 					except:
 						pass
 			
-				# terrain = smooth_around_line(terrain, courbe, depth=4)
+				terrain = smooth_around_line(terrain, courbe, depth=4)
 
 	return terrain
 
