@@ -15,10 +15,10 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 500,
+		"size" : 100,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : True,
+		"custom_terrain" : False,
 		}, terrain_config)
 
 	Display(world).main_loop()

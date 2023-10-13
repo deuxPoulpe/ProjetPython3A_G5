@@ -15,6 +15,7 @@ class Display:
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 
 		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 117))
+		self.sprite_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 117))
 		
 		self.zoom_factor = 100
 		self.zoom_speed = 50
@@ -35,7 +36,8 @@ class Display:
 			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
 			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
 			"plants": [],
-			"rocks" : []			
+			"rocks" : [],
+			"full_bob" : pygame.image.load(os.path.join("assets","bob.png")).convert()
 		}
 
 		for k in range(0, 12):
@@ -189,28 +191,54 @@ class Display:
 					tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4)
 					self.floor.add(tile)
 
-		self.floor.draw(self.floor_display)		
+		self.floor.draw(self.floor_display)	
 
+	def draw_bobs(self):
+		size = self.world.get_size()
 
-	def render(self):
-		self.screen.fill((135,206,250))
-		# self.draw_world()
+		start_x = self.sprite_display.get_size()[0] // 2
+		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
 
+		terrain = self.world.get_terrain()
+
+		if terrain:
+			for key in self.world.get_bobs():
+				for bob in self.world.get_bobs()[key]:
+					i,j = bob.get_pos()
+					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8, start_y + (i + j) * 8 - 13))	
+
+	def zooming_render(self):
+		scale_x = 6*self.zoom_factor
+		scale_y = 3*self.zoom_factor
+				
 		if self.needs_rescaling:
-
-			scale_x = 6*self.zoom_factor
-			scale_y = 3*self.zoom_factor 
 				
 			self.floor_display_temp = pygame.Surface((scale_x, scale_y))
 			self.floor_display_temp.set_colorkey((0, 0, 0))
 			pygame.transform.scale(self.floor_display, (scale_x, scale_y), self.floor_display_temp)
 
+			self.sprite_display = pygame.transform.scale(self.sprite_display, (scale_x, scale_y))
+			self.sprite_display.set_colorkey((0, 0, 0))
+
+
 			self.needs_rescaling = False
+
+	
+	def render(self):
+		self.screen.fill((135,206,250))
+		self.sprite_display.fill((0,0,0))
+		self.draw_bobs()
+
+
+		self.zooming_render()
 
 		grid_x = -self.camera_x + self.screen_width // 2 - self.floor_display_temp.get_size()[0] // 2
 		grid_y = -self.camera_y + self.screen_height // 2 - self.floor_display_temp.get_size()[1] // 2
+
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
+		self.screen.blit(self.sprite_display, ( grid_x , grid_y))
+		
 		
 	def main_loop(self):
 		pygame.init()

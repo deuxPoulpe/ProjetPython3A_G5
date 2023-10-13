@@ -5,14 +5,13 @@ from noise import snoise2
 from noise import pnoise2
 
 from math import sin
-from math import cos
 
 
 
 def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
 
 	terrain = np.zeros((size, size))
-	random_seed = random.randint(0, 1900000)
+	random_seed = random.randint(0, 1024)
 	
 	for x in range(size):
 		for y in range(size):
@@ -45,7 +44,7 @@ def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.
 					except:
 						pass
 			
-				terrain = smooth_around_line(terrain, courbe, depth=4)
+				# terrain = smooth_around_line(terrain, courbe, depth=4)
 
 	return terrain
 

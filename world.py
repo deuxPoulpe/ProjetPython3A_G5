@@ -1,6 +1,7 @@
 import os
 import pygame
 from terrain import Terrain
+from bob import Bob
 
 
 
@@ -80,7 +81,12 @@ class World:
 		pass
 
 	def spawn_reproduce(self,mother_bob):
-		pass
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self.world,energy = mother_bob.get_energy()*1/4)
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
+		
 
 	def save(self):
 		pass
