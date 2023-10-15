@@ -1,0 +1,58 @@
+import pygame
+import os
+from terrain import Terrain
+
+
+terrain = Terrain(100, {
+		"generate_river" : True,
+		"number_of_river" : 2,
+		"generate_lake" : True,
+		"number_of_lake" : 1,
+		"size_of_lake" : 20,
+		"max_height" : 10,
+		})
+
+
+def hide_behind_terrain(bob_image, tile, bob_position, terrain):
+    
+    
+    bob_array = pygame.surfarray.array_colorkey(bob_image)
+    tile_array = pygame.surfarray.array_alpha(tile)
+    
+    width, height = bob_array.shape
+
+    for i in range(width):
+        for j in range(height):
+            if bob_array[i][j] != 0:
+                print("#",end=" ")
+            else:
+                print(".",end=" ")
+        print()
+    print()
+    for i in range(tile_array.shape[0]):
+        for j in range(tile_array.shape[1]):
+            if tile_array[i][j] != 0:
+                print("#",end=" ")
+            else:
+                print(".",end=" ")
+        print()
+    print()
+    return bob_image
+
+pygame.init()
+screen = pygame.display.set_mode((800,600), pygame.RESIZABLE)
+
+bob_sprite = pygame.image.load(os.path.join("assets","bob.png")).convert()
+tile = pygame.image.load(os.path.join("assets/tiles","tile_028.png"))
+
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+
+    screen.fill((0,0,0))
+
+    screen.blit(hide_behind_terrain(bob_sprite, tile, (0,0), terrain), (400,300))
+
+    pygame.display.flip()

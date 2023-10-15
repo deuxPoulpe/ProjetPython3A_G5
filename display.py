@@ -1,9 +1,10 @@
 import pygame
 import pygame_menu
-from tiles import Tile
+from sprite import Tile
 import os
 import matplotlib.pyplot as plt
 import random
+from bob import Bob
 
 
 class Display:
@@ -193,6 +194,20 @@ class Display:
 
 		self.floor.draw(self.floor_display)	
 
+
+	def hide_behind_terrain(self, bob_image, bob_position, terrain):
+		
+		
+		bob_array = pygame.surfarray.array2d(bob_image)
+		
+		width, height = bob_array.shape
+
+		sub_terrain = []
+
+
+				
+		
+
 	def draw_bobs(self):
 		size = self.world.get_size()
 
@@ -205,7 +220,9 @@ class Display:
 			for key in self.world.get_bobs():
 				for bob in self.world.get_bobs()[key]:
 					i,j = bob.get_pos()
-					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8 , start_y + (i + j) * 8 - 13 ))	
+					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8 , start_y + (i + j) * 8 - 13 ))
+		
+
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
@@ -251,6 +268,8 @@ class Display:
 
 		running = True
 		self.draw_better_world()
+		self.hide_behind_terrain(self.assets["full_bob"], (0,0), self.world.terrain.get_terrain())
+
 		
 		while running:
 

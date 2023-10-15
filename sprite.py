@@ -3,7 +3,7 @@ import os
 
  #create a sub class to a sprite class
 
-class Tile(pygame.sprite.DirtySprite):
+class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
         super().__init__()
         self.image = image

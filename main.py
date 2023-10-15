@@ -19,9 +19,17 @@ if __name__ == "__main__":
 		"size" : 100,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : False,
+		"custom_terrain" : True,
 		}, terrain_config)
 	
+
+	for i in range(20):
+		for j in range(20):
+			bob = Bob(i,j,world)
+			if bob.get_pos() not in world.get_bobs():
+				world.get_bobs()[bob.get_pos()] = []
+			world.get_bobs()[bob.get_pos()].append(bob)
+		
 
 	Display(world).main_loop()
 
