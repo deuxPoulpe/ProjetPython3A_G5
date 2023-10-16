@@ -3,6 +3,7 @@ import os
 from terrain import Terrain
 from sprite import Sprite_bob
 import numpy as np
+import time
 
 
 terrain = Terrain(100, {
@@ -47,7 +48,6 @@ def tile_to_array(tile_image):
 
 def hide_behind_terrain(bob_sprite, tile_array, close_tile_height):
 	
-	
 	bob_array = pygame.surfarray.array3d(bob_sprite.get_image())
 	
 	width, height, _ = bob_array.shape
@@ -58,41 +58,52 @@ def hide_behind_terrain(bob_sprite, tile_array, close_tile_height):
 	offset_x_right = - 8 + int(8 *(1 - bob_sprite.get_size()))
 	offset_x_bot = 8 + int(8 *(1 - bob_sprite.get_size()))
 
-	offset_y = - 7 + int(16 *(1 - bob_sprite.get_size()))
+	offset_y_left = - 7 + int(16 *(1 - bob_sprite.get_size())) + 9 * close_tile_height[1]
+	offset_y_right = - 7 + int(16 *(1 - bob_sprite.get_size())) + 9 * close_tile_height[0]
+	offset_y_bot = - 7 + int(16 *(1 - bob_sprite.get_size())) - 10 + 9 * close_tile_height[2]
+
 
 
 	for i in range(width):
 		for j in range(height):
-			if any(bob_array[i,j] != 0):
-				x = i + offset_x_right
-				y = j + offset_y + 9 * close_tile_height[0]
-				if x >= 0 and y >= 0:
-					try:
-						if tile_array[x][y] != 0:
-							bob_array[i,j] = 0
-					except:
-						pass
-				x = i + offset_x_left
-				y = j + offset_y + 9 * close_tile_height[1]
-				if x >= 0 and y >= 0:
-					try:
-						if tile_array[x][y] != 0:
-							bob_array[i,j] = 0
-					except:
-						pass
+			x = i + offset_x_right
+			y = j + offset_y_right
+			if x >= 0 and y >= 0:
+				try:
+					if tile_array[x][y] != 0:
+						bob_array[i,j] = 0
+				except:
+					pass
+			x = i + offset_x_left
+			y = j + offset_y_left
+			if x >= 0 and y >= 0:
+				try:
+					if tile_array[x][y] != 0:
+						bob_array[i,j] = 0
+				except:
+					pass
 
-				x = i + offset_x_bot
-				y = j + offset_y - 10 + 9 * close_tile_height[2]
-				if x >= 0 and y >= 0:
-					try:
-						if tile_array[x][y] != 0:
-							bob_array[i,j] = 0
-					except:
-						pass
+			x = i + offset_x_bot
+			y = j + offset_y_bot
+			if x >= 0 and y >= 0:
+				try:
+					if tile_array[x][y] != 0:
+						bob_array[i,j] = 0
+				except:
+					pass
 	# afficher_matrice(bob_array)
 	bob_image = pygame.surfarray.make_surface(bob_array)
 
 	bob_sprite.set_image(bob_image)
+
+
+def show_time(f):
+	start_time = time.time()
+	f()
+	end_time = time.time()
+	print(f"Le temps d'exécution est de {end_time - start_time} secondes.")
+
+
 
 def test_loop():
 

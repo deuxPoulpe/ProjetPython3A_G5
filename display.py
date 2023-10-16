@@ -9,7 +9,7 @@ from math import sqrt
 
 from occlusion_utility import hide_behind_terrain
 from occlusion_utility import tile_to_array
-from occlusion_utility import afficher_matrice
+from occlusion_utility import show_time
 
 
 
@@ -317,7 +317,7 @@ class Display:
 				
 			self.camera()
 
-			self.render()		
+			show_time(self.render)		
 			
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
