@@ -317,7 +317,7 @@ class Display:
 				
 			self.camera()
 
-			show_time(self.render)		
+			show_time(self.render)	
 			
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")

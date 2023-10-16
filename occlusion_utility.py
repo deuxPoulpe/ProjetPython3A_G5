@@ -52,17 +52,16 @@ def hide_behind_terrain(bob_sprite, tile_array, close_tile_height):
 	
 	width, height, _ = bob_array.shape
 
+	base_offset_x = int(8 *(1 - bob_sprite.get_size()))
+	base_offset_y = int(16 *(1 - bob_sprite.get_size())) - 7
 
+	offset_x_left = 24 + base_offset_x
+	offset_x_right = - 8 + base_offset_x
+	offset_x_bot = 8 + base_offset_x
 
-	offset_x_left = 24 + int(8 *(1 - bob_sprite.get_size()))
-	offset_x_right = - 8 + int(8 *(1 - bob_sprite.get_size()))
-	offset_x_bot = 8 + int(8 *(1 - bob_sprite.get_size()))
-
-	offset_y_left = - 7 + int(16 *(1 - bob_sprite.get_size())) + 9 * close_tile_height[1]
-	offset_y_right = - 7 + int(16 *(1 - bob_sprite.get_size())) + 9 * close_tile_height[0]
-	offset_y_bot = - 7 + int(16 *(1 - bob_sprite.get_size())) - 10 + 9 * close_tile_height[2]
-
-
+	offset_y_left = base_offset_y + 9 * close_tile_height[1]
+	offset_y_right = base_offset_y + 9 * close_tile_height[0]
+	offset_y_bot = base_offset_y - 10 + 9 * close_tile_height[2]
 
 	for i in range(width):
 		for j in range(height):
@@ -91,10 +90,9 @@ def hide_behind_terrain(bob_sprite, tile_array, close_tile_height):
 						bob_array[i,j] = 0
 				except:
 					pass
-	# afficher_matrice(bob_array)
-	bob_image = pygame.surfarray.make_surface(bob_array)
 
-	bob_sprite.set_image(bob_image)
+
+	bob_sprite.set_image(pygame.surfarray.make_surface(bob_array))
 
 
 def show_time(f):
@@ -114,7 +112,6 @@ def test_loop():
 	tile = pygame.image.load(os.path.join("assets/tiles","tile_028.png"))
 	bob_sprite = Sprite_bob(0,0, bob_image, 1)
 	tile_array = tile_to_array(tile)
-	# tile_array = pygame.surfarray.array_alpha(tile)
 
 
 
