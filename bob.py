@@ -19,6 +19,8 @@ class Bob:
 		return self.position
 	def get_energy(self):
 		return self.energy
+	def get_mass(self):
+		return self.mass
 
 
 	def __str__(self):

@@ -1,10 +1,16 @@
 import pygame
 import pygame_menu
 from sprite import Tile
+from sprite import Sprite_bob
 import os
 import matplotlib.pyplot as plt
 import random
-from bob import Bob
+from math import sqrt
+
+from occlusion_utility import hide_behind_terrain
+from occlusion_utility import tile_to_array
+from occlusion_utility import afficher_matrice
+
 
 
 class Display:
@@ -15,8 +21,8 @@ class Display:
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 
-		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 117))
-		self.sprite_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 117))
+		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
+		self.sprite_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
 		
 		self.zoom_factor = 100
 		self.zoom_speed = 50
@@ -30,7 +36,7 @@ class Display:
 
 		self.floor = pygame.sprite.Group()
 		self.assets = {
-			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")).convert(),
+			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")),
 			"dirt": pygame.image.load(os.path.join("assets/tiles", "tile_003.png")).convert(),
 			"close_water": pygame.image.load(os.path.join("assets/tiles", "tile_019.png")),
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
@@ -125,37 +131,39 @@ class Display:
 
 	def draw_empty_world(self,start_x,start_y,i,j,grid):
 		for k in range(grid[i][j] + 1):
+			x = start_x + (i - j) * 32 / 2 - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * (k - 1) - 16
 			if k < grid[i][j] - 1:
-				under_tile = Tile(0,0, self.assets["stone"])
+				under_tile = Tile(x,y, self.assets["stone"])
 			else:
-				under_tile = Tile(0,0, self.assets["dirt"])
-			under_tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (k - 1))
+				under_tile = Tile(x,y, self.assets["dirt"])
 			self.floor.add(under_tile)
 
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
+		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] == 0:
-			tile = Tile(0,0, self.assets["water"])
-			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 7)
+			y = start_y + (i + j) * 32 / 4 - 7 - 16
+			tile = Tile(x,y, self.assets["water"])
 		elif grid[i][j] == 1:
-			tile = Tile(0,0, self.assets["close_water"])
-			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9)
+			y = start_y + (i + j) * 32 / 4 - 9 - 16
+			tile = Tile(x,y, self.assets["close_water"])
 		else:
-			tile = Tile(0,0, self.assets["grass"])
-			tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * grid[i][j])
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
+			tile = Tile(x,y, self.assets["grass"])
 
 		self.floor.add(tile)
 
 	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
+		x = start_x + (i - j) * 32 / 2 - 16
 		if decoration_to_add[i][j]== 1 and grid[i][j] > 2:
-			plant = Tile(0,0, self.assets["plants"][random.randint(0,11)])
-			plant.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1))
+			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
+			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
 		elif decoration_to_add[i][j] == 2:
-			rock = Tile(0,0, self.assets["rocks"][random.randint(0,10)])
-			rock.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4 - 8)
+			y = start_y + (i + j) * 32 / 4 - 8 - 16
+			rock = Tile(x,y, self.assets["rocks"][random.randint(0,10)])
 			self.floor.add(rock)
 
-			pass
 
 	def draw_better_world(self):
 		size = self.world.get_size()
@@ -174,12 +182,13 @@ class Display:
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
+			self.tile_array = tile_to_array(self.assets["grass"])
 		
 			for i in range(size):
 				for j in range(size):
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
-					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
+					# self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
 
 				
 
@@ -188,40 +197,63 @@ class Display:
 		else:
 			for i in range(size):
 				for j in range(size):
-					tile = Tile(0,0, self.assets["clean_grass"])
-					tile.set_pos(start_x + (i - j) * 32 / 2, start_y + (i + j) * 32 / 4)
+					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
 					self.floor.add(tile)
 
 		self.floor.draw(self.floor_display)	
 
 
-	def hide_behind_terrain(self, bob_image, bob_position, terrain):
-		
-		
-		bob_array = pygame.surfarray.array2d(bob_image)
-		
-		width, height = bob_array.shape
-
-		sub_terrain = []
-
-
-				
-		
-
 	def draw_bobs(self):
+		bobs = pygame.sprite.Group()
 		size = self.world.get_size()
 
 		start_x = self.sprite_display.get_size()[0] // 2
 		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
 
 		terrain = self.world.get_terrain()
+		
 
 		if not terrain:
 			for key in self.world.get_bobs():
 				for bob in self.world.get_bobs()[key]:
 					i,j = bob.get_pos()
-					self.sprite_display.blit(self.assets["full_bob"], (start_x + (i - j) * 16 - 8 , start_y + (i + j) * 8 - 13 ))
-		
+					size = sqrt(bob.get_mass())
+					x = start_x + (i - j) * 16 - 8 * size
+					y = start_y + (i + j) * 8 - 15 * size
+					bob = Sprite_bob(x,y, self.assets["full_bob"], size)
+					bobs.add(bob)
+		else:
+			grid_of_height = terrain.get_terrain()
+			for key in self.world.get_bobs():
+				for bob in self.world.get_bobs()[key]:
+					i,j = bob.get_pos()
+					base = grid_of_height[i][j]
+					size = sqrt(bob.get_mass())
+					x = start_x + (i - j) * 16 - 8 * size
+					y = start_y + (i + j) * 8 - 15 * size - 9 * base
+					
+					try:
+						rc = grid_of_height[i+1][j] - base
+					except:
+						rc = 0
+					try:
+						lc = grid_of_height[i][j+1] - base
+					except:
+						lc = 0
+					try:
+						bc = grid_of_height[i+1][j+1] - base
+					except:
+						bc = 0
+					
+					bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
+					if any(x > 0 for x in [rc,lc,bc]):
+						hide_behind_terrain(bob_s, self.tile_array, [rc, lc, bc])
+
+					
+					bobs.add(bob_s)
+
+
+		bobs.draw(self.sprite_display)		
 
 
 	def zooming_render(self):
@@ -268,7 +300,7 @@ class Display:
 
 		running = True
 		self.draw_better_world()
-		self.hide_behind_terrain(self.assets["full_bob"], (0,0), self.world.terrain.get_terrain())
+		# self.hide_behind_terrain(self.assets["full_bob"], (0,0), self.world.terrain.get_terrain())
 
 		
 		while running:
