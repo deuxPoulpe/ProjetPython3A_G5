@@ -211,11 +211,13 @@ class Display:
 		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
 
 		terrain = self.world.get_terrain()
+
+		all_bobs = self.world.get_bobs()
 		
 
 		if not terrain:
-			for key in self.world.get_bobs():
-				for bob in self.world.get_bobs()[key]:
+			for key in all_bobs:
+				for bob in all_bobs[key]:
 					i,j = bob.get_pos()
 					size = sqrt(bob.get_mass())
 					x = start_x + (i - j) * 16 - 8 * size
@@ -224,11 +226,12 @@ class Display:
 					bobs.add(bob)
 		else:
 			grid_of_height = terrain.get_terrain()
-			for key in self.world.get_bobs():
-				for bob in self.world.get_bobs()[key]:
+			for key in all_bobs:
+				for bob in all_bobs[key]:
 					i,j = bob.get_pos()
 					base = grid_of_height[i][j]
 					size = sqrt(bob.get_mass())
+
 					x = start_x + (i - j) * 16 - 8 * size
 					y = start_y + (i + j) * 8 - 15 * size - 9 * base
 					
@@ -246,7 +249,7 @@ class Display:
 						bc = 0
 					
 					bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
-					if any(x > 0 for x in [rc,lc,bc]):
+					if rc > 0 or lc > 0 or bc > 0:
 						hide_behind_terrain(bob_s, self.tile_array, [rc, lc, bc])
 
 					

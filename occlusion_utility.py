@@ -47,53 +47,26 @@ def tile_to_array(tile_image):
 
 
 def hide_behind_terrain(bob_sprite, tile_array, close_tile_height):
-	
-	bob_array = pygame.surfarray.array3d(bob_sprite.get_image())
-	
-	width, height, _ = bob_array.shape
+    bob_array = pygame.surfarray.array3d(bob_sprite.get_image())
+    width, height, _ = bob_array.shape
 
-	base_offset_x = int(8 *(1 - bob_sprite.get_size()))
-	base_offset_y = int(16 *(1 - bob_sprite.get_size())) - 7
+    base_offset_x = int(8 *(1 - bob_sprite.get_size()))
+    base_offset_y = int(16 *(1 - bob_sprite.get_size())) - 7
 
-	offset_x_left = 24 + base_offset_x
-	offset_x_right = - 8 + base_offset_x
-	offset_x_bot = 8 + base_offset_x
+    offsets = [
+        (24 + base_offset_x, base_offset_y + 9 * close_tile_height[1]),  # Left
+        (- 8 + base_offset_x, base_offset_y + 9 * close_tile_height[0]),  # Right
+        (8 + base_offset_x, base_offset_y - 10 + 9 * close_tile_height[2])  # Bottom
+    ]
 
-	offset_y_left = base_offset_y + 9 * close_tile_height[1]
-	offset_y_right = base_offset_y + 9 * close_tile_height[0]
-	offset_y_bot = base_offset_y - 10 + 9 * close_tile_height[2]
+    for i in range(width):
+        for j in range(height):
+            for offset_x, offset_y in offsets:
+                x, y = i + offset_x, j + offset_y
+                if 0 <= x < len(tile_array) and 0 <= y < len(tile_array[x]) and tile_array[x][y] != 0:
+                    bob_array[i,j] = 0
 
-	for i in range(width):
-		for j in range(height):
-			x = i + offset_x_right
-			y = j + offset_y_right
-			if x >= 0 and y >= 0:
-				try:
-					if tile_array[x][y] != 0:
-						bob_array[i,j] = 0
-				except:
-					pass
-			x = i + offset_x_left
-			y = j + offset_y_left
-			if x >= 0 and y >= 0:
-				try:
-					if tile_array[x][y] != 0:
-						bob_array[i,j] = 0
-				except:
-					pass
-
-			x = i + offset_x_bot
-			y = j + offset_y_bot
-			if x >= 0 and y >= 0:
-				try:
-					if tile_array[x][y] != 0:
-						bob_array[i,j] = 0
-				except:
-					pass
-
-
-	bob_sprite.set_image(pygame.surfarray.make_surface(bob_array))
-
+    bob_sprite.set_image(pygame.surfarray.make_surface(bob_array))
 
 def show_time(f):
 	start_time = time.time()
