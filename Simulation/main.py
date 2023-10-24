@@ -20,7 +20,7 @@ if __name__ == "__main__":
 		"size" : 100,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : True,
+		"custom_terrain" : False,
 		}, terrain_config)
 	
 
