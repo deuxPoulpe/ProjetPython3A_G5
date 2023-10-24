@@ -1,3 +1,4 @@
+import sys
 import pygame
 import pygame_menu
 from sprite import Tile
@@ -7,7 +8,9 @@ import matplotlib.pyplot as plt
 import random
 from math import sqrt
 
-from occlusion_utility import hide_behind_terrain
+
+
+from occlusion_utility import hide_behind_terrain_image
 from occlusion_utility import tile_to_array
 from occlusion_utility import show_time
 
@@ -58,6 +61,9 @@ class Display:
 		for key in self.assets:
 			if key != "plants" and key != "rocks":
 				self.assets[key].set_colorkey((0, 0, 0))
+
+
+		self.bobs_occlusion_cache = {}
 	
 
 	def draw_world(self):
@@ -190,10 +196,6 @@ class Display:
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					# self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
 
-				
-
-					
-
 		else:
 			for i in range(size):
 				for j in range(size):
@@ -228,7 +230,7 @@ class Display:
 			grid_of_height = terrain.get_terrain()
 			for key in all_bobs:
 				for bob in all_bobs[key]:
-					i,j = bob.get_pos()
+					i,j = key
 					base = grid_of_height[i][j]
 					size = sqrt(bob.get_mass())
 
@@ -250,13 +252,19 @@ class Display:
 					
 					bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
 					if rc > 0 or lc > 0 or bc > 0:
-						hide_behind_terrain(bob_s, self.tile_array, [rc, lc, bc])
-
-					
+						try:
+							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+						except:
+							print(f"New occlusion{(rc, lc, bc)}")
+							self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
+							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+				
 					bobs.add(bob_s)
 
 
+		
 		bobs.draw(self.sprite_display)		
+
 
 
 	def zooming_render(self):
@@ -281,7 +289,7 @@ class Display:
 		self.screen.fill((135,206,250))
 		self.sprite_display.fill((0,0,0))
 
-		self.draw_bobs()
+		show_time(self.draw_bobs)
 
 
 		self.zooming_render()
@@ -320,7 +328,7 @@ class Display:
 				
 			self.camera()
 
-			show_time(self.render)	
+			self.render()
 			
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")

@@ -24,7 +24,7 @@ if __name__ == "__main__":
 		}, terrain_config)
 	
 
-	nb_bob = 1000
+	nb_bob = 100
 
 	for j in range(nb_bob):
 		bob = Bob(random.randint(0,world.get_size()-1),random.randint(0,world.get_size()-1),world)
