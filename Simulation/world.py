@@ -110,3 +110,39 @@ class World:
 				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
 				print("saved",i)
 		output.close()
+
+	
+
+	def update_tick(self ):
+		
+		#une journée en fonction des ticks 
+		
+		journe = 100 * tick
+		
+		#tick
+		for bob in self.bobs.values():
+				for b in bob :
+					b.updtate.tick
+		
+		
+		for bob in self.bobs.values():
+			for b in bob:
+				if b == 0 :
+					kill_bob(b)	
+		
+		#journee passé
+		if self.tick % 100 == 0 :
+			for food in self.foods.values():
+				for f in food:
+					f.spaw()
+		
+			
+			
+
+
+		
+		
+		
+		tick += 1
+
+		
