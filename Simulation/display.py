@@ -47,7 +47,8 @@ class Display:
 			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
 			"plants": [],
 			"rocks" : [],
-			"full_bob" : pygame.image.load(os.path.join("assets","bob.png")).convert()
+			"full_bob" : pygame.image.load(os.path.join("assets","bob.png")).convert(),
+			"foods_banana" : pygame.image.load(os.path.join("assets","food.png")).convert()
 		}
 
 		for k in range(0, 12):
@@ -220,12 +221,12 @@ class Display:
 		if not terrain:
 			for key in all_bobs:
 				for bob in all_bobs[key]:
-					i,j = bob.get_pos()
+					i,j = key
 					size = sqrt(bob.get_mass())
 					x = start_x + (i - j) * 16 - 8 * size
 					y = start_y + (i + j) * 8 - 15 * size
-					bob = Sprite_bob(x,y, self.assets["full_bob"], size)
-					bobs.add(bob)
+					bob_s = Sprite_bob(x,y, self.assets["full_bob"], size)
+					bobs.add(bob_s)
 		else:
 			grid_of_height = terrain.get_terrain()
 			for key in all_bobs:
@@ -255,7 +256,6 @@ class Display:
 						try:
 							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
 						except:
-							print(f"New occlusion{(rc, lc, bc)}")
 							self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
 							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
 				
@@ -265,7 +265,62 @@ class Display:
 		
 		bobs.draw(self.sprite_display)		
 
+	def draw_foods(self):
+		foods = pygame.sprite.Group()
+		size = self.world.get_size()
 
+		start_x = self.sprite_display.get_size()[0] // 2
+		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
+
+		terrain = self.world.get_terrain()
+
+		all_foods = self.world.get_foods()
+		
+
+		if not terrain:
+			for key in all_foods:
+				for food in all_foods[key]:
+					i,j = key
+					x = start_x + (i - j) * 16 - 8 * size
+					y = start_y + (i + j) * 8 - 15 * size
+					food_s = Sprite_bob(x,y, self.assets["foods_banana"], size)
+					foods.add(food_s)
+		else:
+			grid_of_height = terrain.get_terrain()
+			for key in all_foods:
+				for food in all_foods[key]:
+					i,j = key
+					base = grid_of_height[i][j]
+
+					x = start_x + (i - j) * 16 - 8 * size
+					y = start_y + (i + j) * 8 - 15 * size - 9 * base
+					
+					try:
+						rc = grid_of_height[i+1][j] - base
+					except:
+						rc = 0
+					try:
+						lc = grid_of_height[i][j+1] - base
+					except:
+						lc = 0
+					try:
+						bc = grid_of_height[i+1][j+1] - base
+					except:
+						bc = 0
+					
+					food_s = Sprite_bob(x,y,self.assets["foods_banana"] , size)
+					if rc > 0 or lc > 0 or bc > 0:
+						try:
+							food_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+						except:
+							self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
+							food_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+				
+					foods.add(food_s)
+
+
+		
+		foods.draw(self.sprite_display)
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
