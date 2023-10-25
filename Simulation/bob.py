@@ -1,6 +1,7 @@
 import random
-
 import pygame
+from world import World
+from food import Food
 
 class Bob:
 	def __init__(self, x, y, world ,energy = 100, velocity = 1, mass = 1, perception = 0, max_energy = 200,):
@@ -28,21 +29,24 @@ class Bob:
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 	
 
-	def move(self): #fonction de déplacement du bob dorra
-		dx = random.randint(-1,1) * self.velocity
-		dy = random.randint(-1.1) * self.velocity
-		 #update position 
-		self.position[0] += dx
-		self.position[1] += dy
-		#garantir que bob reste dans la fenêtre du jeu 
-		self.positon[0] = max(0, min(self.position[0],self.world.self.world.get_width()))
-		self.position[1] = max(0, min(self.position[1], self.world.get_height()))
-	
-		
-
-			
-	def eat(self):
+	def move(self): #fonction de déplacement du bob
 		pass
+
+
+#fonction qui permet aux bobs de manger
+	def eat_energy(self, food): #food est un objet de la classe food
+		remain_energy = self.max_energy - self.energy
+		self.energy += food.self.value
+		food.self.value = remain_energy
+
+	'''	if (self.energy >= self.max_energy): à placer dans la fonction reproduce
+			reproduction = World ()
+			reproduction.spawn_reproduce(self)
+			'''
+			
+	def reproduce(self):
+			
+		
 
 	def in_case(self):
 		pass
@@ -57,30 +61,3 @@ class Bob:
 		pass
 
 	
-def update_tick(self ):
-		
-		#une journée en fonction des ticks 
-		
-		journe = 100 * tick
-		
-		#tick
-		for bob in self.bobs.values():
-				for b in bob :
-					b.move()
-		
-		if bob.eat():
-			for bob in self.bobs.values():
-				for b in bob:
-					b.eat_energie()
-
-		if bob.energy() == 0 :
-			for bob in self.bobs.values():
-				for b in bob:
-					b.kill(bob)	
-			
-		
-
-		
-		
-		
-		tick += 1
