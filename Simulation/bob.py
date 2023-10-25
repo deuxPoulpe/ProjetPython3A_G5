@@ -1,4 +1,5 @@
 import random
+
 import pygame
 
 class Bob:
@@ -27,9 +28,19 @@ class Bob:
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 	
 
-	def move(self): #fonction de déplacement du bob
-		pass
+	def move(self): #fonction de déplacement du bob dorra
+		dx = random.randint(-1,1) * self.velocity
+		dy = random.randint(-1.1) * self.velocity
+		 #update position 
+		self.position[0] += dx
+		self.position[1] += dy
+		#garantir que bob reste dans la fenêtre du jeu 
+		self.positon[0] = max(0, min(self.position[0],self.world.self.world.get_width()))
+		self.position[1] = max(0, min(self.position[1], self.world.get_height()))
+	
+		
 
+			
 	def eat(self):
 		pass
 
@@ -46,3 +57,30 @@ class Bob:
 		pass
 
 	
+def update_tick(self ):
+		
+		#une journée en fonction des ticks 
+		
+		journe = 100 * tick
+		
+		#tick
+		for bob in self.bobs.values():
+				for b in bob :
+					b.move()
+		
+		if bob.eat():
+			for bob in self.bobs.values():
+				for b in bob:
+					b.eat_energie()
+
+		if bob.energy() == 0 :
+			for bob in self.bobs.values():
+				for b in bob:
+					b.kill(bob)	
+			
+		
+
+		
+		
+		
+		tick += 1
