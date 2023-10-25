@@ -345,6 +345,7 @@ class Display:
 		self.sprite_display.fill((0,0,0))
 
 		show_time(self.draw_bobs)
+		self.draw_foods()
 
 
 		self.zooming_render()
