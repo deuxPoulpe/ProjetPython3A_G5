@@ -8,8 +8,6 @@ class Food:
         pass
 
 
-
-
     #getters
     def get_value(self):
         return self.value

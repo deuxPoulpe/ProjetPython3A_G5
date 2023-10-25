@@ -3,7 +3,8 @@ import pygame
 import pickle
 from terrain import Terrain
 from bob import Bob
-
+from food import Food
+import random
 
 
 class World:
@@ -63,8 +64,11 @@ class World:
 
 
 	#methods
-
+	def move_bob(self,bob,old_x,old_y):
+		pass
+	
 	def kill_bob(self,bob):
+		self.bobs[bob.get_pos()].remove(bob)
 		pass
 
 	def kill_food(self,food):
@@ -73,11 +77,24 @@ class World:
 	def update_tick(self):
 		pass
 
-	def spawn_bob(self,nb):
-		pass
+	def spawn_bob(self,num_bobs):
+		for _ in range(num_bobs):
+			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
+			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
+			bob=Bob(x, y, self)
+			if (x,y) not in self.bobs:
+				self.bobs[(x,y)]=[]
+			self.bobs[(x,y)].append(bob)	
 
-	def spawn_food(self,nb):
-		pass
+	def spawn_food(self,num_food):
+		for _ in range(num_food):
+			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
+			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
+			food=Food(x, y, self)
+			if (x,y) not in self.foods:
+				self.foods[(x,y)]=[]
+			self.foods[(x,y)].append(food)             
+
 
 	def spawn_reproduce(self,mother_bob):
 		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self.world,energy = mother_bob.get_energy()*1/4)
@@ -93,39 +110,3 @@ class World:
 				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
 				print("saved",i)
 		output.close()
-
-	
-
-	def update_tick(self ):
-		
-		#une journée en fonction des ticks 
-		
-		journe = 100 * tick
-		
-		#tick
-		for bob in self.bobs.values():
-				for b in bob :
-					b.updtate.tick
-		
-		
-		for bob in self.bobs.values():
-			for b in bob:
-				if b == 0 :
-					kill_bob(b)	
-		
-		#journee passé
-		if self.tick % 100 == 0 :
-			for food in self.foods.values():
-				for f in food:
-					f.spaw()
-		
-			
-			
-
-
-		
-		
-		
-		tick += 1
-
-		
