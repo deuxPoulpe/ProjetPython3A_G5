@@ -29,14 +29,18 @@ class Bob:
 	
 
 	def move(self): #fonction de déplacement du bob dorra
-		dx = random.randint(-1,1) * self.velocity
-		dy = random.randint(-1.1) * self.velocity
+		
+		old_x = self.position.x #l'ancienne valeur de x
+		old_y = self.position.y #l'ancienne valeur de y 
+		dx = random.randint(-1,1) 
+		dy = random.randint(-1.1) 
 		 #update position 
 		self.position[0] += dx
 		self.position[1] += dy
 		#garantir que bob reste dans la fenêtre du jeu 
-		self.positon[0] = max(0, min(self.position[0],self.world.self.world.get_width()))
-		self.position[1] = max(0, min(self.position[1], self.world.get_height()))
+		self.positon[0] = max(0, min(self.position[0],self.world.get_size()))
+		self.position[1] = max(0, min(self.position[1], self.world.get_size()))
+		self.world.move_bob(self,old_x,old_y)
 	
 		
 
