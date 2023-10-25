@@ -48,3 +48,30 @@ class Bob:
 		pass
 
 	
+def update_tick(self ):
+		
+		#une journée en fonction des ticks 
+		
+		journe = 100 * tick
+		
+		#tick
+		for bob in self.bobs.values():
+				for b in bob :
+					b.move()
+		
+		if bob.eat():
+			for bob in self.bobs.values():
+				for b in bob:
+					b.eat_energie()
+
+		if bob.energy() == 0 :
+			for bob in self.bobs.values():
+				for b in bob:
+					b.kill(bob)	
+			
+		
+
+		
+		
+		
+		tick += 1
