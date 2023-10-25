@@ -3,9 +3,12 @@ import pygame
 import pickle
 from terrain import Terrain
 from bob import Bob
+<<<<<<< HEAD
+import random
+=======
 from food import Food
 import random
-
+>>>>>>> 01d29e97a92cdb6668442b03ff925c6a5cb89466
 
 
 class World:
@@ -65,7 +68,9 @@ class World:
 
 
 	#methods
-
+	def move_bob(self,bob,old_x,old_y):
+		pass
+	
 	def kill_bob(self,bob):
 		self.bobs[bob.get_pos()].remove(bob)
 		pass
