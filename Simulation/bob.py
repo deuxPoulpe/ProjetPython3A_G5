@@ -75,7 +75,11 @@ class Bob:
 		elif Bob.energy() == 0 :
 			Bob.kill(Bob)	
 		
-		if 
+		elif self.energy() == self.max_energy():
+			Bob.reproduction()
+		
+		elif self.perception()  
+
 		
 
 		
