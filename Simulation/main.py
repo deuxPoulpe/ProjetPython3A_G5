@@ -26,13 +26,10 @@ if __name__ == "__main__":
 
 	nb_bob = 100
 
-	for j in range(nb_bob):
-		bob = Bob(random.randint(0,world.get_size()-1),random.randint(0,world.get_size()-1),world)
-		if bob.get_pos() not in world.get_bobs():
-			world.get_bobs()[bob.get_pos()] = []
-		world.get_bobs()[bob.get_pos()].append(bob)
-		
+	world.spawn_bob(30)
+	world.spawn_food(30)	
 
 	Display(world).main_loop()
+
 
 
