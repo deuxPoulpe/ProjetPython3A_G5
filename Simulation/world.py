@@ -65,6 +65,7 @@ class World:
 	#methods
 
 	def kill_bob(self,bob):
+		self.bobs[bob.get_pos()].remove(bob)
 		pass
 
 	def kill_food(self,food):

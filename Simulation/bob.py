@@ -31,16 +31,17 @@ class Bob:
 		pass
 
 	def eat(self):
+ 
 		pass
 
-	def in_case(self):
-		pass
+	# def in_case(self):
+	# 	pass
 
 	def die(self):
 		pass
 		
-	def self_reproduction(self):
-		pass
+	# def self_reproduction(self):
+	# 	pass
 		
 	def reproduction(self):
 		pass
