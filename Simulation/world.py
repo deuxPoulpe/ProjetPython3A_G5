@@ -65,6 +65,7 @@ class World:
 	#methods
 
 	def kill_bob(self,bob):
+		self.bobs[bob.get_pos()].remove(bob)
 		pass
 
 	def kill_food(self,food):
@@ -111,7 +112,7 @@ class World:
 		for bob in self.bobs.values():
 			for b in bob:
 				if b == 0 :
-					self.kill_bob(b)	
+					kill_bob(b)	
 		
 		#journee passé
 		if self.tick % 100 == 0 :
