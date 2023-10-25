@@ -27,7 +27,9 @@ class Bob:
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 	
 
-	def move(self): #fonction de déplacement du bob
+	def move(self): #fonction de déplacement du bob dorra
+
+		
 		pass
 
 	def eat(self):
