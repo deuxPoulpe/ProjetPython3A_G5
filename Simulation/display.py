@@ -1,4 +1,3 @@
-import sys
 import pygame
 import pygame_menu
 from sprite import Tile
@@ -222,6 +221,7 @@ class Display:
 			for key in all_bobs:
 				for bob in all_bobs[key]:
 					i,j = key
+					
 					size = sqrt(bob.get_mass())
 					x = start_x + (i - j) * 16 - 8 * size
 					y = start_y + (i + j) * 8 - 15 * size
@@ -232,6 +232,7 @@ class Display:
 			for key in all_bobs:
 				for bob in all_bobs[key]:
 					i,j = key
+					
 					base = grid_of_height[i][j]
 					size = sqrt(bob.get_mass())
 
@@ -334,16 +335,16 @@ class Display:
 
 
 			self.needs_rescaling = False
-			self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
-			self.sprite_display_temp.set_colorkey((0, 0, 0))
-			pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
+		self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
+		self.sprite_display_temp.set_colorkey((0, 0, 0))
+		pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
 
 	
 	def render(self):
 		self.screen.fill((135,206,250))
 		self.sprite_display.fill((0,0,0))
 
-		show_time(self.draw_bobs)
+		self.draw_bobs()
 		self.draw_foods()
 
 
@@ -355,9 +356,9 @@ class Display:
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
-		
-		
-	def main_loop(self):
+
+
+	def main_loop(self,tick_interval):
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill((135,206,250))
@@ -366,23 +367,31 @@ class Display:
 
 		running = True
 		self.draw_better_world()
-		# self.hide_behind_terrain(self.assets["full_bob"], (0,0), self.world.terrain.get_terrain())
 
-		
+		last_update_time = pygame.time.get_ticks()
+
 		while running:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					running = False
+
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
 				
 				self.zoom(event)
 				self.start_drag(event)
-				
-			self.camera()
 
+
+
+			current_time = pygame.time.get_ticks()
+			if current_time - last_update_time >= tick_interval:
+				self.world.update_tick()
+				last_update_time = current_time
+
+
+			self.camera()
 			self.render()
 			
 
@@ -394,3 +403,29 @@ class Display:
 
 			
 			clock.tick()
+
+
+
+
+
+	def graph(self):
+		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
+
+		# Premier graphique
+		ax1.plot(range(len(self.world.get_population_Bob())), self.world.get_population_Bob(), label="Population")
+		ax1.legend()
+		ax1.set_ylabel('Population')
+		ax1.set_title('Bob Population Over Time')
+		ax1.grid(True)
+
+		# Deuxième graphique
+		ax2.plot(range(len(self.world.get_population_Food())), self.world.get_population_Food(), label="Food", color='orange')
+		ax2.legend()
+		ax2.set_xlabel('Ticks')
+		ax2.set_ylabel('Food')
+		ax2.set_title('Bob Food Over Time')
+		ax2.grid(True)
+
+		plt.tight_layout()
+		plt.show()
+

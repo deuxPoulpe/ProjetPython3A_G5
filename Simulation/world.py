@@ -1,5 +1,4 @@
-import os
-import pygame
+
 import pickle
 from terrain import Terrain
 from bob import Bob
@@ -16,6 +15,8 @@ class World:
 		self.tick = 0
 		self.population_bob = []
 		self.population_food = []
+		self.nb_bob = 0
+		self.nb_food = 0
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
@@ -41,9 +42,9 @@ class World:
 		return self.argDict["size"]
 	def get_terrain_config(self):
 		return self.terrain_config
-	def get_populationBob(self):
+	def get_population_Bob(self):
 		return self.population_bob
-	def get_populationFood(self):
+	def get_population_Food(self):
 		return self.population_food
 	def get_tick(self):
 		return self.tick
@@ -65,17 +66,28 @@ class World:
 
 	#methods
 	def move_bob(self,bob,old_x,old_y):
-		pass
+		self.bobs[(old_x,old_y)].remove(bob)
+		if self.bobs[(old_x,old_y)] == []:
+			self.bobs.pop((old_x,old_y))
+		if not bob.get_pos() in self.bobs:
+			self.bobs[bob.get_pos()] = []
+		self.bobs[bob.get_pos()].append(bob)
+
 	
 	def kill_bob(self,bob):
 		self.bobs[bob.get_pos()].remove(bob)
-		pass
+		if self.bobs[bob.get_pos()] == []:
+			self.bobs.pop(bob.get_pos())
+
+		self.nb_bob -= 1
 
 	def kill_food(self,food):
-		pass
+		self.foods[food.get_pos()].remove(food)
+		if self.foods[food.get_pos()] == []:
+			self.foods.pop(food.get_pos())
 
-	def update_tick(self):
-		pass
+		self.nb_food -= 1
+
 
 	def spawn_bob(self,num_bobs):
 		for _ in range(num_bobs):
@@ -84,7 +96,9 @@ class World:
 			bob=Bob(x, y, self)
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
-			self.bobs[(x,y)].append(bob)	
+			self.bobs[(x,y)].append(bob)
+
+		self.nb_bob += num_bobs
 
 	def spawn_food(self,num_food):
 		for _ in range(num_food):
@@ -93,15 +107,19 @@ class World:
 			food=Food(x, y, self)
 			if (x,y) not in self.foods:
 				self.foods[(x,y)]=[]
-			self.foods[(x,y)].append(food)             
+			self.foods[(x,y)].append(food)
+
+		self.nb_food += num_food           
 
 
 	def spawn_reproduce(self,mother_bob):
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self.world,energy = mother_bob.get_energy()*1/4)
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()*1/4)
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
 		self.bobs[new_born_pos].append(new_born)
+
+		self.nb_bob += 1
 
 
 	def save(self,filename,*args):
@@ -113,36 +131,27 @@ class World:
 
 	
 
-	def update_tick(self ):
+	def update_tick(self):
 		
 		#une journée en fonction des ticks 
 		
-		journe = 100 * tick
 		
-		#tick
-		for bob in self.bobs.values():
-				for b in bob :
-					b.updtate.tick
-		
-		
-		for bob in self.bobs.values():
-			for b in bob:
-				if b == 0 :
-					kill_bob(b)	
+		#update tick for all bobs
+		all_bobs_dict = self.bobs.copy()
+		for bobs in all_bobs_dict.values():
+			for bob in bobs :
+				bob.update_tick()
 		
 		#journee passé
-		if self.tick % 100 == 0 :
-			for food in self.foods.values():
-				for f in food:
-					f.spaw()
-		
+		if self.tick % self.argDict["dayTick"] == 0 :
+			self.foods = {}
+			self.spawn_food(self.argDict["nbFood"])
+			self.nb_food = self.argDict["nbFood"]		
 			
-			
+		#ajouter la population de bobs et de food dans des listes pour le graphique final
+		self.population_bob.append(self.nb_bob)
+		self.population_food.append(self.nb_food)
 
-
-		
-		
-		
-		tick += 1
+		self.tick += 1
 
 		

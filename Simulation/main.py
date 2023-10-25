@@ -17,19 +17,19 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 100,
+		"size" : 50,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : False,
+		"custom_terrain" : True,
 		}, terrain_config)
 	
 
-	nb_bob = 100
 
 	world.spawn_bob(30)
-	world.spawn_food(30)	
 
-	Display(world).main_loop()
+	display = Display(world)
+	display.main_loop(100)
+	display.graph()
 
 
 
