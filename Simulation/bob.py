@@ -57,27 +57,24 @@ class Bob:
 		pass
 
 	
-def update_tick(self ):
+	def update_tick(self ):
 		
 		#une journée en fonction des ticks 
 		
 		journe = 100 * tick
 		
 		#tick
-		for bob in self.bobs.values():
-				for b in bob :
-					b.move()
-		
-		if bob.eat():
-			for bob in self.bobs.values():
-				for b in bob:
-					b.eat_energie()
-
-		if bob.energy() == 0 :
-			for bob in self.bobs.values():
-				for b in bob:
-					b.kill(bob)	
+		if Bob.eat():
+			Bob.eat_energie()
 			
+		
+		elif self.world.get_food()[self.position]:
+			Bob.move()
+
+		elif Bob.energy() == 0 :
+			Bob.kill(Bob)	
+		
+		if 
 		
 
 		

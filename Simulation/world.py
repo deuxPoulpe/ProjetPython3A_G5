@@ -111,7 +111,7 @@ class World:
 		for bob in self.bobs.values():
 			for b in bob:
 				if b == 0 :
-					kill_bob(b)	
+					self.kill_bob(b)	
 		
 		#journee passé
 		if self.tick % 100 == 0 :
