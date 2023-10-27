@@ -1,8 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import random
-from noise import snoise2
 from math import sin
+from noise_generation import perlin_noise1
+from noise_generation import perlin_noise2
+
 
 class Terrain:
 
@@ -23,25 +24,12 @@ class Terrain:
 		self.generate_terrain(size,z_max = config_dict["max_height"])	
 		
 
-	def generate_terrain(self ,size, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
+	def generate_terrain(self ,size, z_min=0, z_max=9):
 
-		terrain = np.zeros((size, size))
-		random_seed = random.randint(0, 1024)
 		
-		for x in range(size):
-			for y in range(size):
-				terrain[x][y] = snoise2(x*scale + random_seed, 
-										y*scale + random_seed,
-										octaves=octaves, 
-										persistence=persistence, 
-										lacunarity=lacunarity
-				)
 
-		terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
-		terrain = np.add(terrain, 2)
-		terrain = np.round(terrain).astype(int)
-
-		self.terrain = terrain
+		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed=None)
+		self.terrain = perlin_noise2(size, z_min, z_max, seed=None)
 
 
 		def bezier_curve(p0, p1, p2, t):

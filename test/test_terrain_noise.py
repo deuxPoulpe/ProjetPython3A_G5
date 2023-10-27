@@ -2,20 +2,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from noise import snoise2
-from noise import pnoise2
+from perlin_noise import PerlinNoise
+
 
 from math import sin
 
+def noise(size ,z_min , z_max):
+	terrain = np.random.uniform(z_min,z_max,size=(size,size))
+	# terrain = np.convolve(terrain, np.ones((3,3)), mode='same')
+	return terrain
 
-
-def generate_terrain(size, scale=0.02, octaves=6, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
+def generate_terrain(size, scale=0.02, octaves=2, persistence=0.3, lacunarity=2.0, z_min=0, z_max=9):
 
 	terrain = np.zeros((size, size))
 	random_seed = random.randint(0, 1024)
 	
 	for x in range(size):
 		for y in range(size):
-			terrain[x][y] = pnoise2(x*scale + random_seed, 
+			terrain[x][y] = snoise2(x*scale + random_seed, 
 									y*scale + random_seed,
 									octaves=octaves, 
 									persistence=persistence, 
@@ -77,21 +81,21 @@ def ondulation(courbe, amplitude=10, frequence=0.2):
 
 
 def smooth_around_line(terrain, ligne, depth=4):
-    smoothed_terrain = terrain.copy()
-    
-    for x, y in ligne:
-        for dx in range(-depth, depth+1):
-            for dy in range(-depth, depth+1):
-                dist = np.sqrt(dx*dx + dy*dy) 
-                if dist == 0:
-                    continue
-                
-                xi, yi = x + dx, y + dy
-                if 0 <= xi < terrain.shape[0] and 0 <= yi < terrain.shape[1]:
-                    factor = (dist / depth)**2
-                    smoothed_terrain[xi, yi] = min(smoothed_terrain[xi, yi], terrain[xi, yi] * factor)
-    
-    return smoothed_terrain
+	smoothed_terrain = terrain.copy()
+	
+	for x, y in ligne:
+		for dx in range(-depth, depth+1):
+			for dy in range(-depth, depth+1):
+				dist = np.sqrt(dx*dx + dy*dy) 
+				if dist == 0:
+					continue
+				
+				xi, yi = x + dx, y + dy
+				if 0 <= xi < terrain.shape[0] and 0 <= yi < terrain.shape[1]:
+					factor = (dist / depth)**2
+					smoothed_terrain[xi, yi] = min(smoothed_terrain[xi, yi], terrain[xi, yi] * factor)
+	
+	return smoothed_terrain
 
 
 
@@ -101,5 +105,29 @@ def display_terrain(terrain):
 	plt.colorbar()
 	plt.show()
 
-terrain = generate_terrain(500)
-display_terrain(terrain)
+
+def perlin_noise(size):
+
+	seed = random.randint(0, 1024)
+	noise = PerlinNoise(octaves=4, seed=seed)
+	additionnal_noise = PerlinNoise(octaves=13, seed=seed)
+	grid = np.zeros((size, size))
+
+	for i in range(size):
+		for j in range(size):
+			grid[i][j] = noise([i/size, j/size])
+			grid[i][j] += 0.1 * additionnal_noise([i/size, j/size])
+
+	grid = np.interp(grid, (grid.min(), grid.max()), (0, 10))
+	grid = np.add(grid, 2)
+	grid = np.round(grid).astype(int)
+
+	return grid
+
+# terrain = generate_terrain(100)
+# display_terrain(terrain)
+# display_terrain(noise(100,0, 10))
+
+
+display_terrain(perlin_noise(100))
+

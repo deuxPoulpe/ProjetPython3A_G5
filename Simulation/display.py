@@ -11,7 +11,7 @@ from math import sqrt
 
 from occlusion_utility import hide_behind_terrain_image
 from occlusion_utility import tile_to_array
-from occlusion_utility import show_time
+
 
 
 

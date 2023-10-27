@@ -1,35 +1,10 @@
 import pygame
 import os
-from terrain import Terrain
 from sprite import Sprite_bob
 import numpy as np
 import time
 
 
-terrain = Terrain(100, {
-		"generate_river" : True,
-		"number_of_river" : 2,
-		"generate_lake" : True,
-		"number_of_lake" : 1,
-		"size_of_lake" : 20,
-		"max_height" : 10,
-		})
-
-
-def afficher_matrice(matrice):
-	try:
-		if len(matrice.shape) == 3:
-			matrice = matrice[:,:,0]
-	except:
-		pass
-	for i in range(len(matrice)):
-		for j in range(len(matrice[i])):
-			if matrice[i][j] != 0:
-				print("#",end=" ")
-			else:
-				print(".",end=" ")
-		print()
-	print()
 
 def tile_to_array(tile_image):
 	tile_array = pygame.surfarray.array_alpha(tile_image)
@@ -89,13 +64,6 @@ def hide_behind_terrain_image(bob_sprite, tile_array, close_tile_height):
                     bob_array[i,j] = 0
 
     return pygame.surfarray.make_surface(bob_array)
-
-def show_time(f):
-	start_time = time.time()
-	f()
-	end_time = time.time()
-	print(f"Le temps d'exécution est de {(end_time - start_time):.4f} secondes.")
-
 
 
 def test_loop():
