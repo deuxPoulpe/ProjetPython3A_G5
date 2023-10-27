@@ -24,12 +24,12 @@ class Terrain:
 		self.generate_terrain(size,z_max = config_dict["max_height"])	
 		
 
-	def generate_terrain(self ,size, z_min=0, z_max=9):
+	def generate_terrain(self ,size, z_min=0, z_max=9, seed = None):
 
 		
 
-		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed=None)
-		self.terrain = perlin_noise2(size, z_min, z_max, seed=None)
+		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed)
+		self.terrain = perlin_noise2(size, z_min, z_max, 0.01, seed)
 
 
 		def bezier_curve(p0, p1, p2, t):
@@ -42,6 +42,8 @@ class Terrain:
 		
 		def ondulation(courbe, amplitude=9, frequence=0.2):
 			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+			# return [( int(x + amplitude * sin(frequence * y)), int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+
 		
 		def add_points(courbe):
 			

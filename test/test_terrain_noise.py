@@ -17,18 +17,20 @@ def generate_terrain(size, scale=0.02, octaves=2, persistence=0.3, lacunarity=2.
 	terrain = np.zeros((size, size))
 	random_seed = random.randint(0, 1024)
 	
-	for x in range(size):
-		for y in range(size):
-			terrain[x][y] = snoise2(x*scale + random_seed, 
-									y*scale + random_seed,
-									octaves=octaves, 
-									persistence=persistence, 
-									lacunarity=lacunarity
-			)
+	# for x in range(size):
+	# 	for y in range(size):
+	# 		terrain[x][y] = snoise2(x*scale + random_seed, 
+	# 								y*scale + random_seed,
+	# 								octaves=octaves, 
+	# 								persistence=persistence, 
+	# 								lacunarity=lacunarity
+	# 		)
 
-	terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
-	terrain = np.add(terrain, 2)
-	terrain = np.round(terrain).astype(int)
+	# terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
+	# terrain = np.add(terrain, 2)
+	# terrain = np.round(terrain).astype(int)
+
+	terrain = perlin_noise2(size, z_min, z_max, 0.01, random_seed)
 
 	# ligne aleatoire
 	for _ in range(1):
@@ -76,7 +78,8 @@ def trace_courbe_bezier(p0, p1, p2):
 	return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
 
 def ondulation(courbe, amplitude=10, frequence=0.2):
-	return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+	return [( int(x + amplitude * sin(frequence * y)), int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+
 
 
 
@@ -106,28 +109,32 @@ def display_terrain(terrain):
 	plt.show()
 
 
-def perlin_noise(size):
+def perlin_noise2(size, z_min, z_max, scale, seed=None):
+	
+	if seed is None:
+		seed = random.randint(0, 1024)
 
-	seed = random.randint(0, 1024)
 	noise = PerlinNoise(octaves=4, seed=seed)
-	additionnal_noise = PerlinNoise(octaves=13, seed=seed)
-	grid = np.zeros((size, size))
+	additionnal_noise = PerlinNoise(octaves=10, seed=seed)
+	terrain = np.zeros((size, size))
 
 	for i in range(size):
 		for j in range(size):
-			grid[i][j] = noise([i/size, j/size])
-			grid[i][j] += 0.1 * additionnal_noise([i/size, j/size])
+			x = i*scale
+			y = j*scale
+			terrain[i][j] = noise([x, y])
+			terrain[i][j] += 0.2 * additionnal_noise([x, y])
 
-	grid = np.interp(grid, (grid.min(), grid.max()), (0, 10))
-	grid = np.add(grid, 2)
-	grid = np.round(grid).astype(int)
+	terrain = np.interp(terrain, (terrain.min(), terrain.max()), (z_min, z_max))
+	terrain = np.add(terrain, 2)
+	terrain = np.round(terrain).astype(int)
 
-	return grid
+	return terrain
 
-# terrain = generate_terrain(100)
-# display_terrain(terrain)
+terrain = generate_terrain(1000)
+display_terrain(terrain)
 # display_terrain(noise(100,0, 10))
 
 
-display_terrain(perlin_noise(100))
+# display_terrain(perlin_noise2(100, 0, 10, 0.01))
 

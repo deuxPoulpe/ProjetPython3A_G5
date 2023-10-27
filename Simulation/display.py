@@ -195,7 +195,7 @@ class Display:
 				for j in range(size):
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
-					# self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
+					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
 
 		else:
 			for i in range(size):
@@ -335,8 +335,8 @@ class Display:
 
 
 			self.needs_rescaling = False
-		self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
-		self.sprite_display_temp.set_colorkey((0, 0, 0))
+			self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
+			self.sprite_display_temp.set_colorkey((0, 0, 0))
 		pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
 
 	
