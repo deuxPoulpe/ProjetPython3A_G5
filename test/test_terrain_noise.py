@@ -37,20 +37,26 @@ def generate_terrain(size, scale=0.02, octaves=2, persistence=0.3, lacunarity=2.
 				p0 = (random.randint(0, size-1), random.randint(0, size-1))
 				p1 = (random.randint(0, size-1), random.randint(0, size-1))  # Point de contrôle
 				p2 = (random.randint(0, size-1), random.randint(0, size-1))
+				p3 = (random.randint(0, size-1), random.randint(0, size-1))
+
+				p0 = (0,0)
+				p1 = (0, size-1)
+				p2 = (size-1, 0)
+				p3 = (size-1, size-1)
 
 				lake = [(random.randint(0, size-1), random.randint(0, size-1))]
 
 				courbe = lake
-				courbe = trace_courbe_bezier(p0, p1, p2)	
-				courbe = ondulation(courbe)	
-				courbe = add_points(add_points(add_points(courbe)))	
+				courbe = trace_courbe_cubic_bezier(p0, p1, p2, p3)
+				# courbe = ondulation(courbe)	
+				# courbe = add_points(add_points(add_points(courbe)))	
 				for x, y in courbe:
 					try:
 						terrain[int(x)][int(y)] = 0
 					except:
 						pass
 			
-				terrain = smooth_around_line(terrain, courbe, depth=4)
+				# terrain = smooth_around_line(terrain, courbe, depth=4)
 
 	return terrain
 
@@ -131,7 +137,36 @@ def perlin_noise2(size, z_min, z_max, scale, seed=None):
 
 	return terrain
 
-terrain = generate_terrain(1000)
+def int_lerp(a, b, t):
+	return int(a + (b - a) * t)
+
+def bezier_cubic_curve(start, c1, c2, end, t):
+	x = int_lerp(
+			int_lerp(
+				int_lerp(start[0], c1[0], t), 
+				int_lerp(c1[0] , c2[0], t),
+				t), 
+			int_lerp(
+				int_lerp(c1[0] , c2[0], t), 
+				int_lerp(c2[0] , end[0], t),
+				t),
+		t)
+	y = int_lerp(
+			int_lerp(
+				int_lerp(start[1], c1[1], t), 
+				int_lerp(c1[1] , c2[1], t),
+				t), 
+			int_lerp(
+				int_lerp(c1[1] , c2[1], t), 
+				int_lerp(c2[1] , end[1], t),
+				t),
+		t)
+	return x, y
+
+def trace_courbe_cubic_bezier(p0, p1, p2, p3):
+	return [bezier_cubic_curve(p0, p1, p2, p3, t) for t in np.linspace(0, 1, 100)]
+
+terrain = generate_terrain(100)
 display_terrain(terrain)
 # display_terrain(noise(100,0, 10))
 
