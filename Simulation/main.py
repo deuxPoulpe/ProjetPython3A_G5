@@ -1,7 +1,5 @@
 from world import World
 from display import Display
-from bob import Bob
-import random
 
 
 if __name__ == "__main__":

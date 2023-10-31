@@ -1,8 +1,9 @@
 import numpy as np
 import random
 from math import sin
-from noise_generation import perlin_noise1
-from noise_generation import perlin_noise2
+from Utility.noise_generation import perlin_noise1
+from Utility.noise_generation import perlin_noise2
+from Utility.geometry_utility import *
 
 
 class Terrain:
@@ -28,37 +29,37 @@ class Terrain:
 
 		
 
-		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed)
+		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed=seed)
 		self.terrain = perlin_noise2(size, z_min, z_max, 0.01, seed)
 
 
-		def bezier_curve(p0, p1, p2, t):
-			x = int(round((1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]))
-			y = int(round((1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]))
-			return x, y
+		# def bezier_curve(p0, p1, p2, t):
+		# 	x = int(round((1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]))
+		# 	y = int(round((1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]))
+		# 	return x, y
 		
-		def trace_courbe_bezier(p0, p1, p2):
-			return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
+		# def trace_courbe_bezier(p0, p1, p2):
+		# 	return [bezier_curve(p0, p1, p2, t) for t in np.linspace(0, 1, 100)]
 		
-		def ondulation(courbe, amplitude=9, frequence=0.2):
-			return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
-			# return [( int(x + amplitude * sin(frequence * y)), int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+		# def ondulation(courbe, amplitude=9, frequence=0.2):
+		# 	return [(x, int(y + amplitude * sin(frequence * x))) for x, y in courbe]
+		# 	# return [( int(x + amplitude * sin(frequence * y)), int(y + amplitude * sin(frequence * x))) for x, y in courbe]
 
 		
-		def add_points(courbe):
+		# def add_points(courbe):
 			
-			new_courbe = [courbe[0]]
-			for i in range(1, len(courbe)):
-				previous_point  = courbe[i - 1]
-				current_point  = courbe[i]
+		# 	new_courbe = [courbe[0]]
+		# 	for i in range(1, len(courbe)):
+		# 		previous_point  = courbe[i - 1]
+		# 		current_point  = courbe[i]
 				
-				x = (previous_point[0] + current_point[0]) // 2
-				y = (previous_point[1] + current_point[1]) // 2
-				mid_point = (x, y)
+		# 		x = (previous_point[0] + current_point[0]) // 2
+		# 		y = (previous_point[1] + current_point[1]) // 2
+		# 		mid_point = (x, y)
 				
-				new_courbe.extend([mid_point, current_point])
+		# 		new_courbe.extend([mid_point, current_point])
 
-			return new_courbe
+		# 	return new_courbe
 		
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)

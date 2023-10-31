@@ -9,8 +9,8 @@ from math import sqrt
 
 
 
-from occlusion_utility import hide_behind_terrain_image
-from occlusion_utility import tile_to_array
+from Utility.occlusion_utility import hide_behind_terrain_image
+from Utility.occlusion_utility import tile_to_array
 
 
 
@@ -44,6 +44,7 @@ class Display:
 			"water": pygame.image.load(os.path.join("assets/tiles", "tile_094.png")).convert(),
 			"clean_grass" : pygame.image.load(os.path.join("assets/tiles", "tile_040.png")),
 			"stone" : pygame.image.load(os.path.join("assets/tiles", "tile_063.png")),
+			"sand" : pygame.image.load(os.path.join("assets/tiles", "tile_115.png")),
 			"plants": [],
 			"rocks" : [],
 			"full_bob" : pygame.image.load(os.path.join("assets","bob.png")).convert(),
@@ -153,7 +154,7 @@ class Display:
 			tile = Tile(x,y, self.assets["water"])
 		elif grid[i][j] == 1:
 			y = start_y + (i + j) * 32 / 4 - 9 - 16
-			tile = Tile(x,y, self.assets["close_water"])
+			tile = Tile(x,y, self.assets["sand"])
 		else:
 			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
 			tile = Tile(x,y, self.assets["grass"])
