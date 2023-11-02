@@ -5,7 +5,20 @@ from perlin_noise import PerlinNoise
 
 
 def perlin_noise1(size, z_min, z_max, scale, octaves, persistence, lacunarity, seed):
-		
+	"""
+    Génère un terrain en utilisant le bruit de Perlin.
+
+    :param size: Taille du terrain (nombre de points en largeur et en hauteur).
+    :param z_min: Valeur minimale de la hauteur du terrain.
+    :param z_max: Valeur maximale de la hauteur du terrain.
+    :param scale: Échelle du bruit de Perlin.
+    :param octaves: Nombre d'octaves utilisées pour le bruit de Perlin.
+    :param persistence: Persistance du bruit de Perlin.
+    :param lacunarity: Lacunarité du bruit de Perlin.
+    :param seed: Graine pour la génération aléatoire.
+    :return: Un tableau numpy représentant les hauteurs du terrain.
+    """
+
 	if seed is None:
 		seed = random.randint(0, 1024)
 	terrain = np.zeros((size, size))
@@ -27,6 +40,16 @@ def perlin_noise1(size, z_min, z_max, scale, octaves, persistence, lacunarity, s
 
 
 def perlin_noise2(size, z_min, z_max, scale, seed):
+	"""
+    Génère un terrain en utilisant une variante du bruit de Perlin.
+
+    :param size: Taille du terrain.
+    :param z_min: Valeur minimale de la hauteur du terrain.
+    :param z_max: Valeur maximale de la hauteur du terrain.
+    :param scale: Échelle du bruit de Perlin.
+    :param seed: Graine pour la génération aléatoire.
+    :return: Un tableau numpy représentant les hauteurs du terrain.
+    """
 	
 	if seed is None:
 		seed = random.randint(0, 1024)
