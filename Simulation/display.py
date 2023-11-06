@@ -141,7 +141,7 @@ class Display:
     
 	def test_in_screen(self, x, y):
 		return True
-		return x >= 0 and x < self.screen_width and y >= 0 and y < self.screen_height
+		# return x >= 0 and x < self.screen_width and y >= 0 and y < self.screen_height
     
     
 
