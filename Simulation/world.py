@@ -7,7 +7,29 @@ import random
 
 
 class World:
+	"""
+    Classe représentant le monde dans lequel les objets 'Bob' et 'Food' interagissent.
+
+    Attributs:
+        argDict (dict): Dictionnaire d'arguments de configuration du monde.
+        terrain_config (dict): Dictionnaire de configuration du terrain.
+        bobs (dict): Dictionnaire des 'Bob' présents dans le monde.
+        foods (dict): Dictionnaire de nourriture présente dans le monde.
+        tick (int): Compteur de ticks dans le monde.
+        population_bob (list): Liste de la population de 'Bob'.
+        population_food (list): Liste de la population de nourriture.
+        nb_bob (int): Nombre de 'Bob' dans le monde.
+        nb_food (int): Nombre d'éléments de nourriture dans le monde.
+        terrain (Terrain): Objet représentant le terrain du monde.
+    """
 	def __init__(self,argDict,terrain_config_dict):
+		"""
+        Initialise une nouvelle instance du monde.
+
+        Paramètres:
+            argDict (dict): Dictionnaire d'arguments de configuration du monde.
+            terrain_config_dict (dict): Dictionnaire de configuration du terrain.
+        """
 		self.argDict = argDict
 		self.terrain_config = terrain_config_dict
 		self.bobs = {}
@@ -66,6 +88,14 @@ class World:
 
 	#methods
 	def move_bob(self,bob,old_x,old_y):
+		"""
+		Déplace un 'Bob' dans le monde.
+
+		Paramètres:
+			bob (Bob): L'instance de 'Bob' à déplacer.
+			old_x (int): Ancienne position en x.
+			old_y (int): Ancienne position en y.
+		"""
 		self.bobs[(old_x,old_y)].remove(bob)
 		if self.bobs[(old_x,old_y)] == []:
 			self.bobs.pop((old_x,old_y))
@@ -75,6 +105,12 @@ class World:
 
 	
 	def kill_bob(self,bob):
+		"""
+		Supprime un 'Bob' du monde.
+
+		Paramètres:
+			bob (Bob): L'instance de 'Bob' à supprimer.
+		"""
 		self.bobs[bob.get_pos()].remove(bob)
 		if self.bobs[bob.get_pos()] == []:
 			self.bobs.pop(bob.get_pos())
@@ -82,6 +118,12 @@ class World:
 		self.nb_bob -= 1
 
 	def kill_food(self,food):
+		"""
+		Supprime un élément de nourriture du monde.
+
+		Paramètres:
+			food (Food): L'élément de nourriture à supprimer.
+		"""
 		self.foods[food.get_pos()].remove(food)
 		if self.foods[food.get_pos()] == []:
 			self.foods.pop(food.get_pos())
@@ -90,6 +132,12 @@ class World:
 
 
 	def spawn_bob(self,num_bobs):
+		"""
+		Génère un nombre spécifié de 'Bob' dans le monde.
+
+		Paramètres:
+			num_bobs (int): Nombre de 'Bob' à générer.
+		"""
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
@@ -101,6 +149,12 @@ class World:
 		self.nb_bob += num_bobs
 
 	def spawn_food(self,num_food):
+		"""
+		Génère un nombre spécifié d'éléments de nourriture dans le monde.
+
+		Paramètres:
+			num_food (int): Nombre d'éléments de nourriture à générer.
+		"""
 		for _ in range(num_food):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
@@ -113,6 +167,12 @@ class World:
 
 
 	def spawn_reproduce(self,mother_bob):
+		"""
+		Gère la reproduction des 'Bob'. Crée un nouveau 'Bob' à partir d'un 'Bob' existant.
+
+		Paramètres:
+			mother_bob (Bob): Le 'Bob' qui se reproduit.
+		"""
 		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()*1/4)
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
@@ -123,6 +183,13 @@ class World:
 
 
 	def save(self,filename,*args):
+		"""
+		Enregistre l'état actuel du monde dans un fichier.
+
+		Paramètres:
+			filename (str): Nom du fichier dans lequel enregistrer l'état.
+			*args: Arguments supplémentaires ou objets à enregistrer.
+		"""
 		with open(filename, 'wb') as output:
 			for i in args:
 				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
@@ -132,6 +199,9 @@ class World:
 	
 
 	def update_tick(self):
+		"""
+		Met à jour l'état du monde à chaque tick. Cela inclut la mise à jour de tous les 'Bob' et la génération de nourriture.
+		"""
 		
 		#une journée en fonction des ticks 
 		
