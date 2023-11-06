@@ -70,46 +70,6 @@ class Display:
 		self.foods_occlusion_cache = {}
 	
 
-	def draw_world(self):
-		
-		size = self.world.getSize()
-		start_x = self.screen_width // 2 - self.camera_x
-		start_y = self.screen_height // 10 - self.camera_y
-
-		iso_size_x =self.zoom_factor / 25
-		iso_size_y =self.zoom_factor / 50
-
-		floor = [
-			(start_x, start_y),
-			(start_x + iso_size_x * size, start_y + iso_size_y * size),
-			(start_x , start_y + iso_size_y * size * 2),
-			(start_x - iso_size_x * size, start_y + iso_size_y * size),
-		]
-
-		base = [
-			(start_x, start_y),
-			(start_x + iso_size_x * size, start_y + iso_size_y * size),
-			(start_x + iso_size_x * size, start_y + iso_size_y * size + iso_size_y * size / 3),
-			(start_x , start_y + iso_size_y * size * 2 + iso_size_y * size / 3),
-			(start_x - iso_size_x * size, start_y + iso_size_y * size + iso_size_y * size / 3),
-			(start_x - iso_size_x * size, start_y + iso_size_y * size),
-		]
-
-		pygame.gfxdraw.filled_polygon(self.screen, base, (26, 13, 0))
-		pygame.gfxdraw.filled_polygon(self.screen, floor, (25, 102, 8))
-
-		for k in range(size + 1):
-			pygame.gfxdraw.line(self.screen, 
-								int(start_x + iso_size_x*k), int(start_y + iso_size_y*k),
-								int(start_x - iso_size_x*(size - k)), int(start_y + iso_size_y*(size+k)),
-								(0, 51, 51))
-
-			pygame.gfxdraw.line(self.screen,
-								int(start_x - iso_size_x*k), int(start_y + iso_size_y*k),
-								int(start_x + iso_size_x*(size - k)), int(start_y + iso_size_y*(size+k)),
-								(0, 51, 51))
-
-			
 
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
