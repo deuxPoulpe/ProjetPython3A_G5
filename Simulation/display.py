@@ -25,6 +25,8 @@ class Display:
 
 		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
 		self.sprite_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
+		self.floor_display_temp = pygame.Surface((0,0))
+		self.sprite_display_temp = pygame.Surface((0,0))
 		
 		self.zoom_factor = 100
 		self.zoom_speed = 50
@@ -110,9 +112,9 @@ class Display:
 			
 
 	def zoom(self,event):
-		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor += self.zoom_speed
-		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 or pygame.key.get_pressed()[pygame.K_PAGEDOWN]:
 			self.zoom_factor -= self.zoom_speed
 			if self.zoom_factor < 10:  
 				self.zoom_factor = 10
@@ -136,6 +138,12 @@ class Display:
 				self.camera_x += self.drag_pos[0] - current_mouse_pos[0] 
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
+    
+	def test_in_screen(self, x, y):
+		return True
+		return x >= 0 and x < self.screen_width and y >= 0 and y < self.screen_height
+    
+    
 
 	def draw_empty_world(self,start_x,start_y,i,j,grid):
 		for k in range(grid[i][j] + 1):
@@ -226,8 +234,9 @@ class Display:
 					size = sqrt(bob.get_mass())
 					x = start_x + (i - j) * 16 - 8 * size
 					y = start_y + (i + j) * 8 - 15 * size
-					bob_s = Sprite_bob(x,y, self.assets["full_bob"], size)
-					bobs.add(bob_s)
+					if self.test_in_screen(x,y):
+						bob_s = Sprite_bob(x,y, self.assets["full_bob"], size)
+						bobs.add(bob_s)
 		else:
 			grid_of_height = terrain.get_terrain()
 			for key in all_bobs:
@@ -239,29 +248,30 @@ class Display:
 
 					x = start_x + (i - j) * 16 - 8 * size
 					y = start_y + (i + j) * 8 - 15 * size - 9 * base
-					
-					try:
-						rc = grid_of_height[i+1][j] - base
-					except:
-						rc = 0
-					try:
-						lc = grid_of_height[i][j+1] - base
-					except:
-						lc = 0
-					try:
-						bc = grid_of_height[i+1][j+1] - base
-					except:
-						bc = 0
-					
-					bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
-					if rc > 0 or lc > 0 or bc > 0:
+					if self.test_in_screen(x,y):
+						
 						try:
-							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+							rc = grid_of_height[i+1][j] - base
 						except:
-							self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
-							bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
-				
-					bobs.add(bob_s)
+							rc = 0
+						try:
+							lc = grid_of_height[i][j+1] - base
+						except:
+							lc = 0
+						try:
+							bc = grid_of_height[i+1][j+1] - base
+						except:
+							bc = 0
+						
+						bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
+						if rc > 0 or lc > 0 or bc > 0:
+							try:
+								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+							except:
+								self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
+								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
+					
+						bobs.add(bob_s)
 
 
 		
@@ -284,8 +294,9 @@ class Display:
 					i,j = key
 					x = start_x + (i - j) * 16 - 8
 					y = start_y + (i + j) * 8 - 15
-					food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
-					foods.add(food_s)
+					if self.test_in_screen(x,y):
+						food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
+						foods.add(food_s)
 		else:
 			grid_of_height = terrain.get_terrain()
 			for key in all_foods:
@@ -295,47 +306,48 @@ class Display:
 
 					x = start_x + (i - j) * 16 - 8 
 					y = start_y + (i + j) * 8 - 15 - 9 * base
-					
-					try:
-						rc = grid_of_height[i+1][j] - base
-					except:
-						rc = 0
-					try:
-						lc = grid_of_height[i][j+1] - base
-					except:
-						lc = 0
-					try:
-						bc = grid_of_height[i+1][j+1] - base
-					except:
-						bc = 0
-					
-					food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
-					if rc > 0 or lc > 0 or bc > 0:
+
+					if self.test_in_screen(x,y):
 						try:
-							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+							rc = grid_of_height[i+1][j] - base
 						except:
-							self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
-							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-				
-					foods.add(food_s)
+							rc = 0
+						try:
+							lc = grid_of_height[i][j+1] - base
+						except:
+							lc = 0
+						try:
+							bc = grid_of_height[i+1][j+1] - base
+						except:
+							bc = 0
+						
+						food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
+						if rc > 0 or lc > 0 or bc > 0:
+							try:
+								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+							except:
+								self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
+								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+					
+						foods.add(food_s)
 
 
 		
 		foods.draw(self.sprite_display)
+              
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
 		scale_y = 3*self.zoom_factor
 				
 		if self.needs_rescaling:
+			self.needs_rescaling = False
 				
 			self.floor_display_temp = pygame.Surface((scale_x, scale_y))
 			self.floor_display_temp.set_colorkey((0, 0, 0))
 			pygame.transform.scale(self.floor_display, (scale_x, scale_y), self.floor_display_temp)
-			# self.floor_display_temp = pygame.transform.chop(self.floor_display_temp, (0, 0, 20, 20)) 
 
 
-			self.needs_rescaling = False
 			self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
 			self.sprite_display_temp.set_colorkey((0, 0, 0))
 		pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
@@ -344,12 +356,13 @@ class Display:
 	def render(self):
 		self.screen.fill((135,206,250))
 		self.sprite_display.fill((0,0,0))
+  
 
 		self.draw_bobs()
 		self.draw_foods()
-
-
+  
 		self.zooming_render()
+  
 
 		grid_x = -self.camera_x + self.screen_width // 2 - self.floor_display_temp.get_size()[0] // 2
 		grid_y = -self.camera_y + self.screen_height // 2 - self.floor_display_temp.get_size()[1] // 2
