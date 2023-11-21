@@ -61,7 +61,7 @@ class Bob:
 		Retourne:
 			bool: True si Bob a mangé, False sinon.
 		"""
-		if self.get_pos() in self.world.get_foods() and self.energy != self.max_energy:
+		if self.get_pos() in self.world.get_foods().keys() and self.energy != self.max_energy:
 			food = self.world.get_foods()[self.get_pos()]
 			self.energy += food.be_eaten(min(food.get_value(), self.max_energy - self.energy))
 			return True
@@ -89,7 +89,7 @@ class Bob:
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.energy -= 1
+		self.loose_energy("move")
 		return True
 
 	def die(self):
@@ -126,12 +126,13 @@ class Bob:
 		Retourne:
 			None
 		"""
-  
 		actions = [self.die, self.reproduce, self.move]
-		sub_actions = [self.eat]
+		sub_actions = [self.eat_food]
 		for action in actions:
 			if action():
-				if action is self.move:
+				if action.__name__ == "move":
 					for sub_action in sub_actions:
 						sub_action()
 						break
+
+				break

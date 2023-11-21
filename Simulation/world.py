@@ -80,6 +80,10 @@ class World:
 		return self.argDict
 	def get_terrain(self):
 		return self.terrain
+	def get_nb_bob(self):
+		return self.nb_bob
+	def get_nb_food(self):
+		return self.nb_food
 
 	#setter
 	def setArgDict(self,newArgDict):
@@ -96,9 +100,11 @@ class World:
 			old_x (int): Ancienne position en x.
 			old_y (int): Ancienne position en y.
 		"""
+  
 		self.bobs[(old_x,old_y)].remove(bob)
 		if self.bobs[(old_x,old_y)] == []:
 			self.bobs.pop((old_x,old_y))
+   
 		if not bob.get_pos() in self.bobs:
 			self.bobs[bob.get_pos()] = []
 		self.bobs[bob.get_pos()].append(bob)
@@ -124,9 +130,8 @@ class World:
 		Paramètres:
 			food (Food): L'élément de nourriture à supprimer.
 		"""
-		self.foods[food.get_pos()].remove(food)
-		if self.foods[food.get_pos()] == []:
-			self.foods.pop(food.get_pos())
+		
+		self.foods.pop(food.get_pos())
 
 		self.nb_food -= 1
 

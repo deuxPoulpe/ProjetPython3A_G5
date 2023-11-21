@@ -312,7 +312,7 @@ class Display:
 
 	
 	def render(self):
-		self.screen.fill((135,206,250))
+		
 		self.sprite_display.fill((0,0,0))
   
 
@@ -328,6 +328,7 @@ class Display:
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
+		
 
 
 	def main_loop(self,tick_interval):
@@ -337,10 +338,13 @@ class Display:
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
 
-		running = True
+		
 		self.draw_better_world()
 
 		last_update_time = pygame.time.get_ticks()
+
+		rendering = True
+		running = True
 
 		while running:
 
@@ -351,6 +355,13 @@ class Display:
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
+
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+					if rendering:
+						rendering = False
+					else:
+						rendering = True
+	
 				
 				self.zoom(event)
 				self.start_drag(event)
@@ -364,8 +375,14 @@ class Display:
 
 
 			self.camera()
-			self.render()
-			
+			self.screen.fill((135,206,250))
+			if rendering:
+				self.render()
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.world.get_tick()//self.world.get_argDict()['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.world.get_tick()}", True, (0,0,0)),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.world.get_nb_bob()}", True, (0,0,0)),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.world.get_nb_food()}", True, (0,0,0)),(20,80))
+				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 
