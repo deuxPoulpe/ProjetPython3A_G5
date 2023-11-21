@@ -124,9 +124,21 @@ class Bob:
 				break
 	
 	def velocity_manager(self):
-		
+
 		self.case_to_move += abs(self.velocity)
 		self.velocity_buffer += self.velocity-abs(self.velocity)
 		if self.velocity_buffer > 0:
 			self.velocity_buffer -= 1
 			case_to_move += 1
+	
+	def eat_bob(self):
+		self.get_pos() in self.world.get_bobs()
+		copy_bob = self.world.get_bobs()[self.get_pos()].remove(self).copy()
+		for bob in copy_bob:
+			if (bob.get_mass()/self.get_mass())<(2/3):
+				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
+					self.energy = self.max_energy
+				else:
+					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+				self.world.kill_bob(bob)
+
