@@ -144,4 +144,35 @@ class Bob:
 			self.world.kill_bob(bob)
 			return True
 		return False
+	
+	def bob_perception(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
+		"""
+		
+		#Génération d'une matrice carré de taille perception-1
+		perception_list = []
+		for x in range(self.get_pos()[0]-(self.perception-1),self.get_pos()[0]+self.perception):
+			for y in range(self.get_pos()[1]-(self.perception-1),self.get_pos()[1]+self.perception):
+				if (x,y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+				if (x,y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		#Ajout des bords manquants
+		y=self.get_pos()[1]
+		for x in range(self.get_pos()[0]-(self.perception),self.get_pos()[0]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		x=self.get_pos()[0]
+		for y in range(self.get_pos()[1]-(self.perception),self.get_pos()[1]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+
+		return perception_list
 
