@@ -16,7 +16,7 @@ class Bob:
 		world (World): Référence au monde dans lequel Bob évolue.
 	"""
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -122,3 +122,11 @@ class Bob:
 		for action in actions:
 			if action():
 				break
+	
+	def velocity_manager(self):
+		
+		self.case_to_move += abs(self.velocity)
+		self.velocity_buffer += self.velocity-abs(self.velocity)
+		if self.velocity_buffer > 0:
+			self.velocity_buffer -= 1
+			case_to_move += 1
