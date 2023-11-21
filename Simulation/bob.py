@@ -142,4 +142,6 @@ class Bob:
 			else:
 				self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
 			self.world.kill_bob(bob)
+			return True
+		return False
 
