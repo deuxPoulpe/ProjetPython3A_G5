@@ -28,6 +28,9 @@ class Food:
 	def get_value(self):
 		return self.value
 
+	def add_value(self, value):
+		self.value += value
+
 	def get_pos(self):
 		return self.pos
 

@@ -250,46 +250,44 @@ class Display:
 
 		if not terrain:
 			for key in all_foods:
-				for food in all_foods[key]:
-					i,j = key
-					x = start_x + (i - j) * 16 - 8
-					y = start_y + (i + j) * 8 - 15
-					if self.test_in_screen(x,y):
-						food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
-						foods.add(food_s)
+				i,j = key
+				x = start_x + (i - j) * 16 - 8
+				y = start_y + (i + j) * 8 - 15
+				if self.test_in_screen(x,y):
+					food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
+					foods.add(food_s)
 		else:
 			grid_of_height = terrain.get_terrain()
 			for key in all_foods:
-				for food in all_foods[key]:
-					i,j = key
-					base = grid_of_height[i][j]
+				i,j = key
+				base = grid_of_height[i][j]
 
-					x = start_x + (i - j) * 16 - 8 
-					y = start_y + (i + j) * 8 - 15 - 9 * base
+				x = start_x + (i - j) * 16 - 8 
+				y = start_y + (i + j) * 8 - 15 - 9 * base
 
-					if self.test_in_screen(x,y):
-						try:
-							rc = grid_of_height[i+1][j] - base
-						except:
-							rc = 0
-						try:
-							lc = grid_of_height[i][j+1] - base
-						except:
-							lc = 0
-						try:
-							bc = grid_of_height[i+1][j+1] - base
-						except:
-							bc = 0
-						
-						food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
-						if rc > 0 or lc > 0 or bc > 0:
-							try:
-								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-							except:
-								self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
-								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+				if self.test_in_screen(x,y):
+					try:
+						rc = grid_of_height[i+1][j] - base
+					except:
+						rc = 0
+					try:
+						lc = grid_of_height[i][j+1] - base
+					except:
+						lc = 0
+					try:
+						bc = grid_of_height[i+1][j+1] - base
+					except:
+						bc = 0
 					
-						foods.add(food_s)
+					food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
+					if rc > 0 or lc > 0 or bc > 0:
+						try:
+							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+						except:
+							self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
+							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
+				
+					foods.add(food_s)
 
 
 		

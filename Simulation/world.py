@@ -8,28 +8,28 @@ import random
 
 class World:
 	"""
-    Classe représentant le monde dans lequel les objets 'Bob' et 'Food' interagissent.
+	Classe représentant le monde dans lequel les objets 'Bob' et 'Food' interagissent.
 
-    Attributs:
-        argDict (dict): Dictionnaire d'arguments de configuration du monde.
-        terrain_config (dict): Dictionnaire de configuration du terrain.
-        bobs (dict): Dictionnaire des 'Bob' présents dans le monde.
-        foods (dict): Dictionnaire de nourriture présente dans le monde.
-        tick (int): Compteur de ticks dans le monde.
-        population_bob (list): Liste de la population de 'Bob'.
-        population_food (list): Liste de la population de nourriture.
-        nb_bob (int): Nombre de 'Bob' dans le monde.
-        nb_food (int): Nombre d'éléments de nourriture dans le monde.
-        terrain (Terrain): Objet représentant le terrain du monde.
-    """
+	Attributs:
+		argDict (dict): Dictionnaire d'arguments de configuration du monde.
+		terrain_config (dict): Dictionnaire de configuration du terrain.
+		bobs (dict): Dictionnaire des 'Bob' présents dans le monde.
+		foods (dict): Dictionnaire de nourriture présente dans le monde.
+		tick (int): Compteur de ticks dans le monde.
+		population_bob (list): Liste de la population de 'Bob'.
+		population_food (list): Liste de la population de nourriture.
+		nb_bob (int): Nombre de 'Bob' dans le monde.
+		nb_food (int): Nombre d'éléments de nourriture dans le monde.
+		terrain (Terrain): Objet représentant le terrain du monde.
+	"""
 	def __init__(self,argDict,terrain_config_dict):
 		"""
-        Initialise une nouvelle instance du monde.
+		Initialise une nouvelle instance du monde.
 
-        Paramètres:
-            argDict (dict): Dictionnaire d'arguments de configuration du monde.
-            terrain_config_dict (dict): Dictionnaire de configuration du terrain.
-        """
+		Paramètres:
+			argDict (dict): Dictionnaire d'arguments de configuration du monde.
+			terrain_config_dict (dict): Dictionnaire de configuration du terrain.
+		"""
 		self.argDict = argDict
 		self.terrain_config = terrain_config_dict
 		self.bobs = {}
@@ -158,13 +158,13 @@ class World:
 		for _ in range(num_food):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			food=Food(x, y, self)
+			food=Food(x, y, self, value=self.argDict["Food_energy"])
 			if (x,y) not in self.foods:
-				self.foods[(x,y)]=[]
-			self.foods[(x,y)].append(food)
+				self.foods[(x,y)] = food
+			else:
+				self.foods[(x,y)].add_value(food.get_value())
 
-		self.nb_food += num_food           
-
+		self.nb_food += num_food
 
 	def spawn_reproduce(self,mother_bob):
 		"""

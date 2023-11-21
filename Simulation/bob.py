@@ -54,7 +54,7 @@ class Bob:
 		return self.mass
 
 	
-	def eat(self):
+	def eat_food(self):
 		"""
 		Permet à Bob de manger. Augmente l'énergie de Bob si de la nourriture est disponible à sa position.
 
@@ -62,11 +62,19 @@ class Bob:
 			bool: True si Bob a mangé, False sinon.
 		"""
 		if self.get_pos() in self.world.get_foods() and self.energy != self.max_energy:
-			food = max(self.world.get_foods()[self.get_pos()], key=lambda x: x.get_value())
+			food = self.world.get_foods()[self.get_pos()]
 			self.energy += food.be_eaten(min(food.get_value(), self.max_energy - self.energy))
 			return True
 		else:
 			return False
+
+	def loose_energy(self, mode):
+		if mode == "move":
+			self.energy -= self.mass * self.velocity**2
+		elif mode == "stand":
+			self.energy -= 0.5
+			
+		
 
 	def move(self):
 		"""
@@ -118,7 +126,12 @@ class Bob:
 		Retourne:
 			None
 		"""
-		actions = [self.die, self.eat, self.reproduce, self.move]
+  
+		actions = [self.die, self.reproduce, self.move]
+		sub_actions = [self.eat]
 		for action in actions:
 			if action():
-				break
+				if action is self.move:
+					for sub_action in sub_actions:
+						sub_action()
+						break
