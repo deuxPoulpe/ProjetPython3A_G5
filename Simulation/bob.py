@@ -132,13 +132,14 @@ class Bob:
 			case_to_move += 1
 	
 	def eat_bob(self):
-		self.get_pos() in self.world.get_bobs()
-		copy_bob = self.world.get_bobs()[self.get_pos()].remove(self).copy()
-		for bob in copy_bob:
-			if (bob.get_mass()/self.get_mass())<(2/3):
-				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
-					self.energy = self.max_energy
-				else:
-					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
-				self.world.kill_bob(bob)
+		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
+		mass_bob_list = [x.get_mass() for x in copy_bobs]
+		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
+
+		if (bob.get_mass()/self.get_mass())<(2/3):
+			if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
+				self.energy = self.max_energy
+			else:
+				self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+			self.world.kill_bob(bob)
 
