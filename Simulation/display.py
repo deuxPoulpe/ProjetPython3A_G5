@@ -16,7 +16,7 @@ from Utility.occlusion_utility import tile_to_array
 
 
 class Display:
-	def __init__(self,world):
+	def __init__(self, world):
 		self.world = world
 
 		self.screen_width = 800
@@ -39,6 +39,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
+
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")),
 			"dirt": pygame.image.load(os.path.join("assets/tiles", "tile_003.png")).convert(),
@@ -141,7 +142,44 @@ class Display:
 			self.floor.add(rock)
 
 
+	
+
 	def draw_better_world(self):
+		
+		def world_loader(load_percentage, message):
+			"""Fonction qui affiche le chargement du monde et gere l'affichage de la fenetre et des evenements seulement pendant le chargement du monde
+   
+			ps: afficher le chargement du monde prend plus de temps que de charger le monde lui meme sad
+			Args:
+				load (int): Pourcentage de chargement du monde
+			"""
+			
+			for event in pygame.event.get():
+				if event.type == pygame.VIDEORESIZE:
+						self.screen_height = event.size[1]
+						self.screen_width = event.size[0]
+				elif event.type == pygame.QUIT:
+					pygame.quit()
+					quit()
+
+			
+			self.screen.fill((135,206,250))
+			LOADING_BG = pygame.image.load(os.path.join("assets", "Loading Bar Background.png"))
+			LOADING_BG_RECT = LOADING_BG.get_rect(center=(self.screen_width/2, self.screen_height/2))
+			loading_bar = pygame.image.load(os.path.join("assets", "Loading Bar.png"))
+			load_text = pygame.font.Font(None, 40).render(f"{message}", True, (0,0,0))
+			load_text_rect = load_text.get_rect(center=(self.screen_width/2, self.screen_height/2 - 150))
+			
+
+			loading_bar_width = 765 * load_percentage / 100
+			loading_bar = pygame.transform.scale(loading_bar, (int(loading_bar_width), 200))
+			loading_bar_rect = loading_bar.get_rect(midleft=(self.screen_width/2 - 380, self.screen_height/2))
+   
+			self.screen.blit(load_text, load_text_rect)
+			self.screen.blit(loading_bar, loading_bar_rect)
+			self.screen.blit(LOADING_BG, LOADING_BG_RECT)
+		
+			pygame.display.flip()
 		size = self.world.get_size()
 		self.floor.empty()
 
@@ -151,10 +189,7 @@ class Display:
 
 		terrain = self.world.get_terrain()
 
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Génération du terrain en cours ...", True, (255,255,255)),
-					 (self.screen_width/2 - 100, self.screen_height/2))
-		pygame.display.flip()
-
+		world_loader(0,"Génération de l'affichage du monde en cours ...")
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
@@ -165,13 +200,17 @@ class Display:
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
+
 
 		else:
 			for i in range(size):
 				for j in range(size):
 					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
 					self.floor.add(tile)
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
 
+		world_loader(100,"Chargement de l'affichage du monde en cours ...")
 		self.floor.draw(self.floor_display)	
 
 

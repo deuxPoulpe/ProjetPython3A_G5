@@ -28,10 +28,10 @@ class Terrain:
 	def generate_terrain(self ,size, z_min=0, z_max=9, seed = None):
 
 		
+		self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed=seed)
+		# self.terrain = perlin_noise2(size, z_min, z_max, 0.01, seed)
 
-		# self.terrain = perlin_noise1(size, z_min, z_max, scale=0.02, octaves=10, persistence=0.3, lacunarity=2.0, seed=seed)
-		self.terrain = perlin_noise2(size, z_min, z_max, 0.01, seed)
-
+		
 		
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
@@ -81,6 +81,7 @@ class Terrain:
 							self.decoration_to_add[lake[0][0]+rand_x][lake[0][1]+rand_y] = 2
 					except:
 						pass
+				
 
 
 
