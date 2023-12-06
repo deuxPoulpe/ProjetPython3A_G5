@@ -26,8 +26,10 @@ if __name__ == "__main__":
 
 
 	world.spawn_bob(200)
-	display = Display(world)
-	display.main_loop(100)
+	api = Api(world, 1)
+	display = Display(api)
+	api.start()
+	display.main_loop()
 
 
 
