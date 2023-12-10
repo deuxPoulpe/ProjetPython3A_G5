@@ -54,10 +54,12 @@ class Api:
   
 	def run(self):
 		while True:
+			start = time.time()
 			self.world_sim.update_tick()
 			self.update_shared_data()
 
 			time.sleep(self.tick_interval/1000)
+			print("tick time : " + str(time.time() - start))
 
 
    

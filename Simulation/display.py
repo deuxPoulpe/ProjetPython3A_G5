@@ -361,8 +361,8 @@ class Display:
 		self.zooming_render()
   
 
-		grid_x = -self.camera_x + self.screen_width // 2 - self.floor_display_temp.get_size()[0] // 2
-		grid_y = -self.camera_y + self.screen_height // 2 - self.floor_display_temp.get_size()[1] // 2
+		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
+		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
@@ -379,6 +379,7 @@ class Display:
 
 		
 		self.draw_better_world()
+		self.api.start()
 
 
 		rendering = True
@@ -410,15 +411,15 @@ class Display:
 
 			self.camera()
 			self.screen.fill((135,206,250))
-			# if rendering:
-			# 	self.render()
-			# self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.api.get_data_tick()//self.api.get_date_argDict()['dayTick']}", True, (0,0,0)),(20,20))
-			# self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.api.get_data_tick()}", True, (0,0,0)),(20,40))
-			# self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,60))
-			# self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,80))
+			if rendering:
+				self.render()
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.api.get_data_tick()//self.api.get_date_argDict()['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.api.get_data_tick()}", True, (0,0,0)),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,80))
 				
 
-			# pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
+			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 
 
 			pygame.display.flip()
