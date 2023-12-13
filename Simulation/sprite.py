@@ -4,6 +4,10 @@ import os
  #create a sub class to a sprite class
 
 class Tile(pygame.sprite.Sprite):
+    """
+    Class representing a tile object in the game world.
+    
+    """
     def __init__(self, x, y, image):
         super().__init__()
         self.image = image
@@ -14,7 +18,11 @@ class Tile(pygame.sprite.Sprite):
         return self.image.get_size()
     
 
-class Sprite_bob(pygame.sprite.Sprite):
+class Sprite(pygame.sprite.Sprite):
+    """
+    Class representing a Sprite object in the game world.
+
+    """
     def __init__(self, x, y, image, size):
         super().__init__()
         self.size = size

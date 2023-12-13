@@ -1,7 +1,7 @@
 import pygame
 import pygame_menu
 from sprite import Tile
-from sprite import Sprite_bob
+from sprite import Sprite
 import os
 import matplotlib.pyplot as plt
 import random
@@ -69,6 +69,7 @@ class Display:
 
 		self.bobs_occlusion_cache = {}
 		self.foods_occlusion_cache = {}
+		self.sprite_occlusion_cache = {}
 	
 
 
@@ -99,11 +100,6 @@ class Display:
 				self.camera_x += self.drag_pos[0] - current_mouse_pos[0] 
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
-    
-	def test_in_screen(self, x, y):
-		return True
-		# return x >= 0 and x < self.screen_width and y >= 0 and y < self.screen_height
-    
     
 
 	def draw_empty_world(self,start_x,start_y,i,j,grid):
@@ -214,124 +210,84 @@ class Display:
 		self.floor.draw(self.floor_display)	
 
 
-	def draw_bobs(self):
-		bobs = pygame.sprite.Group()
+	def draw_sprite(self, sprite_type):
+
+		def add_sprite_to_group_occlusion(key, sprite_mass):
+			i,j = key
+			base = grid_of_height[i][j]
+
+			size = sprite_mass ** (1/3)
+			x = start_x + (i - j) * 16 - 8 
+			y = start_y + (i + j) * 8 - 15 - 9 * base
+			
+			try:
+				rc = max(grid_of_height[i+1][j] - base, 0)
+			except:
+				rc = 0
+			try:
+				lc = max(grid_of_height[i][j+1] - base, 0)
+			except:
+				lc = 0
+			try:
+				bc = max(grid_of_height[i+1][j+1] - base, 0)
+			except:
+				bc = 0
+			
+			sprite = Sprite(x, y, sprite_image, size)
+			if rc > 0 or lc > 0 or bc > 0:
+				if (rc, lc, bc, sprite) in self.sprite_occlusion_cache.keys():
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite)])
+				else:
+					self.sprite_occlusion_cache[(rc, lc, bc, sprite)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc])
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite)])
+
+		
+			sprite_group.add(sprite)
+
+		def add_sprite_to_group(key, sprite_mass):
+			i,j = key
+			size = sprite_mass ** (1/3)
+			x = start_x + (i - j) * 16 - 8 * size
+			y = start_y + (i + j) * 8 - 15 * size
+			sprite_group.add(Sprite(x,y, sprite_image, size))
+
+
+		sprite_group = pygame.sprite.Group()
 
 		start_x = self.sprite_display.get_size()[0] // 2
 		start_y = self.sprite_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
 
 		terrain = self.api.get_data_terrain()
 
-		all_bobs = self.api.get_data_bobs()
+		match sprite_type:
+			case "bob":
+				sprite_dict = self.api.get_data_bobs()
+				sprite_image = self.assets["full_bob"]
+
+			case "food":
+				sprite_dict = self.api.get_data_foods()
+				sprite_image = self.assets["foods_banana"]
 		
 
 		if not terrain:
-			for key in all_bobs:
-				for bob in all_bobs[key]:
-					i,j = key
-					
-					size = sqrt(bob.get_mass())
-					x = start_x + (i - j) * 16 - 8 * size
-					y = start_y + (i + j) * 8 - 15 * size
-					if self.test_in_screen(x,y):
-						bob_s = Sprite_bob(x,y, self.assets["full_bob"], size)
-						bobs.add(bob_s)
+			for key, sprites in sprite_dict.items():
+				if sprite_type == "bob":
+					for bob in sprites:
+						add_sprite_to_group(key, bob.get_mass())
+				else:
+					add_sprite_to_group(key, 1)
 		else:
 			grid_of_height = terrain.get_terrain()
-			for key in all_bobs:
-				for bob in all_bobs[key]:
-					i,j = key
+			for key, sprites in sprite_dict.items():
+				if sprite_type == "bob":
+					for bob in sprites:
+						add_sprite_to_group_occlusion(key, bob.get_mass())
+				else:
+					add_sprite_to_group_occlusion(key, 1)
+
 					
-					base = grid_of_height[i][j]
-					size = sqrt(bob.get_mass())
 
-					x = start_x + (i - j) * 16 - 8 * size
-					y = start_y + (i + j) * 8 - 15 * size - 9 * base
-					if self.test_in_screen(x,y):
-						
-						try:
-							rc = grid_of_height[i+1][j] - base
-						except:
-							rc = 0
-						try:
-							lc = grid_of_height[i][j+1] - base
-						except:
-							lc = 0
-						try:
-							bc = grid_of_height[i+1][j+1] - base
-						except:
-							bc = 0
-						
-						bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
-						if rc > 0 or lc > 0 or bc > 0:
-							try:
-								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
-							except:
-								self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
-								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
-					
-						bobs.add(bob_s)
-
-
-		
-		bobs.draw(self.sprite_display)		
-
-	def draw_foods(self):
-		foods = pygame.sprite.Group()
-
-		start_x = self.sprite_display.get_size()[0] // 2
-		start_y = self.sprite_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
-
-		terrain = self.api.get_data_terrain()
-
-		all_foods = self.api.get_data_foods()
-		
-
-		if not terrain:
-			for key in all_foods:
-				i,j = key
-				x = start_x + (i - j) * 16 - 8
-				y = start_y + (i + j) * 8 - 15
-				if self.test_in_screen(x,y):
-					food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
-					foods.add(food_s)
-		else:
-			grid_of_height = terrain.get_terrain()
-			for key in all_foods:
-				i,j = key
-				base = grid_of_height[i][j]
-
-				x = start_x + (i - j) * 16 - 8 
-				y = start_y + (i + j) * 8 - 15 - 9 * base
-
-				if self.test_in_screen(x,y):
-					try:
-						rc = grid_of_height[i+1][j] - base
-					except:
-						rc = 0
-					try:
-						lc = grid_of_height[i][j+1] - base
-					except:
-						lc = 0
-					try:
-						bc = grid_of_height[i+1][j+1] - base
-					except:
-						bc = 0
-					
-					food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
-					if rc > 0 or lc > 0 or bc > 0:
-						try:
-							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-						except:
-							self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
-							food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-				
-					foods.add(food_s)
-
-
-		
-		foods.draw(self.sprite_display)
-              
+		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
@@ -355,8 +311,11 @@ class Display:
 		self.sprite_display.fill((0,0,0))
   
 
-		self.draw_bobs()
-		self.draw_foods()
+		# self.draw_bobs()
+		# self.draw_foods()
+
+		self.draw_sprite("bob")
+		self.draw_sprite("food")
   
 		self.zooming_render()
   

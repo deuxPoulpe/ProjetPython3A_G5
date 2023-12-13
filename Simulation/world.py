@@ -8,28 +8,28 @@ import random
 
 class World:
 	"""
-	Classe représentant le monde dans lequel les objets 'Bob' et 'Food' interagissent.
+    Class representing the world in which 'Bob' and 'Food' objects interact.
 
-	Attributs:
-		argDict (dict): Dictionnaire d'arguments de configuration du monde.
-		terrain_config (dict): Dictionnaire de configuration du terrain.
-		bobs (dict): Dictionnaire des 'Bob' présents dans le monde.
-		foods (dict): Dictionnaire de nourriture présente dans le monde.
-		tick (int): Compteur de ticks dans le monde.
-		population_bob (list): Liste de la population de 'Bob'.
-		population_food (list): Liste de la population de nourriture.
-		nb_bob (int): Nombre de 'Bob' dans le monde.
-		nb_food (int): Nombre d'éléments de nourriture dans le monde.
-		terrain (Terrain): Objet représentant le terrain du monde.
-	"""
+    Attributes:
+        argDict (dict): Dictionary of world configuration arguments.
+        terrain_config (dict): Dictionary of terrain configuration.
+        bobs (dict): Dictionary of 'Bob' objects present in the world.
+        foods (dict): Dictionary of food items present in the world.
+        tick (int): Tick counter in the world.
+        population_bob (list): List of 'Bob' population.
+        population_food (list): List of food population.
+        nb_bob (int): Number of 'Bob' in the world.
+        nb_food (int): Number of food items in the world.
+        terrain (Terrain): Object representing the world's terrain.
+    """
 	def __init__(self,argDict,terrain_config_dict):
 		"""
-		Initialise une nouvelle instance du monde.
+        Initializes a new instance of the world.
 
-		Paramètres:
-			argDict (dict): Dictionnaire d'arguments de configuration du monde.
-			terrain_config_dict (dict): Dictionnaire de configuration du terrain.
-		"""
+        Parameters:
+            argDict (dict): Dictionary of world configuration arguments.
+            terrain_config_dict (dict): Dictionary of terrain configuration.
+        """
 		self.argDict = argDict
 		self.terrain_config = terrain_config_dict
 		self.bobs = {}
@@ -49,15 +49,7 @@ class World:
 		type(argDict["nbFood"]) == int ,
 		type(argDict["dayTick"]) == int
 		])
-	#exemple argDict:
-
-	# argDict = {
-	# 	"size" : size (100),
-	# 	"nbFood" : nbFood (200),
-	# 	"dayTick" : dayTick (100),
-	# 	"custom_terrain" : True,   #si True ajoute un bruite a la generation de terrain
-	# }
-
+	
 
 	#getters
 	def get_size(self):
@@ -76,8 +68,6 @@ class World:
 		return self.bobs
 	def get_foods(self):
 		return self.foods
-	def get_argDict(self):
-		return self.argDict
 	def get_terrain(self):
 		return self.terrain
 	def get_nb_bob(self):
@@ -93,13 +83,13 @@ class World:
 	#methods
 	def move_bob(self,bob,old_x,old_y):
 		"""
-		Déplace un 'Bob' dans le monde.
+        Moves a 'Bob' in the world.
 
-		Paramètres:
-			bob (Bob): L'instance de 'Bob' à déplacer.
-			old_x (int): Ancienne position en x.
-			old_y (int): Ancienne position en y.
-		"""
+        Parameters:
+            bob (Bob): The instance of 'Bob' to move.
+            old_x (int): Old x-coordinate.
+            old_y (int): Old y-coordinate.
+        """
   
 		self.bobs[(old_x,old_y)].remove(bob)
 		if self.bobs[(old_x,old_y)] == []:
@@ -112,11 +102,11 @@ class World:
 	
 	def kill_bob(self,bob):
 		"""
-		Supprime un 'Bob' du monde.
+        Removes a 'Bob' from the world.
 
-		Paramètres:
-			bob (Bob): L'instance de 'Bob' à supprimer.
-		"""
+        Parameters:
+            bob (Bob): The instance of 'Bob' to remove.
+        """
 		self.bobs[bob.get_pos()].remove(bob)
 		if self.bobs[bob.get_pos()] == []:
 			self.bobs.pop(bob.get_pos())
@@ -125,11 +115,11 @@ class World:
 
 	def kill_food(self,food):
 		"""
-		Supprime un élément de nourriture du monde.
+        Removes a food item from the world.
 
-		Paramètres:
-			food (Food): L'élément de nourriture à supprimer.
-		"""
+        Parameters:
+            food (Food): The food item to remove.
+        """
 		
 		self.foods.pop(food.get_pos())
 
@@ -138,11 +128,11 @@ class World:
 
 	def spawn_bob(self,num_bobs):
 		"""
-		Génère un nombre spécifié de 'Bob' dans le monde.
+        Generates a specified number of 'Bob' in the world.
 
-		Paramètres:
-			num_bobs (int): Nombre de 'Bob' à générer.
-		"""
+        Parameters:
+            num_bobs (int): Number of 'Bob' to generate.
+        """
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
@@ -155,11 +145,11 @@ class World:
 
 	def spawn_food(self,num_food):
 		"""
-		Génère un nombre spécifié d'éléments de nourriture dans le monde.
+        Generates a specified number of food items in the world.
 
-		Paramètres:
-			num_food (int): Nombre d'éléments de nourriture à générer.
-		"""
+        Parameters:
+            num_food (int): Number of food items to generate.
+        """
 		for _ in range(num_food):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
@@ -173,11 +163,11 @@ class World:
 
 	def spawn_reproduce(self,mother_bob):
 		"""
-		Gère la reproduction des 'Bob'. Crée un nouveau 'Bob' à partir d'un 'Bob' existant.
+        Manages the reproduction of 'Bob'. Creates a new 'Bob' from an existing 'Bob'.
 
-		Paramètres:
-			mother_bob (Bob): Le 'Bob' qui se reproduit.
-		"""
+        Parameters:
+            mother_bob (Bob): The 'Bob' that is reproducing.
+        """
 		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()*1/4)
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
@@ -189,12 +179,12 @@ class World:
 
 	def save(self,filename,*args):
 		"""
-		Enregistre l'état actuel du monde dans un fichier.
+        Saves the current state of the world to a file.
 
-		Paramètres:
-			filename (str): Nom du fichier dans lequel enregistrer l'état.
-			*args: Arguments supplémentaires ou objets à enregistrer.
-		"""
+        Parameters:
+            filename (str): Name of the file to save the state to.
+            *args: Additional arguments or objects to save.
+        """
 		with open(filename, 'wb') as output:
 			for i in args:
 				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
@@ -205,11 +195,9 @@ class World:
 
 	def update_tick(self):
 		"""
-		Met à jour l'état du monde à chaque tick. Cela inclut la mise à jour de tous les 'Bob' et la génération de nourriture.
+		Updates the state of the world on each tick
 		"""
-		
-		#une journée en fonction des ticks 
-		
+				
 		
 		#update tick for all bobs
 		all_bobs_dict = self.bobs.copy()
