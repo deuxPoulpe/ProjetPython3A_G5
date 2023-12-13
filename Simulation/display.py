@@ -235,11 +235,11 @@ class Display:
 			
 			sprite = Sprite(x, y, sprite_image, size)
 			if rc > 0 or lc > 0 or bc > 0:
-				if (rc, lc, bc, sprite) in self.sprite_occlusion_cache.keys():
-					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite)])
+				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 				else:
-					self.sprite_occlusion_cache[(rc, lc, bc, sprite)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc])
-					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite)])
+					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc])
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 
 		
 			sprite_group.add(sprite)
