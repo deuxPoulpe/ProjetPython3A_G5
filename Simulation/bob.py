@@ -122,3 +122,15 @@ class Bob:
 		for action in actions:
 			if action():
 				break
+	
+
+	#deux bobs doivent etre dans la meme case pour se reproduire 
+	def sexual_reproduction(self ):
+		for partener in self.world.getbobs[self.position]:
+			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
+				self.reproduce
+				self.loose_energy("sexual_reproduction")
+				new_bob = Bob(self.position , 50)
+				return True
+			else:
+				return False 
