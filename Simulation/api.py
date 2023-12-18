@@ -5,12 +5,14 @@ class Api:
 	
 	def __init__(self, world, tick_interval_ms):
 		self.world_sim = world
-		self.tick_interval = tick_interval_ms
+		self.tick_interval = mp.Manager().Value('i', tick_interval_ms)
 		self.process = None
 		self.shared_data = mp.Manager().dict()
 		self.quit = False
 		self.update_shared_data()
-  
+		self.shared_data['real_tick_time'] = 0
+		self.running = mp.Manager().Value('i', False)
+
 	def get_data_bobs(self):
 		return self.shared_data['bobs']
 	def get_data_foods(self):
@@ -27,6 +29,12 @@ class Api:
 		return self.shared_data['nb_food']
 	def get_date_argDict(self):
 		return self.shared_data['argDict']
+	def get_data_real_tick_time(self):
+		return self.shared_data['real_tick_time']
+	def get_tick_interval(self):
+		return self.tick_interval.value
+	def set_tick_interval(self, tick_interval_ms):
+		self.tick_interval.value = tick_interval_ms
      
 
 	def pause(self):
@@ -53,13 +61,15 @@ class Api:
   
   
 	def run(self):
-		while True:
+		self.running.value = True
+		while self.running.value:
 			start = time.time()
 			self.world_sim.update_tick()
 			self.update_shared_data()
 
-			time.sleep(self.tick_interval/1000)
-			print("tick time : " + str(time.time() - start))
+			time.sleep(self.tick_interval.value/1000)
+			self.shared_data['real_tick_time'] = time.time() - start
+   
 
 
    
@@ -67,6 +77,9 @@ class Api:
    
 	def stop(self):
 		if self.process is not None:
-			exit()
+			self.running.value = False
+			self.process.join()
+   
+   
 			
    

@@ -20,13 +20,13 @@ if __name__ == "__main__":
 		"nbFood" : 200,
 		"dayTick" : 100,
 		"Food_energy" : 100,
-		"custom_terrain" : False,
+		"custom_terrain" : True,
 		}, terrain_config)
 	
 
 
 	world.spawn_bob(500)
-	api = Api(world, 1)
+	api = Api(world, 1000)
 	display = Display(api)
 	display.main_loop()
 

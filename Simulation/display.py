@@ -349,6 +349,8 @@ class Display:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
+					from time import sleep
+					sleep(1)
 					pygame.quit()
 					quit()
 
@@ -374,8 +376,10 @@ class Display:
 				self.render()
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.api.get_data_tick()//self.api.get_date_argDict()['dayTick']}", True, (0,0,0)),(20,20))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.api.get_data_tick()}", True, (0,0,0)),(20,40))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.api.get_data_real_tick_time()*1000:.1f} ms", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,120))
 				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
