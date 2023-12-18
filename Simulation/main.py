@@ -1,5 +1,6 @@
 from world import World
 from display import Display
+from api import Api
 
 
 if __name__ == "__main__":
@@ -18,15 +19,17 @@ if __name__ == "__main__":
 		"size" : 100,
 		"nbFood" : 200,
 		"dayTick" : 100,
-		"custom_terrain" : True,
+		"Food_energy" : 100,
+		"custom_terrain" : False,
 		}, terrain_config)
 	
 
 
-	world.spawn_bob(30)
+	world.spawn_bob(500)
+	api = Api(world, 1)
+	display = Display(api)
+	display.main_loop()
 
-	display = Display(world)
-	display.main_loop(100)
 
 
 

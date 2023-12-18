@@ -2,34 +2,34 @@ import random
 
 class Bob:
 	"""
-	Classe représentant un personnage 'Bob' dans un monde simulé.
+    Class representing a character 'Bob' in a simulated world.
 
-	Attributs:
-		energy (int): Énergie actuelle de Bob.
-		velocity (int): Vitesse de déplacement de Bob.
-		mass (int): Masse de Bob.
-		perception (int): Capacité de perception de Bob.
-		memory_space (list): Espace mémoire de Bob.
-		max_energy (int): Énergie maximale que Bob peut accumuler.
-		position (tuple): Position actuelle de Bob dans le monde (x, y).
-		en_fuite (bool): État indiquant si Bob est en fuite.
-		world (World): Référence au monde dans lequel Bob évolue.
-	"""
+    Attributes:
+        energy (int): Bob's current energy.
+        velocity (int): Bob's movement speed.
+        mass (int): Bob's mass.
+        perception (int): Bob's perception ability.
+        memory_space (list): Bob's memory space.
+        max_energy (int): The maximum energy Bob can accumulate.
+        position (tuple): Bob's current position in the world (x, y).
+        en_fuite (bool): Indicates whether Bob is fleeing.
+        world (World): Reference to the world in which Bob exists.
+    """
 
 	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200):
 		"""
-		Initialise une nouvelle instance de Bob.
+        Initializes a new instance of Bob.
 
-		Paramètres:
-			x (int): Position initiale en x de Bob.
-			y (int): Position initiale en y de Bob.
-			world (World): Référence au monde dans lequel Bob évolue.
-			energy (int, optionnel): Énergie initiale de Bob. Par défaut à 100.
-			velocity (int, optionnel): Vitesse initiale de Bob. Par défaut à 1.
-			mass (int, optionnel): Masse initiale de Bob. Par défaut à 1.
-			perception (int, optionnel): Perception initiale de Bob. Par défaut à 0.
-			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
-		"""
+        Parameters:
+            x (int): Initial position of Bob in the x-axis.
+            y (int): Initial position of Bob in the y-axis.
+            world (World): Reference to the world in which Bob exists.
+            energy (int, optional): Initial energy of Bob. Default is 100.
+            velocity (int, optional): Initial velocity of Bob. Default is 1.
+            mass (int, optional): Initial mass of Bob. Default is 1.
+            perception (int, optional): Initial perception of Bob. Default is 0.
+            max_energy (int, optional): Maximum energy of Bob. Default is 200.
+        """
 		self.energy = energy
 		self.velocity = velocity
 		self.mass = mass
@@ -54,43 +54,51 @@ class Bob:
 		return self.mass
 
 	
-	def eat(self):
+	def eat_food(self):
 		"""
-		Permet à Bob de manger. Augmente l'énergie de Bob si de la nourriture est disponible à sa position.
+        Allows Bob to eat. Increases Bob's energy if food is available at his position.
 
-		Retourne:
-			bool: True si Bob a mangé, False sinon.
-		"""
-		if self.get_pos() in self.world.get_foods() and self.energy != self.max_energy:
-			food = max(self.world.get_foods()[self.get_pos()], key=lambda x: x.get_value())
+        Returns:
+            bool: True if Bob ate, False otherwise.
+        """
+		if self.get_pos() in self.world.get_foods().keys() and self.energy != self.max_energy:
+			food = self.world.get_foods()[self.get_pos()]
 			self.energy += food.be_eaten(min(food.get_value(), self.max_energy - self.energy))
 			return True
 		else:
 			return False
 
+	def loose_energy(self, mode):
+		if mode == "move":
+			self.energy -= self.mass * self.velocity**2
+		elif mode == "stand":
+			self.energy -= 0.5
+			
+		
+
 	def move(self):
 		"""
-		Déplace Bob dans une nouvelle position aléatoire.
+        Moves Bob to a new random position.
 
-		Retourne:
-			bool: True après le déplacement de Bob.
-		"""
+        Returns:
+            bool: True after Bob's movement.
+        """
 		old_x, old_y = self.position
-		dx, dy = random.randint(-1, 1), random.randint(-1, 1)
+		dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
 		new_x, new_y = old_x + dx, old_y + dy
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.energy -= 1
+		self.loose_energy("move")
 		return True
 
 	def die(self):
 		"""
-		Gère la mort de Bob. Bob meurt si son énergie est inférieure ou égale à 0.
+        Handles Bob's death. Bob dies if his energy is less than or equal to 0.
 
-		Retourne:
-			bool: True si Bob meurt, False sinon.
-		"""
+        Returns:
+            bool: True if Bob dies, False otherwise.
+        """
 		if self.energy <= 0:
 			self.world.kill_bob(self)
 			return True
@@ -99,11 +107,11 @@ class Bob:
 
 	def reproduce(self):
 		"""
-		Gère la reproduction de Bob. La reproduction a lieu si l'énergie de Bob est suffisante.
+        Handles Bob's reproduction. Reproduction occurs if Bob's energy is sufficient.
 
-		Retourne:
-			bool: True si la reproduction a lieu, False sinon.
-		"""
+        Returns:
+            bool: True if reproduction occurs, False otherwise.
+        """
 		if self.energy >= self.max_energy:
 			self.energy = 3 * self.energy // 4
 			self.world.spawn_reproduce(self)
@@ -113,12 +121,18 @@ class Bob:
 
 	def update_tick(self):
 		"""
-		Met à jour l'état de Bob à chaque 'tick' ou intervalle de temps. Gère diverses actions comme mourir, manger, se reproduire et se déplacer.
+        Updates Bob's state at each 'tick' or time interval. Manages various actions like dying, eating, reproducing, and moving.
 
-		Retourne:
-			None
-		"""
-		actions = [self.die, self.eat, self.reproduce, self.move]
+        Returns:
+            None
+        """
+		actions = [self.die, self.reproduce, self.move]
+		sub_actions = [self.eat_food]
 		for action in actions:
 			if action():
+				if action.__name__ == "move":
+					for sub_action in sub_actions:
+						sub_action()
+						break
+
 				break
