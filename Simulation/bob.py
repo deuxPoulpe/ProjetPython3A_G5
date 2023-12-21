@@ -16,7 +16,7 @@ class Bob:
         world (World): Reference to the world in which Bob exists.
     """
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
 		"""
         Initializes a new instance of Bob.
 
@@ -136,3 +136,57 @@ class Bob:
 						break
 
 				break
+	
+	def velocity_manager(self):
+
+		self.case_to_move += abs(self.velocity)
+		self.velocity_buffer += self.velocity-abs(self.velocity)
+		if self.velocity_buffer > 0:
+			self.velocity_buffer -= 1
+			case_to_move += 1
+	
+	def eat_bob(self):
+		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
+		mass_bob_list = [x.get_mass() for x in copy_bobs]
+		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
+
+		if (bob.get_mass()/self.get_mass())<(2/3):
+			if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
+				self.energy = self.max_energy
+			else:
+				self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+			self.world.kill_bob(bob)
+			return True
+		return False
+	
+	def bob_perception(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
+		"""
+		
+		#Génération d'une matrice carré de taille perception-1
+		perception_list = []
+		for x in range(self.get_pos()[0]-(self.perception-1),self.get_pos()[0]+self.perception):
+			for y in range(self.get_pos()[1]-(self.perception-1),self.get_pos()[1]+self.perception):
+				if (x,y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+				if (x,y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		#Ajout des bords manquants
+		y=self.get_pos()[1]
+		for x in range(self.get_pos()[0]-(self.perception),self.get_pos()[0]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		x=self.get_pos()[0]
+		for y in range(self.get_pos()[1]-(self.perception),self.get_pos()[1]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+
+		return perception_list
+
