@@ -1,7 +1,7 @@
 import pygame
 import pygame_menu
 from sprite import Tile
-from sprite import Sprite_bob
+from sprite import Sprite
 import os
 import matplotlib.pyplot as plt
 import random
@@ -16,15 +16,15 @@ from Utility.occlusion_utility import tile_to_array
 
 
 class Display:
-	def __init__(self,world):
-		self.world = world
+	def __init__(self, api):
+		self.api = api
 
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 
-		self.floor_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
-		self.sprite_display = pygame.Surface((32 * world.get_size(), 16 * world.get_size() + 250))
+		self.floor_display = pygame.Surface((32 * api.get_data_world_size(), 16 * api.get_data_world_size() + 250))
+		self.sprite_display = pygame.Surface((32 * api.get_data_world_size(), 16 * api.get_data_world_size() + 250))
 		self.floor_display_temp = pygame.Surface((0,0))
 		self.sprite_display_temp = pygame.Surface((0,0))
 		
@@ -39,6 +39,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
+
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")),
 			"dirt": pygame.image.load(os.path.join("assets/tiles", "tile_003.png")).convert(),
@@ -68,6 +69,7 @@ class Display:
 
 		self.bobs_occlusion_cache = {}
 		self.foods_occlusion_cache = {}
+		self.sprite_occlusion_cache = {}
 	
 
 
@@ -98,11 +100,6 @@ class Display:
 				self.camera_x += self.drag_pos[0] - current_mouse_pos[0] 
 				self.camera_y += self.drag_pos[1] - current_mouse_pos[1]
 				self.drag_pos = current_mouse_pos
-    
-	def test_in_screen(self, x, y):
-		return True
-		# return x >= 0 and x < self.screen_width and y >= 0 and y < self.screen_height
-    
     
 
 	def draw_empty_world(self,start_x,start_y,i,j,grid):
@@ -141,20 +138,54 @@ class Display:
 			self.floor.add(rock)
 
 
+	
+
 	def draw_better_world(self):
-		size = self.world.get_size()
+		
+		def world_loader(load_percentage, message):
+			"""Fonction qui affiche le chargement du monde et gere l'affichage de la fenetre et des evenements seulement pendant le chargement du monde
+   
+			ps: afficher le chargement du monde prend plus de temps que de charger le monde lui meme sad
+			Args:
+				load (int): Pourcentage de chargement du monde
+			"""
+			
+			for event in pygame.event.get():
+				if event.type == pygame.VIDEORESIZE:
+						self.screen_height = event.size[1]
+						self.screen_width = event.size[0]
+				elif event.type == pygame.QUIT:
+					pygame.quit()
+					quit()
+
+			
+			self.screen.fill((135,206,250))
+			LOADING_BG = pygame.image.load(os.path.join("assets", "Loading Bar Background.png"))
+			LOADING_BG_RECT = LOADING_BG.get_rect(center=(self.screen_width/2, self.screen_height/2))
+			loading_bar = pygame.image.load(os.path.join("assets", "Loading Bar.png"))
+			load_text = pygame.font.Font(None, 40).render(f"{message}", True, (0,0,0))
+			load_text_rect = load_text.get_rect(center=(self.screen_width/2, self.screen_height/2 - 150))
+			
+
+			loading_bar_width = 765 * load_percentage / 100
+			loading_bar = pygame.transform.scale(loading_bar, (int(loading_bar_width), 200))
+			loading_bar_rect = loading_bar.get_rect(midleft=(self.screen_width/2 - 380, self.screen_height/2))
+   
+			self.screen.blit(load_text, load_text_rect)
+			self.screen.blit(loading_bar, loading_bar_rect)
+			self.screen.blit(LOADING_BG, LOADING_BG_RECT)
+		
+			pygame.display.flip()
+		size = self.api.get_data_world_size()
 		self.floor.empty()
 
 
 		start_x = self.floor_display.get_size()[0] // 2
-		start_y = self.floor_display.get_size()[1] - 16 * (self.world.get_size()+1)
+		start_y = self.floor_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
 
-		terrain = self.world.get_terrain()
+		terrain = self.api.get_data_terrain()
 
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Génération du terrain en cours ...", True, (255,255,255)),
-					 (self.screen_width/2 - 100, self.screen_height/2))
-		pygame.display.flip()
-
+		world_loader(0,"Génération de l'affichage du monde en cours ...")
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
@@ -165,136 +196,98 @@ class Display:
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
+
 
 		else:
 			for i in range(size):
 				for j in range(size):
 					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
 					self.floor.add(tile)
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
 
+		world_loader(100,"Chargement de l'affichage du monde en cours ...")
 		self.floor.draw(self.floor_display)	
 
 
-	def draw_bobs(self):
-		bobs = pygame.sprite.Group()
+	def draw_sprite(self, sprite_type):
+
+		def add_sprite_to_group_occlusion(key, sprite_mass):
+			i,j = key
+			base = grid_of_height[i][j]
+
+			size = sprite_mass ** (1/3)
+			x = start_x + (i - j) * 16 - 8 
+			y = start_y + (i + j) * 8 - 15 - 9 * base
+			
+			try:
+				rc = max(grid_of_height[i+1][j] - base, 0)
+			except:
+				rc = 0
+			try:
+				lc = max(grid_of_height[i][j+1] - base, 0)
+			except:
+				lc = 0
+			try:
+				bc = max(grid_of_height[i+1][j+1] - base, 0)
+			except:
+				bc = 0
+			
+			sprite = Sprite(x, y, sprite_image, size)
+			if rc > 0 or lc > 0 or bc > 0:
+				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
+				else:
+					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc])
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
+
+		
+			sprite_group.add(sprite)
+
+		def add_sprite_to_group(key, sprite_mass):
+			i,j = key
+			size = sprite_mass ** (1/3)
+			x = start_x + (i - j) * 16 - 8 * size
+			y = start_y + (i + j) * 8 - 15 * size
+			sprite_group.add(Sprite(x,y, sprite_image, size))
+
+
+		sprite_group = pygame.sprite.Group()
 
 		start_x = self.sprite_display.get_size()[0] // 2
-		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
+		start_y = self.sprite_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
 
-		terrain = self.world.get_terrain()
+		terrain = self.api.get_data_terrain()
 
-		all_bobs = self.world.get_bobs()
+		match sprite_type:
+			case "bob":
+				sprite_dict = self.api.get_data_bobs()
+				sprite_image = self.assets["full_bob"]
+
+			case "food":
+				sprite_dict = self.api.get_data_foods()
+				sprite_image = self.assets["foods_banana"]
 		
 
 		if not terrain:
-			for key in all_bobs:
-				for bob in all_bobs[key]:
-					i,j = key
-					
-					size = sqrt(bob.get_mass())
-					x = start_x + (i - j) * 16 - 8 * size
-					y = start_y + (i + j) * 8 - 15 * size
-					if self.test_in_screen(x,y):
-						bob_s = Sprite_bob(x,y, self.assets["full_bob"], size)
-						bobs.add(bob_s)
+			for key, sprites in sprite_dict.items():
+				if sprite_type == "bob":
+					for bob in sprites:
+						add_sprite_to_group(key, bob.get_mass())
+				else:
+					add_sprite_to_group(key, 1)
 		else:
 			grid_of_height = terrain.get_terrain()
-			for key in all_bobs:
-				for bob in all_bobs[key]:
-					i,j = key
+			for key, sprites in sprite_dict.items():
+				if sprite_type == "bob":
+					for bob in sprites:
+						add_sprite_to_group_occlusion(key, bob.get_mass())
+				else:
+					add_sprite_to_group_occlusion(key, 1)
+
 					
-					base = grid_of_height[i][j]
-					size = sqrt(bob.get_mass())
 
-					x = start_x + (i - j) * 16 - 8 * size
-					y = start_y + (i + j) * 8 - 15 * size - 9 * base
-					if self.test_in_screen(x,y):
-						
-						try:
-							rc = grid_of_height[i+1][j] - base
-						except:
-							rc = 0
-						try:
-							lc = grid_of_height[i][j+1] - base
-						except:
-							lc = 0
-						try:
-							bc = grid_of_height[i+1][j+1] - base
-						except:
-							bc = 0
-						
-						bob_s = Sprite_bob(x,y,self.assets["full_bob"] , size)
-						if rc > 0 or lc > 0 or bc > 0:
-							try:
-								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
-							except:
-								self.bobs_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(bob_s, self.tile_array, [rc, lc, bc])
-								bob_s.set_image(self.bobs_occlusion_cache[(rc, lc, bc)])
-					
-						bobs.add(bob_s)
-
-
-		
-		bobs.draw(self.sprite_display)		
-
-	def draw_foods(self):
-		foods = pygame.sprite.Group()
-
-		start_x = self.sprite_display.get_size()[0] // 2
-		start_y = self.sprite_display.get_size()[1] - 16 * (self.world.get_size()+1)
-
-		terrain = self.world.get_terrain()
-
-		all_foods = self.world.get_foods()
-		
-
-		if not terrain:
-			for key in all_foods:
-				for food in all_foods[key]:
-					i,j = key
-					x = start_x + (i - j) * 16 - 8
-					y = start_y + (i + j) * 8 - 15
-					if self.test_in_screen(x,y):
-						food_s = Sprite_bob(x,y, self.assets["foods_banana"], 1)
-						foods.add(food_s)
-		else:
-			grid_of_height = terrain.get_terrain()
-			for key in all_foods:
-				for food in all_foods[key]:
-					i,j = key
-					base = grid_of_height[i][j]
-
-					x = start_x + (i - j) * 16 - 8 
-					y = start_y + (i + j) * 8 - 15 - 9 * base
-
-					if self.test_in_screen(x,y):
-						try:
-							rc = grid_of_height[i+1][j] - base
-						except:
-							rc = 0
-						try:
-							lc = grid_of_height[i][j+1] - base
-						except:
-							lc = 0
-						try:
-							bc = grid_of_height[i+1][j+1] - base
-						except:
-							bc = 0
-						
-						food_s = Sprite_bob(x,y,self.assets["foods_banana"] , 1)
-						if rc > 0 or lc > 0 or bc > 0:
-							try:
-								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-							except:
-								self.foods_occlusion_cache[(rc, lc, bc)] = hide_behind_terrain_image(food_s, self.tile_array, [rc, lc, bc])
-								food_s.set_image(self.foods_occlusion_cache[(rc, lc, bc)])
-					
-						foods.add(food_s)
-
-
-		
-		foods.draw(self.sprite_display)
-              
+		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
 		scale_x = 6*self.zoom_factor
@@ -314,60 +307,80 @@ class Display:
 
 	
 	def render(self):
-		self.screen.fill((135,206,250))
+		
 		self.sprite_display.fill((0,0,0))
   
 
-		self.draw_bobs()
-		self.draw_foods()
+		# self.draw_bobs()
+		# self.draw_foods()
+
+		self.draw_sprite("bob")
+		self.draw_sprite("food")
   
 		self.zooming_render()
   
 
-		grid_x = -self.camera_x + self.screen_width // 2 - self.floor_display_temp.get_size()[0] // 2
-		grid_y = -self.camera_y + self.screen_height // 2 - self.floor_display_temp.get_size()[1] // 2
+		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
+		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
 		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
+		
 
 
-	def main_loop(self,tick_interval):
+	def main_loop(self):
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill((135,206,250))
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
 
-		running = True
+		
 		self.draw_better_world()
+		self.api.start()
 
-		last_update_time = pygame.time.get_ticks()
+
+		rendering = True
+		running = True
 
 		while running:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					running = False
+					self.api.stop()
+					from time import sleep
+					sleep(1)
+					pygame.quit()
+					quit()
 
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
+
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+					if rendering:
+						rendering = False
+					else:
+						rendering = True
+	
 				
 				self.zoom(event)
 				self.start_drag(event)
 
 
 
-			current_time = pygame.time.get_ticks()
-			if current_time - last_update_time >= tick_interval:
-				self.world.update_tick()
-				last_update_time = current_time
-
-
 			self.camera()
-			self.render()
-			
+			self.screen.fill((135,206,250))
+			if rendering:
+				self.render()
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.api.get_data_tick()//self.api.get_date_argDict()['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.api.get_data_tick()}", True, (0,0,0)),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.api.get_data_real_tick_time()*1000:.1f} ms", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,120))
+				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 
@@ -377,6 +390,7 @@ class Display:
 
 			
 			clock.tick()
+
 
 
 

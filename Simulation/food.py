@@ -1,25 +1,25 @@
 class Food:
 	"""
-	Classe représentant un objet nourriture dans le monde du jeu.
+    Class representing a food object in the game world.
 
-	Attributs:
-		value (int): Valeur nutritive de la nourriture.
-		pos (tuple): Position de la nourriture (x, y) dans le monde.
-		world (World): Référence au monde dans lequel la nourriture est située.
-		type (str): Type de la nourriture (par exemple, "banane").
-	"""
+    Attributes:
+        value (int): Nutritional value of the food.
+        pos (tuple): Position of the food (x, y) in the world.
+        world (World): Reference to the world where the food is located.
+        type (str): Type of the food (e.g., "banana").
+    """
 
 	def __init__(self, x, y, world, type="banane", value=100):
 		"""
-		Initialise une nouvelle instance de nourriture.
+        Initializes a new instance of food.
 
-		Paramètres:
-			x (int): Position en x de la nourriture.
-			y (int): Position en y de la nourriture.
-			world (World): Référence au monde dans lequel la nourriture est située.
-			type (str, optionnel): Type de la nourriture. Par défaut à "banane".
-			value (int, optionnel): Valeur nutritive de la nourriture. Par défaut à 100.
-		"""
+        Parameters:
+            x (int): X-axis position of the food.
+            y (int): Y-axis position of the food.
+            world (World): Reference to the world where the food is located.
+            type (str, optional): Type of the food. Default is "banana".
+            value (int, optional): Nutritional value of the food. Default is 100.
+        """
 		self.value = value
 		self.pos = (x, y)
 		self.world = world
@@ -28,20 +28,23 @@ class Food:
 	def get_value(self):
 		return self.value
 
+	def add_value(self, value):
+		self.value += value
+
 	def get_pos(self):
 		return self.pos
 
 	def be_eaten(self, value):
 		"""
-		Méthode appelée lorsqu'un objet 'Bob' mange cette nourriture. Diminue la valeur nutritive de la nourriture 
-		et la supprime du monde si elle est entièrement consommée.
+        Method called when a 'Bob' object eats this food. Decreases the nutritional value of the food 
+        and removes it from the world if it is entirely consumed.
 
-		Paramètres:
-			value (int): Quantité de nourriture consommée.
+        Parameters:
+            value (int): Amount of food consumed.
 
-		Retourne:
-			int: Quantité de nourriture réellement consommée.
-		"""
+        Returns:
+            int: Amount of food actually consumed.
+        """
 		if self.value - value <= 0:
 			self.world.kill_food(self)
 			return self.value
