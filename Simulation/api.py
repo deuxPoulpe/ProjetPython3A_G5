@@ -13,28 +13,13 @@ class Api:
 		self.shared_data['real_tick_time'] = 0
 		self.running = mp.Manager().Value('i', False)
 
-	def get_data_bobs(self):
-		return self.shared_data['bobs']
-	def get_data_foods(self):
-		return self.shared_data['foods']
-	def get_data_terrain(self):
-		return self.shared_data['terrain']
-	def get_data_world_size(self):
-		return self.shared_data['world_size']
-	def get_data_tick(self):
-		return self.shared_data['tick']
-	def get_data_nb_bob(self):
-		return self.shared_data['nb_bob']
-	def get_data_nb_food(self):
-		return self.shared_data['nb_food']
-	def get_date_argDict(self):
-		return self.shared_data['argDict']
-	def get_data_real_tick_time(self):
-		return self.shared_data['real_tick_time']
+
 	def get_tick_interval(self):
 		return self.tick_interval.value
 	def set_tick_interval(self, tick_interval_ms):
 		self.tick_interval.value = tick_interval_ms
+	def get_shared_data(self):
+		return self.shared_data
      
 
 	def pause(self):

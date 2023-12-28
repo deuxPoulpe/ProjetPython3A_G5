@@ -22,9 +22,10 @@ class Display:
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-
-		self.floor_display = pygame.Surface((32 * api.get_data_world_size(), 16 * api.get_data_world_size() + 250))
-		self.sprite_display = pygame.Surface((32 * api.get_data_world_size(), 16 * api.get_data_world_size() + 250))
+  
+		size = api.get_shared_data()["world_size"]
+		self.floor_display = pygame.Surface((32 * size, 16 * size + 250))
+		self.sprite_display = pygame.Surface((32 * size, 16 * size + 250))
 		self.floor_display_temp = pygame.Surface((0,0))
 		self.sprite_display_temp = pygame.Surface((0,0))
 		
@@ -176,14 +177,14 @@ class Display:
 			self.screen.blit(LOADING_BG, LOADING_BG_RECT)
 		
 			pygame.display.flip()
-		size = self.api.get_data_world_size()
+		size = self.api.get_shared_data()["world_size"]
 		self.floor.empty()
 
 
 		start_x = self.floor_display.get_size()[0] // 2
-		start_y = self.floor_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
+		start_y = self.floor_display.get_size()[1] - 16 * (size+1)
 
-		terrain = self.api.get_data_terrain()
+		terrain = self.api.get_shared_data()["terrain"]
 
 		world_loader(0,"Génération de l'affichage du monde en cours ...")
 		if terrain:
@@ -251,21 +252,21 @@ class Display:
 			y = start_y + (i + j) * 8 - 15 * size
 			sprite_group.add(Sprite(x,y, sprite_image, size))
 
-
+		data = self.api.get_shared_data()
 		sprite_group = pygame.sprite.Group()
 
 		start_x = self.sprite_display.get_size()[0] // 2
-		start_y = self.sprite_display.get_size()[1] - 16 * (self.api.get_data_world_size()+1)
+		start_y = self.sprite_display.get_size()[1] - 16 * (data['world_size']+1)
 
-		terrain = self.api.get_data_terrain()
+		terrain = data["terrain"]
 
 		match sprite_type:
 			case "bob":
-				sprite_dict = self.api.get_data_bobs()
+				sprite_dict = data["bobs"]
 				sprite_image = self.assets["full_bob"]
 
 			case "food":
-				sprite_dict = self.api.get_data_foods()
+				sprite_dict = data["foods"]
 				sprite_image = self.assets["foods_banana"]
 		
 
@@ -363,7 +364,8 @@ class Display:
 						rendering = False
 					else:
 						rendering = True
-	
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_arrow_left:
+					self.api.set_tick_interval(self.api.get_tick_interval() + 10)
 				
 				self.zoom(event)
 				self.start_drag(event)
@@ -374,12 +376,14 @@ class Display:
 			self.screen.fill((135,206,250))
 			if rendering:
 				self.render()
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.api.get_data_tick()//self.api.get_date_argDict()['dayTick']}", True, (0,0,0)),(20,20))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.api.get_data_tick()}", True, (0,0,0)),(20,40))
+    
+			data = self.api.get_shared_data()
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {data['tick']//data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {data['tick']}", True, (0,0,0)),(20,40))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.api.get_data_real_tick_time()*1000:.1f} ms", True, (0,0,0)),(20,80))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.api.get_data_nb_bob()}", True, (0,0,0)),(20,100))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.api.get_data_nb_food()}", True, (0,0,0)),(20,120))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {data['nb_bob']}", True, (0,0,0)),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {data['nb_food']}", True, (0,0,0)),(20,120))
 				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")

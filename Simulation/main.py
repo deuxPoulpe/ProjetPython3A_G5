@@ -13,6 +13,7 @@ if __name__ == "__main__":
 		"number_of_lake" : 1,
 		"size_of_lake" : 20,
 		"max_height" : 10,
+		"seed" : None,
 		}
 
 	world = World({
@@ -26,10 +27,10 @@ if __name__ == "__main__":
 
 
 	world.spawn_bob(500)
-	api = Api(world, 1000)
+	api = Api(world, 1)
 	display = Display(api)
 	display.main_loop()
-
+ 
 
 
 
