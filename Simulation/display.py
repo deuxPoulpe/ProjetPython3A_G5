@@ -22,8 +22,9 @@ class Display:
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-  
-		size = api.get_shared_data()["world_size"]
+	
+		self.data = self.api.get_shared_data()
+		size = self.data["world_size"]
 		self.floor_display = pygame.Surface((32 * size, 16 * size + 250))
 		self.sprite_display = pygame.Surface((32 * size, 16 * size + 250))
 		self.floor_display_temp = pygame.Surface((0,0))
@@ -252,21 +253,20 @@ class Display:
 			y = start_y + (i + j) * 8 - 15 * size
 			sprite_group.add(Sprite(x,y, sprite_image, size))
 
-		data = self.api.get_shared_data()
 		sprite_group = pygame.sprite.Group()
 
 		start_x = self.sprite_display.get_size()[0] // 2
-		start_y = self.sprite_display.get_size()[1] - 16 * (data['world_size']+1)
+		start_y = self.sprite_display.get_size()[1] - 16 * (self.data['world_size']+1)
 
-		terrain = data["terrain"]
+		terrain = self.data["terrain"]
 
 		match sprite_type:
 			case "bob":
-				sprite_dict = data["bobs"]
+				sprite_dict = self.data["bobs"]
 				sprite_image = self.assets["full_bob"]
 
 			case "food":
-				sprite_dict = data["foods"]
+				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
 		
 
@@ -346,6 +346,7 @@ class Display:
 		running = True
 
 		while running:
+			self.data = self.api.get_shared_data()
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
@@ -364,8 +365,23 @@ class Display:
 						rendering = False
 					else:
 						rendering = True
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_arrow_left:
-					self.api.set_tick_interval(self.api.get_tick_interval() + 10)
+      
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+					if self.api.get_tick_interval() < 10:
+						self.api.set_tick_interval(self.api.get_tick_interval() + 1)
+					elif self.api.get_tick_interval() < 100:
+						self.api.set_tick_interval(self.api.get_tick_interval() + 10)
+					elif self.api.get_tick_interval() < 1000:
+						self.api.set_tick_interval(self.api.get_tick_interval() + 100)
+					else:
+						self.api.set_tick_interval(self.api.get_tick_interval() + 500)
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+					if self.api.get_tick_interval() > 100:
+						self.api.set_tick_interval(self.api.get_tick_interval() - 100)
+					elif self.api.get_tick_interval() > 10:
+						self.api.set_tick_interval(self.api.get_tick_interval() - 10)
+					elif self.api.get_tick_interval() > 1:
+						self.api.set_tick_interval(self.api.get_tick_interval() - 1)
 				
 				self.zoom(event)
 				self.start_drag(event)
@@ -377,13 +393,12 @@ class Display:
 			if rendering:
 				self.render()
     
-			data = self.api.get_shared_data()
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {data['tick']//data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {data['tick']}", True, (0,0,0)),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {data['nb_bob']}", True, (0,0,0)),(20,100))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {data['nb_food']}", True, (0,0,0)),(20,120))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
 				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
