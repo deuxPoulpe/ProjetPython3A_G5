@@ -16,7 +16,7 @@ class Bob:
         world (World): Reference to the world in which Bob exists.
     """
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = [], max_energy=200):
 		"""
         Initializes a new instance of Bob.
 
@@ -34,7 +34,8 @@ class Bob:
 		self.velocity = velocity
 		self.mass = mass
 		self.perception = perception
-		self.memory_space = []
+		self.memory_points = memory_points
+		self.memory_space = memory_space
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
@@ -136,3 +137,58 @@ class Bob:
 						break
 
 				break
+
+
+
+	def bob_perception(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
+		"""
+		
+		#Génération d'une matrice carré de taille perception-1
+		perception_list = []
+		for x in range(self.get_pos()[0]-(self.perception-1),self.get_pos()[0]+self.perception):
+			for y in range(self.get_pos()[1]-(self.perception-1),self.get_pos()[1]+self.perception):
+				if (x,y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+				if (x,y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		#Ajout des bords manquants
+		y=self.get_pos()[1]
+		for x in range(self.get_pos()[0]-(self.perception),self.get_pos()[0]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+		
+		x=self.get_pos()[0]
+		for y in range(self.get_pos()[1]-(self.perception),self.get_pos()[1]+self.perception+1,2*self.perception):
+			if (x,self.y) in self.world.get_foods():
+					perception_list.append(self.world.get_foods()[(x,y)])
+			if (x,self.y) in self.world.get_bobs():
+					perception_list.append(self.world.get_bobs()[(x,y)])
+
+		return perception_list
+	
+	def store_memory(self):
+
+
+		self.memory_space
+
+		
+
+	def mutate_memory_points(self):
+		
+		"""
+		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
+
+		"""
+
+		values = [-1, 0 , 1]
+
+		mutation = random.choice(values)
+
+		self.memory_points += mutation
+
+		return self.memory_points
