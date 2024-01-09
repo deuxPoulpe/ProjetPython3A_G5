@@ -328,14 +328,17 @@ class Display:
 		self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
 	
 	
-	
-		
 
 	def main_loop(self):
 		"""
 		Main loop of the game
 		"""
-  
+		def change_color_all_ui():
+			pause_button.change_color()
+			play_button.change_color()
+			fastforward.change_color()
+			backforward.change_color()
+   
 		def ui_tick_modification(pos):
 			"""
 			Handle the click on the UI elements
@@ -345,16 +348,17 @@ class Display:
 				self.api.pause()
 				pause_button.set_active(True)
 				play_button.set_active(False)
-				pause_button.change_color()
-				play_button.change_color()
+				change_color_all_ui()
 
 			elif play_button.get_rect().collidepoint(x,y):
 				self.api.resume()
 				pause_button.set_active(False)
 				play_button.set_active(True)
-				play_button.change_color()
-				pause_button.change_color()
+				change_color_all_ui()
 			elif fastforward.get_rect().collidepoint(x,y):
+				fastforward.set_active(True)
+				fastforward.change_color()
+				self.click_effect = 5
 				if self.api.get_tick_interval() > 100:
 					self.api.set_tick_interval(self.api.get_tick_interval() - 100)
 				elif self.api.get_tick_interval() > 10:
@@ -362,6 +366,9 @@ class Display:
 				elif self.api.get_tick_interval() > 1:
 					self.api.set_tick_interval(self.api.get_tick_interval() - 1)
 			elif backforward.get_rect().collidepoint(x,y):
+				backforward.set_active(True)
+				backforward.change_color()
+				self.click_effect = 5
 				if self.api.get_tick_interval() < 10:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 1)
 				elif self.api.get_tick_interval() < 100:
@@ -378,19 +385,18 @@ class Display:
 		self.screen.fill((135,206,250))
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
+  
+		self.click_effect = 0
 
 
 		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets", "backforward.png")))
-		backforward.set_active(True)
-		backforward.change_color()
+		backforward.set_active(False)
 		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets", "fastforward.png")))
-		fastforward.set_active(True)
-		fastforward.change_color()
+		fastforward.set_active(False)
 		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets", "pause.png")))
 		pause_button.set_active(False)
-		pause_button.change_color()
 		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets", "play.png")))
-		play_button.change_color()
+		change_color_all_ui()
 
   
 		ui_element = pygame.sprite.Group()
@@ -413,8 +419,6 @@ class Display:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
-					from time import sleep
-					sleep(1)
 					pygame.quit()
 					quit()
 
@@ -448,6 +452,8 @@ class Display:
 			
 
 			self.blit_text_info()
+			
+				
 			ui_element.draw(self.screen)
 			
 
@@ -455,6 +461,16 @@ class Display:
 
 
 			pygame.display.flip()
+			
+			if self.click_effect > 0:
+				self.click_effect -= 1
+			elif self.click_effect == 0:
+				fastforward.set_active(False)
+				backforward.set_active(False)
+				fastforward.change_color()
+				backforward.change_color()
+				self.click_effect -= 1
+
 
 
 			

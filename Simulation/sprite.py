@@ -71,7 +71,7 @@ class Sprite_UI(pygame.sprite.Sprite):
         self.rect.topleft = pos
                 
     def change_color(self):
-        if self.active:
+        if not self.active:
             gray_image = pygame.Surface(self.image.get_size())
             gray_image.fill((0,0,0))
             self.image = self.base_image.copy()
