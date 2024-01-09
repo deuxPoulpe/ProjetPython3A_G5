@@ -327,25 +327,77 @@ class Display:
 		self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
 		self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
 	
-
+	
+	
+		
 
 	def main_loop(self):
+		"""
+		Main loop of the game
+		"""
+  
+		def ui_tick_modification(pos):
+			"""
+			Handle the click on the UI elements
+			"""
+			x,y = pos
+			if pause_button.get_rect().collidepoint(x,y):
+				self.api.pause()
+				pause_button.set_active(True)
+				play_button.set_active(False)
+				pause_button.change_color()
+				play_button.change_color()
+
+			elif play_button.get_rect().collidepoint(x,y):
+				self.api.resume()
+				pause_button.set_active(False)
+				play_button.set_active(True)
+				play_button.change_color()
+				pause_button.change_color()
+			elif fastforward.get_rect().collidepoint(x,y):
+				if self.api.get_tick_interval() > 100:
+					self.api.set_tick_interval(self.api.get_tick_interval() - 100)
+				elif self.api.get_tick_interval() > 10:
+					self.api.set_tick_interval(self.api.get_tick_interval() - 10)
+				elif self.api.get_tick_interval() > 1:
+					self.api.set_tick_interval(self.api.get_tick_interval() - 1)
+			elif backforward.get_rect().collidepoint(x,y):
+				if self.api.get_tick_interval() < 10:
+					self.api.set_tick_interval(self.api.get_tick_interval() + 1)
+				elif self.api.get_tick_interval() < 100:
+					self.api.set_tick_interval(self.api.get_tick_interval() + 10)
+				elif self.api.get_tick_interval() < 1000:
+					self.api.set_tick_interval(self.api.get_tick_interval() + 100)
+				else:
+					self.api.set_tick_interval(self.api.get_tick_interval() + 500)
+					
+    
+    
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill((135,206,250))
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
 
-		pause_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets", "pause.png")))
+
+		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets", "backforward.png")))
+		backforward.set_active(True)
+		backforward.change_color()
+		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets", "fastforward.png")))
+		fastforward.set_active(True)
+		fastforward.change_color()
+		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets", "pause.png")))
 		pause_button.set_active(False)
 		pause_button.change_color()
-		play_button = Sprite_UI(self.screen_width - 42, 10, pygame.image.load(os.path.join("assets", "play.png")))
+		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets", "play.png")))
 		play_button.change_color()
 
   
 		ui_element = pygame.sprite.Group()
 		ui_element.add(pause_button)
 		ui_element.add(play_button)
+		ui_element.add(backforward)
+		ui_element.add(fastforward)
 
 		
 		self.draw_better_world()
@@ -369,49 +421,20 @@ class Display:
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
-					pause_button.update_position((self.screen_width - 80, 10))
-					play_button.update_position((self.screen_width - 42, 10))
+					pause_button.update_position((self.screen_width - 120, 10))
+					play_button.update_position((self.screen_width - 80, 10))
+					fastforward.update_position((self.screen_width - 40, 10))
+					backforward.update_position((self.screen_width - 160, 10))
 
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
 					if rendering:
 						rendering = False
 					else:
 						rendering = True
-      
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-					if self.api.get_tick_interval() < 10:
-						self.api.set_tick_interval(self.api.get_tick_interval() + 1)
-					elif self.api.get_tick_interval() < 100:
-						self.api.set_tick_interval(self.api.get_tick_interval() + 10)
-					elif self.api.get_tick_interval() < 1000:
-						self.api.set_tick_interval(self.api.get_tick_interval() + 100)
-					else:
-						self.api.set_tick_interval(self.api.get_tick_interval() + 500)
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-					if self.api.get_tick_interval() > 100:
-						self.api.set_tick_interval(self.api.get_tick_interval() - 100)
-					elif self.api.get_tick_interval() > 10:
-						self.api.set_tick_interval(self.api.get_tick_interval() - 10)
-					elif self.api.get_tick_interval() > 1:
-						self.api.set_tick_interval(self.api.get_tick_interval() - 1)
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
-					x,y = event.pos
-					if pause_button.get_rect().collidepoint(x,y):
-						self.api.pause()
-						pause_button.set_active(True)
-						play_button.set_active(False)
-						pause_button.change_color()
-						play_button.change_color()
-
-					elif play_button.get_rect().collidepoint(x,y):
-						self.api.resume()
-						pause_button.set_active(False)
-						play_button.set_active(True)
-						play_button.change_color()
-						pause_button.change_color()
-					print(pause_button.active, play_button.active)
-				
+					ui_tick_modification(event.pos)
+     
 				self.zoom(event)
 				self.start_drag(event)
 
@@ -427,9 +450,6 @@ class Display:
 			self.blit_text_info()
 			ui_element.draw(self.screen)
 			
-   
-			# self.screen.blit(pause_button.image, pause_button.rect)
-			# self.screen.blit(play_button.image, play_button.rect)
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 
