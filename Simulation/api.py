@@ -12,6 +12,7 @@ class Api:
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
 		self.running = mp.Manager().Value('i', False)
+		self.paused = mp.Manager().Value('i', False)
 
 
 	def get_tick_interval(self):
@@ -24,11 +25,11 @@ class Api:
 
 	def pause(self):
 		if self.process is not None:
-			self.process.suspend()
+			self.paused.value = True
   
 	def resume(self):
 		if self.process is not None:
-			self.process.resume()
+			self.paused.value = False
 
 	def start(self):
 		self.process = mp.Process(target=self.run)
@@ -49,8 +50,10 @@ class Api:
 		self.running.value = True
 		while self.running.value:
 			start = time.time()
-			self.world_sim.update_tick()
-			self.update_shared_data()
+			if not self.paused.value:
+				
+				self.world_sim.update_tick()
+				self.update_shared_data()
 
 			time.sleep(self.tick_interval.value/1000)
 			self.shared_data['real_tick_time'] = time.time() - start

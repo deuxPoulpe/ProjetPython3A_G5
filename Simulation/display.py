@@ -24,9 +24,9 @@ class Display:
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 	
 		self.data = self.api.get_shared_data()
-		size = self.data["world_size"]
-		self.floor_display = pygame.Surface((32 * size, 16 * size + 250))
-		self.sprite_display = pygame.Surface((32 * size, 16 * size + 250))
+		self.world_size = self.data["world_size"]
+		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
 		self.floor_display_temp = pygame.Surface((0,0))
 		self.sprite_display_temp = pygame.Surface((0,0))
 		
@@ -221,19 +221,14 @@ class Display:
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
 			y = start_y + (i + j) * 8 - 15 - 9 * base
+	
+			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
+			left_tile_cord = min(self.world_size - 1, max(0 , j + 1))
 			
-			try:
-				rc = max(grid_of_height[i+1][j] - base, 0)
-			except:
-				rc = 0
-			try:
-				lc = max(grid_of_height[i][j+1] - base, 0)
-			except:
-				lc = 0
-			try:
-				bc = max(grid_of_height[i+1][j+1] - base, 0)
-			except:
-				bc = 0
+			rc = max(grid_of_height[right_tile_cord][j] - base, 0)
+			lc = max(grid_of_height[i][left_tile_cord] - base, 0)
+			bc = max(grid_of_height[right_tile_cord][left_tile_cord] - base, 0)
+
 			
 			sprite = Sprite(x, y, sprite_image, size)
 			if rc > 0 or lc > 0 or bc > 0:
@@ -312,9 +307,6 @@ class Display:
 		self.sprite_display.fill((0,0,0))
   
 
-		# self.draw_bobs()
-		# self.draw_foods()
-
 		self.draw_sprite("bob")
 		self.draw_sprite("food")
   
@@ -328,6 +320,14 @@ class Display:
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
 		
+	def blit_text_info(self):
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
+		self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
+	
 
 
 	def main_loop(self):
@@ -382,6 +382,11 @@ class Display:
 						self.api.set_tick_interval(self.api.get_tick_interval() - 10)
 					elif self.api.get_tick_interval() > 1:
 						self.api.set_tick_interval(self.api.get_tick_interval() - 1)
+
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+					self.api.pause()
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+					self.api.resume()
 				
 				self.zoom(event)
 				self.start_drag(event)
@@ -393,12 +398,13 @@ class Display:
 			if rendering:
 				self.render()
     
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
+			
+
+			self.blit_text_info()
+   
+			self.screen.blit(pygame.image.load(os.path.join("assets", "play.png")), (self.screen_width - 42, 10))
+			self.screen.blit(pygame.image.load(os.path.join("assets", "pause.png")), (self.screen_width - 80, 10))
+   
 				
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")

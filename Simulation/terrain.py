@@ -14,6 +14,7 @@ class Terrain:
 		self.number_of_lake = config_dict["number_of_lake"]
 		self.size_of_lake = config_dict["size_of_lake"]
 		self.seed = config_dict["seed"]
+		self.height = config_dict["max_height"]
   
 		self.new_generation = False
 		self.generation_point = {}
@@ -24,10 +25,10 @@ class Terrain:
 		self.decoration_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))
 
-		self.generate_terrain(size, z_max = config_dict["max_height"])	
+		self.generate_terrain(size, self.height)	
 		
 
-	def generate_terrain(self ,size, z_min=0, z_max=9):
+	def generate_terrain(self ,size, z_max, z_min=0):
 
 		if self.seed is None:
 			self.seed = random.randint(0, 1024)
@@ -107,3 +108,10 @@ class Terrain:
 		return self.decoration_to_add
 	def get_generation_point(self):
 		return self.generation_point
+
+	def set_new_generation(self, bool):
+		self.new_generation = bool
+  
+	def change_terrain_size(self, new_size):
+		self.size = new_size
+		self.generate_terrain(new_size, self.height)
