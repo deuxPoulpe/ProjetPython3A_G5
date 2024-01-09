@@ -176,3 +176,47 @@ class Bob:
 
 		return perception_list
 
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		perception_list = []
+		
+		def bob_get_things_by_distance(self,distance):
+			"""
+			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
+			"""
+			deplacement=0
+			x=self.get_pos()[0]-distance
+			y=self.get_pos()[1]
+
+			while x <= self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+			deplacement=0
+			x=self.get_pos()[0]+distance
+
+			while x > self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+		
+		distance = self.perception
+		while distance > 0:
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+
+		return perception_list
