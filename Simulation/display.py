@@ -1,11 +1,10 @@
 import pygame
-import pygame_menu
 from sprite import Tile
-from sprite import Sprite
+from sprite import Sprite, Sprite_UI
 import os
 import matplotlib.pyplot as plt
 import random
-from math import sqrt
+
 
 
 
@@ -337,6 +336,17 @@ class Display:
 		clock = pygame.time.Clock()
 		font = pygame.font.Font(None, 20)
 
+		pause_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets", "pause.png")))
+		pause_button.set_active(False)
+		pause_button.change_color()
+		play_button = Sprite_UI(self.screen_width - 42, 10, pygame.image.load(os.path.join("assets", "play.png")))
+		play_button.change_color()
+
+  
+		ui_element = pygame.sprite.Group()
+		ui_element.add(pause_button)
+		ui_element.add(play_button)
+
 		
 		self.draw_better_world()
 		self.api.start()
@@ -359,6 +369,8 @@ class Display:
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
+					pause_button.update_position((self.screen_width - 80, 10))
+					play_button.update_position((self.screen_width - 42, 10))
 
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
 					if rendering:
@@ -383,10 +395,22 @@ class Display:
 					elif self.api.get_tick_interval() > 1:
 						self.api.set_tick_interval(self.api.get_tick_interval() - 1)
 
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-					self.api.pause()
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_o:
-					self.api.resume()
+				elif event.type == pygame.MOUSEBUTTONDOWN:
+					x,y = event.pos
+					if pause_button.get_rect().collidepoint(x,y):
+						self.api.pause()
+						pause_button.set_active(True)
+						play_button.set_active(False)
+						pause_button.change_color()
+						play_button.change_color()
+
+					elif play_button.get_rect().collidepoint(x,y):
+						self.api.resume()
+						pause_button.set_active(False)
+						play_button.set_active(True)
+						play_button.change_color()
+						pause_button.change_color()
+					print(pause_button.active, play_button.active)
 				
 				self.zoom(event)
 				self.start_drag(event)
@@ -401,11 +425,11 @@ class Display:
 			
 
 			self.blit_text_info()
+			ui_element.draw(self.screen)
+			
    
-			self.screen.blit(pygame.image.load(os.path.join("assets", "play.png")), (self.screen_width - 42, 10))
-			self.screen.blit(pygame.image.load(os.path.join("assets", "pause.png")), (self.screen_width - 80, 10))
-   
-				
+			# self.screen.blit(pause_button.image, pause_button.rect)
+			# self.screen.blit(play_button.image, play_button.rect)
 
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 
