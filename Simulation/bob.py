@@ -1,5 +1,7 @@
 import random
 
+from queue import *
+
 class Bob:
 	"""
     Class representing a character 'Bob' in a simulated world.
@@ -171,10 +173,42 @@ class Bob:
 
 		return perception_list
 	
+
+	liste_objets = self.bob_perception() # Récupère la liste des objets perçus
+
 	def store_memory(self):
 
+		"""
+		Stocke un certain nombre d'objets dans une file en fonction du niveau de mémoire du bob.
+		"""
+		if self.memory_points > 0:
+			
+			memory_cells = 2*self.memory_points
 
-		self.memory_space
+			file_objets = Queue(memory_cells)
+
+			for i in range(len(liste_objets)):
+				if(liste_objets[i] == self.world.foods.get_pos()):
+					file_objets.put(self.world.foods.get_pos())
+
+		return liste_objets
+
+			
+
+
+
+
+
+
+			
+
+
+
+
+
+			
+
+				
 
 		
 
