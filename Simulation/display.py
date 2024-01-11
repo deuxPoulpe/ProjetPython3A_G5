@@ -17,13 +17,13 @@ from Utility.occlusion_utility import tile_to_array
 class Display:
 	def __init__(self, api):
 		self.api = api
-		self.water_level = 0
 
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 	
 		self.data = self.api.get_shared_data()
+		self.water_level = self.data["water_level"]
 		self.world_size = self.data["world_size"]
 		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
 		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
@@ -52,8 +52,8 @@ class Display:
 			"sand" : pygame.image.load(os.path.join("assets/tiles", "tile_115.png")),
 			"plants": [],
 			"rocks" : [],
-			"full_bob" : pygame.image.load(os.path.join("assets","bob.png")).convert(),
-			"foods_banana" : pygame.image.load(os.path.join("assets","food.png")).convert()
+			"full_bob" : pygame.image.load(os.path.join("assets/Sprites","bob.png")).convert(),
+			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert()
 		}
 
 		for k in range(0, 12):
@@ -139,7 +139,7 @@ class Display:
 			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
 			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
-		elif decoration_to_add[i][j] == 2:
+		elif decoration_to_add[i][j] == 2 and self.water_level == 0:
 			y = start_y + (i + j) * 32 / 4 - 8 - 16
 			rock = Tile(x,y, self.assets["rocks"][random.randint(0,10)])
 			self.floor.add(rock)
@@ -167,9 +167,9 @@ class Display:
 
 			
 			self.screen.fill((135,206,250))
-			LOADING_BG = pygame.image.load(os.path.join("assets", "Loading Bar Background.png"))
+			LOADING_BG = pygame.image.load(os.path.join("assets/UI", "Loading Bar Background.png"))
 			LOADING_BG_RECT = LOADING_BG.get_rect(center=(self.screen_width/2, self.screen_height/2))
-			loading_bar = pygame.image.load(os.path.join("assets", "Loading Bar.png"))
+			loading_bar = pygame.image.load(os.path.join("assets/UI", "Loading Bar.png"))
 			load_text = pygame.font.Font(None, 40).render(f"{message}", True, (0,0,0))
 			load_text_rect = load_text.get_rect(center=(self.screen_width/2, self.screen_height/2 - 150))
 			
@@ -237,7 +237,7 @@ class Display:
 
 			
 			sprite = Sprite(x, y, sprite_image, size)
-			if rc > 0 or lc > 0 or bc > 0:
+			if any([rc, lc, bc]):
 				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 				else:
@@ -326,20 +326,37 @@ class Display:
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
 		
-	def blit_text_info(self):
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
-		self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
 	
 	
+	def gif_generator(self, gif_name, nb_total_image, nb_imame_start, extention, kroma_key):
+		nb_image = nb_imame_start
 
+		while True:
+			nom_fichier = f"{gif_name}{nb_image}{extention}"
+			image = pygame.image.load(os.path.join("assets/gif", nom_fichier))
+			image.set_colorkey(kroma_key)
+			image = pygame.transform.scale(image, (self.screen_width, self.screen_height))
+
+			yield image
+			nb_image += 1
+			if nb_image == nb_total_image:
+				nb_image = nb_imame_start
+
+		
 	def main_loop(self):
 		"""
 		Main loop of the game
 		"""
+
+		def blit_text_info():
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
+
+
 		def change_color_all_ui():
 			pause_button.change_color()
 			play_button.change_color()
@@ -391,19 +408,20 @@ class Display:
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill((135,206,250))
 		clock = pygame.time.Clock()
-		font = pygame.font.Font(None, 20)
   
 		self.click_effect = 0
 
 
-		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets", "backforward.png")))
+		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets/UI", "backforward.png")))
 		backforward.set_active(False)
-		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets", "fastforward.png")))
+		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets/UI", "fastforward.png")))
 		fastforward.set_active(False)
-		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets", "pause.png")))
+		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets/UI", "pause.png")))
 		pause_button.set_active(False)
-		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets", "play.png")))
+		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets/UI", "play.png")))
 		change_color_all_ui()
+
+		rain_gif = self.gif_generator('rain_gif/rain-gif-', 20, 1, ".gif", (43,247,255))
 
   
 		ui_element = pygame.sprite.Group()
@@ -412,7 +430,7 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 
-		self.water_level = 8
+		self.water_level = -1
 		self.draw_better_world(True)
 		self.api.start()
 
@@ -458,9 +476,10 @@ class Display:
     
 			
 
-			self.blit_text_info()
 			
-				
+			self.screen.blit(next(rain_gif), (0,0))
+			
+			blit_text_info()
 			ui_element.draw(self.screen)
 			
 

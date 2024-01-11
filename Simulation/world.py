@@ -39,6 +39,7 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
+		self.water_level = 0
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
@@ -52,6 +53,8 @@ class World:
 	
 
 	#getters
+	def get_water_level(self):
+		return self.water_level
 	def get_size(self):
 		return self.argDict["size"]
 	def get_terrain_config(self):

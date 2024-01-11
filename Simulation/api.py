@@ -44,6 +44,7 @@ class Api:
 		self.shared_data['nb_bob'] = self.world_sim.get_nb_bob()
 		self.shared_data['nb_food'] = self.world_sim.get_nb_food()
 		self.shared_data['argDict'] = self.world_sim.get_argDict()
+		self.shared_data['water_level'] = self.world_sim.get_water_level()
   
   
 	def run(self):
