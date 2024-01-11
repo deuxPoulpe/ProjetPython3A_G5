@@ -17,6 +17,7 @@ from Utility.occlusion_utility import tile_to_array
 class Display:
 	def __init__(self, api):
 		self.api = api
+		self.water_level = 0
 
 		self.screen_width = 800
 		self.screen_height = 600
@@ -115,21 +116,26 @@ class Display:
 
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
-		if grid[i][j] == 0:
-			y = start_y + (i + j) * 32 / 4 - 7 - 16
-			tile = Tile(x,y, self.assets["water"])
-		elif grid[i][j] == 1:
-			y = start_y + (i + j) * 32 / 4 - 9 - 16
+		if grid[i][j] <= 1:
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16 
 			tile = Tile(x,y, self.assets["sand"])
 		else:
 			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
 			tile = Tile(x,y, self.assets["grass"])
 
 		self.floor.add(tile)
-
+		
+   
+	def draw_water_surface_world(self,start_x,start_y,i,j,grid):
+		x = start_x + (i - j) * 32 / 2 - 16
+		if grid[i][j] <= self.water_level:
+			y = start_y + (i + j) * 32 / 4 - 9 * (self.water_level + 1) - 16
+			tile = Tile(x,y, self.assets["water"])
+			self.floor.add(tile)
+   
 	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
 		x = start_x + (i - j) * 32 / 2 - 16
-		if decoration_to_add[i][j]== 1 and grid[i][j] > 2:
+		if decoration_to_add[i][j] == 1 and grid[i][j] > 2:
 			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
 			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
@@ -141,7 +147,7 @@ class Display:
 
 	
 
-	def draw_better_world(self):
+	def draw_better_world(self, load_bar):
 		
 		def world_loader(load_percentage, message):
 			"""Fonction qui affiche le chargement du monde et gere l'affichage de la fenetre et des evenements seulement pendant le chargement du monde
@@ -196,8 +202,9 @@ class Display:
 				for j in range(size):
 					self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
+					self.draw_water_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
-				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
 
 
 		else:
@@ -205,9 +212,9 @@ class Display:
 				for j in range(size):
 					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
 					self.floor.add(tile)
-				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...")
+				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
 
-		world_loader(100,"Chargement de l'affichage du monde en cours ...")
+		world_loader(100,"Chargement de l'affichage du monde en cours ...") if load_bar else None
 		self.floor.draw(self.floor_display)	
 
 
@@ -405,8 +412,8 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 
-		
-		self.draw_better_world()
+		self.water_level = 8
+		self.draw_better_world(True)
 		self.api.start()
 
 
