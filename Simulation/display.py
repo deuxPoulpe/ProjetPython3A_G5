@@ -1,17 +1,20 @@
 import pygame
-from sprite import Tile
-from sprite import Sprite, Sprite_UI
+from sprite import Sprite, Sprite_UI, Tile
 import os
 import matplotlib.pyplot as plt
 import random
+import threading 
 
 
 
+from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
+from Utility.time_function_utility import execute_function_during_it, execute_function_after_it
 
-from Utility.occlusion_utility import hide_behind_terrain_image
-from Utility.occlusion_utility import tile_to_array
+# Global variables:
 
-
+GEN_NULL = iter(())
+BLUE_SKY = (135,206,250)
+BLACK = (0,0,0)
 
 
 class Display:
@@ -23,7 +26,6 @@ class Display:
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 	
 		self.data = self.api.get_shared_data()
-		self.water_level = self.data["water_level"]
 		self.world_size = self.data["world_size"]
 		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
 		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
@@ -58,15 +60,15 @@ class Display:
 
 		for k in range(0, 12):
 			self.assets["plants"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{k+41}.png")))
-			self.assets["plants"][k].set_colorkey((0, 0, 0))
+			self.assets["plants"][k].set_colorkey(BLACK)
 
 		for l in range(0, 11):
 			self.assets["rocks"].append(pygame.image.load(os.path.join("assets/tiles", f"tile_0{l+70}.png")))
-			self.assets["rocks"][l].set_colorkey((0, 0, 0))
+			self.assets["rocks"][l].set_colorkey(BLACK)
 		
 		for key in self.assets:
 			if key != "plants" and key != "rocks":
-				self.assets[key].set_colorkey((0, 0, 0))
+				self.assets[key].set_colorkey(BLACK)
 
 
 		self.bobs_occlusion_cache = {}
@@ -128,8 +130,8 @@ class Display:
    
 	def draw_water_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
-		if grid[i][j] <= self.water_level:
-			y = start_y + (i + j) * 32 / 4 - 9 * (self.water_level + 1) - 16
+		if grid[i][j] <= self.data["water_level"]:
+			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1) - 16
 			tile = Tile(x,y, self.assets["water"])
 			self.floor.add(tile)
    
@@ -139,7 +141,7 @@ class Display:
 			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
 			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
-		elif decoration_to_add[i][j] == 2 and self.water_level == 0:
+		elif decoration_to_add[i][j] == 2 and self.data["water_level"] == 0:
 			y = start_y + (i + j) * 32 / 4 - 8 - 16
 			rock = Tile(x,y, self.assets["rocks"][random.randint(0,10)])
 			self.floor.add(rock)
@@ -166,11 +168,11 @@ class Display:
 					quit()
 
 			
-			self.screen.fill((135,206,250))
+			self.screen.fill(BLUE_SKY)
 			LOADING_BG = pygame.image.load(os.path.join("assets/UI", "Loading Bar Background.png"))
 			LOADING_BG_RECT = LOADING_BG.get_rect(center=(self.screen_width/2, self.screen_height/2))
 			loading_bar = pygame.image.load(os.path.join("assets/UI", "Loading Bar.png"))
-			load_text = pygame.font.Font(None, 40).render(f"{message}", True, (0,0,0))
+			load_text = pygame.font.Font(None, 40).render(f"{message}", True, BLACK)
 			load_text_rect = load_text.get_rect(center=(self.screen_width/2, self.screen_height/2 - 150))
 			
 
@@ -192,7 +194,7 @@ class Display:
 
 		terrain = self.api.get_shared_data()["terrain"]
 
-		world_loader(0,"Génération de l'affichage du monde en cours ...")
+		world_loader(0,"Génération de l'affichage du monde en cours ...") if load_bar else None
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
@@ -215,7 +217,10 @@ class Display:
 				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
 
 		world_loader(100,"Chargement de l'affichage du monde en cours ...") if load_bar else None
-		self.floor.draw(self.floor_display)	
+
+		self.floor_display.fill(BLACK)
+		self.floor.draw(self.floor_display)
+		self.needs_rescaling = True
 
 
 	def draw_sprite(self, sprite_type):
@@ -299,18 +304,18 @@ class Display:
 			self.needs_rescaling = False
 				
 			self.floor_display_temp = pygame.Surface((scale_x, scale_y))
-			self.floor_display_temp.set_colorkey((0, 0, 0))
+			self.floor_display_temp.set_colorkey(BLACK)
 			pygame.transform.scale(self.floor_display, (scale_x, scale_y), self.floor_display_temp)
 
 
 			self.sprite_display_temp = pygame.Surface((scale_x, scale_y))
-			self.sprite_display_temp.set_colorkey((0, 0, 0))
+			self.sprite_display_temp.set_colorkey(BLACK)
 		pygame.transform.scale(self.sprite_display, (scale_x, scale_y), self.sprite_display_temp)
 
 	
 	def render(self):
 		
-		self.sprite_display.fill((0,0,0))
+		self.sprite_display.fill(BLACK)
   
 
 		self.draw_sprite("bob")
@@ -341,6 +346,9 @@ class Display:
 			nb_image += 1
 			if nb_image == nb_total_image:
 				nb_image = nb_imame_start
+	
+	def draw_gif(self, gif_generator, pos):
+		self.screen.blit(next(gif_generator), pos)
 
 		
 	def main_loop(self):
@@ -349,12 +357,12 @@ class Display:
 		"""
 
 		def blit_text_info():
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, (0,0,0)),(20,20))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, (0,0,0)),(20,40))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, (0,0,0)),(20,60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, (0,0,0)),(20,80))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, (0,0,0)),(20,100))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, (0,0,0)),(20,120))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, BLACK),(20,20))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, BLACK),(20,40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, BLACK),(20,60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, BLACK),(20,80))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, BLACK),(20,100))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, BLACK),(20,120))
 
 
 		def change_color_all_ui():
@@ -382,7 +390,9 @@ class Display:
 			elif fastforward.get_rect().collidepoint(x,y):
 				fastforward.set_active(True)
 				fastforward.change_color()
-				self.click_effect = 5
+
+				self.fastforward_active = execute_function_after_it(lambda : (fastforward.set_active(False), fastforward.change_color()), nb_iter = 5)
+
 				if self.api.get_tick_interval() > 100:
 					self.api.set_tick_interval(self.api.get_tick_interval() - 100)
 				elif self.api.get_tick_interval() > 10:
@@ -392,7 +402,9 @@ class Display:
 			elif backforward.get_rect().collidepoint(x,y):
 				backforward.set_active(True)
 				backforward.change_color()
-				self.click_effect = 5
+
+				self.backforward_active = execute_function_after_it(lambda : (backforward.set_active(False), backforward.change_color()), nb_iter = 5)
+
 				if self.api.get_tick_interval() < 10:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 1)
 				elif self.api.get_tick_interval() < 100:
@@ -401,16 +413,14 @@ class Display:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 100)
 				else:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 500)
+			
 					
     
     
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
-		self.screen.fill((135,206,250))
+		self.screen.fill(BLUE_SKY)
 		clock = pygame.time.Clock()
-  
-		self.click_effect = 0
-
 
 		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets/UI", "backforward.png")))
 		backforward.set_active(False)
@@ -421,7 +431,15 @@ class Display:
 		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets/UI", "play.png")))
 		change_color_all_ui()
 
-		rain_gif = self.gif_generator('rain_gif/rain-gif-', 20, 1, ".gif", (43,247,255))
+		self.fastforward_active = GEN_NULL
+		self.backforward_active = GEN_NULL
+
+		rain_gif = self.gif_generator('rain_gif/rain-gif-', 20, 2, ".gif", (43,247,255))
+		solar_gif = self.gif_generator('sun_gif/solar-gif-frame-', 34, 1, ".gif", BLACK)
+		flood_gif_active = GEN_NULL
+		drought_gif_active = GEN_NULL
+
+		event_set_inactif = GEN_NULL
 
   
 		ui_element = pygame.sprite.Group()
@@ -430,7 +448,6 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 
-		self.water_level = -1
 		self.draw_better_world(True)
 		self.api.start()
 
@@ -463,48 +480,51 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
-     
+
 				self.zoom(event)
 				self.start_drag(event)
 
+			# Event management
+			if self.data["event"] == "flood":				
+				regeneration_thread = threading.Thread(target=self.draw_better_world, args=(False,))
+				regeneration_thread.start()
+				flood_gif_active = execute_function_during_it(self.draw_gif, rain_gif, (0,0), nb_iter = 200)
+				self.api.set_event("Finished")
+				event_set_inactif = execute_function_after_it(self.api.set_event, None, nb_iter = 1000)
+			elif self.data["event"] == "drought":
+				regeneration_thread = threading.Thread(target=self.draw_better_world, args=(False,))
+				regeneration_thread.start()
+				drought_gif_active = execute_function_during_it(self.draw_gif, solar_gif, (0,0), nb_iter = 140)
+				self.api.set_event("Finished")
+				event_set_inactif = execute_function_after_it(self.api.set_event, None, nb_iter = 1000)
 
-
+			
 			self.camera()
-			self.screen.fill((135,206,250))
+			self.screen.fill(BLUE_SKY)
+
+			
+
+
+			# Drawing the world and the sprites
 			if rendering:
 				self.render()
-    
-			
 
-			
-			self.screen.blit(next(rain_gif), (0,0))
-			
+			# all fonction that need to be executed after or during a certain number of iteration
+			next(flood_gif_active,None)
+			next(drought_gif_active,None)
+			next(self.fastforward_active,None)
+			next(self.backforward_active,None)
+			next(event_set_inactif,None)
+
+			# UI and text
 			blit_text_info()
 			ui_element.draw(self.screen)
-			
 
+			
+			# Updating the display
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
-
-
 			pygame.display.flip()
-			
-			if self.click_effect > 0:
-				self.click_effect -= 1
-			elif self.click_effect == 0:
-				fastforward.set_active(False)
-				backforward.set_active(False)
-				fastforward.change_color()
-				backforward.change_color()
-				self.click_effect -= 1
-
-
-
-			
 			clock.tick()
-
-
-
-
 
 
 	def graph(self):

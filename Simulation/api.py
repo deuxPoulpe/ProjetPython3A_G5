@@ -11,6 +11,7 @@ class Api:
 		self.quit = False
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
+		self.shared_data['event'] = None
 		self.running = mp.Manager().Value('i', False)
 		self.paused = mp.Manager().Value('i', False)
 
@@ -21,6 +22,8 @@ class Api:
 		self.tick_interval.value = tick_interval_ms
 	def get_shared_data(self):
 		return self.shared_data
+	def set_event(self, event):
+		self.shared_data['event'] = event
      
 
 	def pause(self):
@@ -53,7 +56,11 @@ class Api:
 			start = time.time()
 			if not self.paused.value:
 				
-				self.world_sim.update_tick()
+				event = self.world_sim.update_tick()
+				
+				if self.shared_data['event'] is None:
+					self.shared_data['event'] = event
+
 				self.update_shared_data()
 
 			time.sleep(self.tick_interval.value/1000)

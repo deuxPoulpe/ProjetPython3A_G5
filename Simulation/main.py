@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
 	world = World({
 		"size" : 100,
-		"nbFood" : 0,
+		"nbFood" : 200,
 		"dayTick" : 100,
 		"Food_energy" : 100,
 		"custom_terrain" : True,
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	
 
 
-	world.spawn_bob(0)
+	world.spawn_bob(500)
 	api = Api(world, 1)
 	display = Display(api)
 	display.main_loop()

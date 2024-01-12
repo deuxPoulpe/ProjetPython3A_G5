@@ -50,6 +50,8 @@ class World:
 		type(argDict["nbFood"]) == int ,
 		type(argDict["dayTick"]) == int
 		])
+
+		self.event_type = ["flood","drought"]
 	
 
 	#getters
@@ -195,6 +197,25 @@ class World:
 				print("saved",i)
 		output.close()
 
+	def event_update(self):
+		event_type_choice = random.choice(self.event_type)
+
+
+		match event_type_choice:
+			case "flood":
+				self.water_level += 1
+				bobs = self.bobs.copy()
+				for pos in bobs:
+					x,y = pos
+					if self.terrain.get_terrain()[x][y] == self.water_level:
+						for bob in bobs[pos]:
+							self.kill_bob(bob)
+
+			case "drought":
+				self.water_level -= 1 if self.water_level > 0 else 0
+
+		return event_type_choice
+				
 	
 
 	def update_tick(self):
@@ -202,6 +223,7 @@ class World:
 		Updates the state of the world on each tick
 		"""
 				
+		event = None
 		
 		#update tick for all bobs
 		all_bobs_dict = self.bobs.copy()
@@ -213,12 +235,17 @@ class World:
 		if self.tick % self.argDict["dayTick"] == 0 :
 			self.foods = {}
 			self.spawn_food(self.argDict["nbFood"])
-			self.nb_food = self.argDict["nbFood"]		
+			self.nb_food = self.argDict["nbFood"]	
+			if random.randint(0,10) == 3 and self.terrain:
+				event = self.event_update()
 			
 		#ajouter la population de bobs et de food dans des listes pour le graphique final
 		self.population_bob.append(self.nb_bob)
 		self.population_food.append(self.nb_food)
 
+		
+
 		self.tick += 1
+		return event
 
 		
