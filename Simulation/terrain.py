@@ -19,8 +19,7 @@ class Terrain:
 		self.new_generation = False
 		self.generation_point = {}
 			
-
-
+		random.seed(self.seed)
 
 		self.decoration_to_add = np.zeros((size, size))
 		self.terrain = np.zeros((size, size))

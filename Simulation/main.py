@@ -13,7 +13,7 @@ if __name__ == "__main__":
 		"number_of_lake" : 1,
 		"size_of_lake" : 20,
 		"max_height" : 10,
-		"seed" : None,
+		"seed" : 1234,
 		}
 
 	world = World({
