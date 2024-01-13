@@ -10,10 +10,10 @@ if __name__ == "__main__":
 		"generate_river" : True,
 		"number_of_river" : 1,
 		"generate_lake" : True,
-		"number_of_lake" : 1,
+		"number_of_lake" : 2,
 		"size_of_lake" : 20,
 		"max_height" : 10,
-		"seed" : 1234,
+		"seed" : 543,
 		}
 
 	world = World({

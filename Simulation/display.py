@@ -25,6 +25,7 @@ class Display:
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 	
+
 		self.data = self.api.get_shared_data()
 		self.world_size = self.data["world_size"]
 		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
@@ -439,8 +440,6 @@ class Display:
 		flood_gif_active = GEN_NULL
 		drought_gif_active = GEN_NULL
 
-		event_set_inactif = GEN_NULL
-
   
 		ui_element = pygame.sprite.Group()
 		ui_element.add(pause_button)
@@ -489,14 +488,14 @@ class Display:
 				regeneration_thread = threading.Thread(target=self.draw_better_world, args=(False,))
 				regeneration_thread.start()
 				flood_gif_active = execute_function_during_it(self.draw_gif, rain_gif, (0,0), nb_iter = 200)
-				self.api.set_event("Finished")
-				event_set_inactif = execute_function_after_it(self.api.set_event, None, nb_iter = 1000)
+				self.api.set_event(None)
+				
 			elif self.data["event"] == "drought":
 				regeneration_thread = threading.Thread(target=self.draw_better_world, args=(False,))
 				regeneration_thread.start()
 				drought_gif_active = execute_function_during_it(self.draw_gif, solar_gif, (0,0), nb_iter = 140)
-				self.api.set_event("Finished")
-				event_set_inactif = execute_function_after_it(self.api.set_event, None, nb_iter = 1000)
+				self.api.set_event(None)
+
 
 			
 			self.camera()
@@ -514,7 +513,6 @@ class Display:
 			next(drought_gif_active,None)
 			next(self.fastforward_active,None)
 			next(self.backforward_active,None)
-			next(event_set_inactif,None)
 
 			# UI and text
 			blit_text_info()

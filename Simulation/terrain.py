@@ -68,7 +68,7 @@ class Terrain:
 
 					center_lake = (random.randint(0, size-1), random.randint(0, size-1))
 					extend_lake_x = min(size - 1 , max(0 , center_lake[0]+random.randint(-2,2)))
-					extend_lake_y = min(size - 1 , max(0 , center_lake[0]+random.randint(-2,2)))
+					extend_lake_y = min(size - 1 , max(0 , center_lake[1]+random.randint(-2,2)))
 					lake = (center_lake, (extend_lake_x,extend_lake_y))
 					self.generation_point[f"lake_{k}"] = lake
 					

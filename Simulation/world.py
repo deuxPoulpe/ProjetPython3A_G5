@@ -4,6 +4,9 @@ from terrain import Terrain
 from bob import Bob
 from food import Food
 import random
+import time
+
+from Utility.time_function_utility import execute_function_after_it
 
 
 class World:
@@ -45,6 +48,14 @@ class World:
 		else:
 			self.terrain = None
 
+		self.enable_function = {
+			"custom_event" : True,
+		}
+
+		self.enabled_event = 0
+		self.event_timer_day_tick = 10
+
+
 
 		assert all([type(argDict["size"]) == int ,
 		type(argDict["nbFood"]) == int ,
@@ -83,6 +94,7 @@ class World:
 	#setter
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
+
   
 
 
@@ -212,8 +224,9 @@ class World:
 							self.kill_bob(bob)
 
 			case "drought":
-				self.water_level -= 1 if self.water_level > 0 else 0
-
+				if self.water_level >= 0:
+					self.water_level -= 1
+					
 		return event_type_choice
 				
 	
@@ -236,14 +249,18 @@ class World:
 			self.foods = {}
 			self.spawn_food(self.argDict["nbFood"])
 			self.nb_food = self.argDict["nbFood"]	
-			if random.randint(0,10) == 3 and self.terrain:
+			if random.randint(0,10) == 3 and self.terrain and self.enable_function["custom_event"] and self.enabled_event == 0:
 				event = self.event_update()
+				self.enabled_event = self.event_timer_day_tick * self.argDict["dayTick"]
+				
 			
 		#ajouter la population de bobs et de food dans des listes pour le graphique final
 		self.population_bob.append(self.nb_bob)
 		self.population_food.append(self.nb_food)
-
 		
+		if self.enabled_event > 0:
+			self.enabled_event -= 1
+
 
 		self.tick += 1
 		return event
