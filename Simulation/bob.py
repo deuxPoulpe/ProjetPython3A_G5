@@ -18,7 +18,7 @@ class Bob:
         world (World): Reference to the world in which Bob exists.
     """
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = [], max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = Queue(5), max_energy=200):
 		"""
         Initializes a new instance of Bob.
 
@@ -77,7 +77,7 @@ class Bob:
 		elif mode == "stand":
 			self.energy -= 0.5
 			
-		
+	cases_mémoire = Queue(5)	
 
 	def move(self):
 		"""
@@ -93,6 +93,9 @@ class Bob:
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
 		self.loose_energy("move")
+
+	
+
 		return True
 
 	def die(self):
@@ -174,24 +177,27 @@ class Bob:
 		return perception_list
 	
 
-	liste_objets = self.bob_perception() # Récupère la liste des objets perçus
+	
 
-	def store_memory(self):
+
+
+	def memory_store(self):
 
 		"""
-		Stocke un certain nombre d'objets dans une file en fonction du niveau de mémoire du bob.
+		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
 		"""
-		if self.memory_points > 0:
+		
+		while(1):
 			
-			memory_cells = 2*self.memory_points
+			if(self.move()):
+			
+				self.memory_space.put(self.perception_list)
 
-			file_objets = Queue(memory_cells)
 
-			for i in range(len(liste_objets)):
-				if(liste_objets[i] == self.world.foods.get_pos()):
-					file_objets.put(self.world.foods.get_pos())
+				if len(self.memory_space) > 5:
+					self.memory_space.get()
 
-		return liste_objets
+		return self.memory_space
 
 			
 
