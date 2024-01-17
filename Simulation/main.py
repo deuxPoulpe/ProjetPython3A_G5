@@ -9,16 +9,16 @@ if __name__ == "__main__":
 	terrain_config = {
 		"generate_river" : True,
 		"number_of_river" : 1,
-		"generate_lake" : True,
-		"number_of_lake" : 2,
+		"generate_lake" : False,
+		"number_of_lake" : 1,
 		"size_of_lake" : 20,
 		"max_height" : 10,
 		"seed" : 543,
 		}
 
 	world = World({
-		"size" : 50,
-		"nbFood" : 500,
+		"size" : 100,
+		"nbFood" : 200,
 		"dayTick" : 100,
 		"Food_energy" : 100,
 		"custom_terrain" : True,
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
 
 	world.spawn_bob(500)
-	api = Api(world, 1)
+	api = Api(world, 500)
 	display = Display(api)
 	display.main_loop()
  

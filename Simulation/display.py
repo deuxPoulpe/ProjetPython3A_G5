@@ -3,7 +3,8 @@ from sprite import Sprite, Sprite_UI, Tile
 import os
 import matplotlib.pyplot as plt
 import random
-import threading 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 
 
@@ -107,15 +108,14 @@ class Display:
 				self.drag_pos = current_mouse_pos
     
 
-	def draw_empty_world(self,start_x,start_y,i,j,grid):
-		for k in range(grid[i][j] + 1):
+	def draw_empty_world(self,start_x,start_y,i,j,grid,height):
+    
+		for k in range(height, grid[i][j]):
 			x = start_x + (i - j) * 32 / 2 - 16
-			y = start_y + (i + j) * 32 / 4 - 9 * (k - 1) - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * k - 16
 			if k < grid[i][j] - 1:
 				under_tile = Tile(x,y, self.assets["stone"])
-			else:
-				under_tile = Tile(x,y, self.assets["dirt"])
-			self.floor.add(under_tile)
+				self.floor.add(under_tile)
 
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
@@ -125,6 +125,8 @@ class Display:
 		else:
 			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
 			tile = Tile(x,y, self.assets["clean_grass"])
+			dirt = Tile(x,y + 9, self.assets["dirt"])
+			self.floor.add(dirt)
 
 		self.floor.add(tile)
 		
@@ -203,15 +205,15 @@ class Display:
 		
 			for i in range(size):
 				for j in range(size):
-					if i in (0, size - 1) or j in (0, size - 1):
-						self.draw_empty_world(start_x,start_y,i,j,grid)
+					if i == (size - 1)  or j == (size - 1):
+						self.draw_empty_world(start_x,start_y,i,j,grid,0)
 					else:
 						terrain_height = grid[i][j]
-						rc = min(0, max(size - 1, i + 1))
-						lc = min(0, max(size - 1, j + 1))
-						bc = min(0, max(size - 1, i + 1, j + 1))
-						if any([terrain_height - grid[rc][j], terrain_height - grid[i][lc], terrain_height - grid[rc][lc]]):
-							self.draw_empty_world(start_x,start_y,i,j,grid)
+						rc = min(size - 1, max(0, i + 1))
+						lc = min(size - 1, max(0, j + 1))
+						if terrain_height > grid[rc][j] or terrain_height > grid[i][lc] or terrain_height > grid[rc][lc]:
+							self.draw_empty_world(start_x,start_y,i,j,grid,min(grid[rc][j], grid[i][lc], grid[rc][lc]))
+     
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					self.draw_water_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
@@ -284,22 +286,31 @@ class Display:
 				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
 		
+		with ThreadPoolExecutor(max_workers=10) as threading_pool:
+			pool = []
 
-		if not terrain:
-			for key, sprites in sprite_dict.items():
-				if sprite_type == "bob":
-					for bob in sprites:
-						add_sprite_to_group(key, bob.get_mass())
-				else:
-					add_sprite_to_group(key, 1)
-		else:
-			grid_of_height = terrain.get_terrain()
-			for key, sprites in sprite_dict.items():
-				if sprite_type == "bob":
-					for bob in sprites:
-						add_sprite_to_group_occlusion(key, bob.get_mass())
-				else:
-					add_sprite_to_group_occlusion(key, 1)
+			if not terrain:
+				for key, sprites in sprite_dict.items():
+					if sprite_type == "bob":
+						for bob in sprites:
+							# add_sprite_to_group(key, bob.get_mass())
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass()))
+					else:
+						# add_sprite_to_group(key, 1)
+						pool.append(threading_pool.submit(add_sprite_to_group, key, 1))
+			else:
+				grid_of_height = terrain.get_terrain()
+				for key, sprites in sprite_dict.items():
+					if sprite_type == "bob":
+						for bob in sprites:
+							# add_sprite_to_group_occlusion(key, bob.get_mass())
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass()))
+					else:
+						# add_sprite_to_group_occlusion(key, 1)
+						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1))
+
+			for _ in as_completed(pool):
+				pass
 
 					
 
@@ -326,14 +337,6 @@ class Display:
 		
 		self.sprite_display.fill(BLACK)
   
-		# th1 = threading.Thread(target=self.draw_sprite, args=("bob",))
-		# th2 = threading.Thread(target=self.draw_sprite, args=("food",))
-		# th1.start()
-		# th2.start()
-		# th1.join()
-		# th2.join()
-
-
 		self.draw_sprite("bob")
 		self.draw_sprite("food")
   
