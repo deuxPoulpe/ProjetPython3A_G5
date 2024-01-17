@@ -124,7 +124,7 @@ class Display:
 			tile = Tile(x,y, self.assets["sand"])
 		else:
 			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
-			tile = Tile(x,y, self.assets["grass"])
+			tile = Tile(x,y, self.assets["clean_grass"])
 
 		self.floor.add(tile)
 		
@@ -199,11 +199,19 @@ class Display:
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
-			self.tile_array = tile_to_array(self.assets["grass"])
+			self.tile_array = tile_to_array(self.assets["clean_grass"])
 		
 			for i in range(size):
 				for j in range(size):
-					self.draw_empty_world(start_x,start_y,i,j,grid)
+					if i in (0, size - 1) or j in (0, size - 1):
+						self.draw_empty_world(start_x,start_y,i,j,grid)
+					else:
+						terrain_height = grid[i][j]
+						rc = min(0, max(size - 1, i + 1))
+						lc = min(0, max(size - 1, j + 1))
+						bc = min(0, max(size - 1, i + 1, j + 1))
+						if any([terrain_height - grid[rc][j], terrain_height - grid[i][lc], terrain_height - grid[rc][lc]]):
+							self.draw_empty_world(start_x,start_y,i,j,grid)
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					self.draw_water_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
@@ -318,6 +326,13 @@ class Display:
 		
 		self.sprite_display.fill(BLACK)
   
+		# th1 = threading.Thread(target=self.draw_sprite, args=("bob",))
+		# th2 = threading.Thread(target=self.draw_sprite, args=("food",))
+		# th1.start()
+		# th2.start()
+		# th1.join()
+		# th2.join()
+
 
 		self.draw_sprite("bob")
 		self.draw_sprite("food")
@@ -460,9 +475,9 @@ class Display:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
-					pygame.quit()
-					quit()
-
+					# pygame.quit()
+					# quit()
+					running = False
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
@@ -545,4 +560,6 @@ class Display:
 
 		plt.tight_layout()
 		plt.show()
+
+
 

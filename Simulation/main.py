@@ -17,8 +17,8 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 100,
-		"nbFood" : 200,
+		"size" : 50,
+		"nbFood" : 500,
 		"dayTick" : 100,
 		"Food_energy" : 100,
 		"custom_terrain" : True,
@@ -31,6 +31,3 @@ if __name__ == "__main__":
 	display = Display(api)
 	display.main_loop()
  
-
-
-

@@ -13,6 +13,7 @@ class Api:
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
 		self.shared_data['event'] = None
+		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
 		self.paused = mp.Manager().Value('i', False)
 		
@@ -74,6 +75,7 @@ class Api:
 			time.sleep(self.tick_interval.value/1000)
 			with self.data_lock:
 				self.shared_data['real_tick_time'] = time.time() - start
+				self.shared_data['real_tick_time_data'].append(self.shared_data['real_tick_time'])
    
 
 
