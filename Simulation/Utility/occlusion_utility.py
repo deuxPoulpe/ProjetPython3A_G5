@@ -1,7 +1,7 @@
 import pygame
 
 
-def tile_to_array(tile_image):
+def tile_to_array(tile_image, tile_size_x, tile_size_y):
     """
     Convertit une image de tuile Pygame en un tableau utilisé pour le calcul de l'occlusion.
 
@@ -11,7 +11,7 @@ def tile_to_array(tile_image):
     
     tile_array = pygame.surfarray.array_alpha(tile_image)
 
-    final_array = [[0 for _ in range(48)] for _ in range(32)]
+    final_array = [[0 for _ in range(tile_size_y)] for _ in range(tile_size_x)]
 
     for i in range(len(tile_array)):
         for j in range(len(tile_array)):
@@ -24,7 +24,7 @@ def tile_to_array(tile_image):
 
 
 
-def hide_behind_terrain_image(bob_sprite, tile_array, close_tile_height):
+def hide_behind_terrain_image(bob_sprite, tile_array, close_tile_height, bob_array_base):
     """
     Modifie un sprite pour qu'il apparaisse derrière un terrain, en fonction d'un tableau de tuiles.
 
@@ -51,6 +51,7 @@ def hide_behind_terrain_image(bob_sprite, tile_array, close_tile_height):
                 x, y = i + offset_x, j + offset_y
                 if 0 <= x < len(tile_array) and 0 <= y < len(tile_array[x]) and tile_array[x][y] != 0:
                     bob_array[i,j] = 0
+                elif bob_array_base[i][j] == 0:
+                    bob_array[i,j] = 0
 
     return pygame.surfarray.make_surface(bob_array)
-

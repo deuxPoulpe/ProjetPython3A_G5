@@ -71,11 +71,12 @@ class Display:
 		for key in self.assets:
 			if key != "plants" and key != "rocks":
 				self.assets[key].set_colorkey(BLACK)
+		
+		self.tile_array = tile_to_array(self.assets["clean_grass"], 32, 48)
+		self.bob_array_base = pygame.surfarray.array2d(self.assets["full_bob"])
 
-
-		self.bobs_occlusion_cache = {}
-		self.foods_occlusion_cache = {}
 		self.sprite_occlusion_cache = {}
+		self.sprite_color_cache = {}
 	
 
 
@@ -150,8 +151,6 @@ class Display:
 			self.floor.add(rock)
 
 
-	
-
 	def draw_better_world(self, load_bar):
 		
 		def world_loader(load_percentage, message):
@@ -201,7 +200,6 @@ class Display:
 		if terrain:
 			grid = terrain.get_terrain()
 			decoration_to_add = terrain.get_decoration_to_add()
-			self.tile_array = tile_to_array(self.assets["clean_grass"])
 		
 			for i in range(size):
 				for j in range(size):
@@ -233,10 +231,29 @@ class Display:
 		self.floor.draw(self.floor_display)
 		self.needs_rescaling = True
 
+	def update_bob_color(self, velocity, bob_image):
+		x = max(0, min(velocity, 100))
+
+		red_amount = int((x - 40) * 2.55) if x > 40 else 10
+		green_amount = int(x * 2.55) if x <= 50 else max(0, 127 - int(((x - 50) / 40) * 255))
+		sub_green_amount = int((x - 80)/20 * 70) if x > 80 else 0
+		blue_amount = int(x * 2.55)
+
+		add_color_surface = pygame.Surface((16, 16))
+		sub_color_surface = pygame.Surface((16, 16))
+
+		add_color_surface.fill((red_amount, green_amount, 0))
+		sub_color_surface.fill((0, sub_green_amount, blue_amount))
+
+		bob_color_modified = bob_image.copy().convert_alpha()
+		bob_color_modified.blit(add_color_surface, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+		bob_color_modified.blit(sub_color_surface, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+
+		return bob_color_modified.convert_alpha()
 
 	def draw_sprite(self, sprite_type):
 
-		def add_sprite_to_group_occlusion(key, sprite_mass):
+		def add_sprite_to_group_occlusion(key, sprite_mass, velocity):
 			i,j = key
 			base = grid_of_height[i][j]
 
@@ -251,13 +268,20 @@ class Display:
 			lc = max(grid_of_height[i][left_tile_cord] - base, 0)
 			bc = max(grid_of_height[right_tile_cord][left_tile_cord] - base, 0)
 
-			
+			if sprite_type == "bob":
+				if velocity in self.sprite_color_cache.keys():
+					sprite_image = self.sprite_color_cache[velocity]
+				else:
+					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
+					self.sprite_color_cache[velocity] = sprite_image
+				
+
 			sprite = Sprite(x, y, sprite_image, size)
 			if any([rc, lc, bc]):
 				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 				else:
-					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc])
+					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base)
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 
 		
@@ -293,20 +317,16 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							# add_sprite_to_group(key, bob.get_mass())
-							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass()))
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), bob.get_velocity()))
 					else:
-						# add_sprite_to_group(key, 1)
 						pool.append(threading_pool.submit(add_sprite_to_group, key, 1))
 			else:
 				grid_of_height = terrain.get_terrain()
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							# add_sprite_to_group_occlusion(key, bob.get_mass())
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass()))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), bob.get_velocity()))
 					else:
-						# add_sprite_to_group_occlusion(key, 1)
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1))
 
 			for _ in as_completed(pool):

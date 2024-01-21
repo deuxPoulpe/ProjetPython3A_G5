@@ -43,15 +43,14 @@ class Bob:
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
-
 	def get_pos(self):
 		return self.position
-
 	def get_energy(self):
 		return self.energy
-
 	def get_mass(self):
 		return self.mass
+	def get_velocity(self):
+		return self.velocity
 
 	
 	def eat_food(self):
