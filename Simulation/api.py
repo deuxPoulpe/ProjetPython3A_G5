@@ -4,6 +4,7 @@ import multiprocessing as mp
 class Api:
 	
 	def __init__(self, world, tick_interval_ms):
+
 		self.data_lock = mp.Lock()
 		self.world_sim = world
 		self.tick_interval = mp.Manager().Value('i', tick_interval_ms)
@@ -12,6 +13,7 @@ class Api:
 		self.quit = False
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
+
 		self.shared_data['event'] = None
 		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
@@ -24,6 +26,7 @@ class Api:
 		return self.tick_interval.value
 	def set_tick_interval(self, tick_interval_ms):
 		self.tick_interval.value = tick_interval_ms
+
 	def get_shared_data(self):
 		return self.shared_data
 	def set_event(self, event):
@@ -46,6 +49,7 @@ class Api:
 		self.process.start()
   
 	def update_shared_data(self):
+
 		with self.data_lock:
 			self.shared_data['bobs'] = self.world_sim.get_bobs()
 			self.shared_data['foods'] = self.world_sim.get_foods()
@@ -76,10 +80,7 @@ class Api:
 			with self.data_lock:
 				self.shared_data['real_tick_time'] = time.time() - start
 				self.shared_data['real_tick_time_data'].append(self.shared_data['real_tick_time'])
-   
-
-
-   
+  
 			
    
 	def stop(self):

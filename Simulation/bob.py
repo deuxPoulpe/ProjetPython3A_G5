@@ -2,35 +2,34 @@ import random
 
 class Bob:
 	"""
-	Classe représentant un personnage 'Bob' dans un monde simulé.
+    Class representing a character 'Bob' in a simulated world.
 
-	Attributs:
-		energy (int): Énergie actuelle de Bob.
-		velocity (int): Vitesse de déplacement de Bob.
-		mass (int): Masse de Bob.
-		perception (int): Capacité de perception de Bob.
-		memory_space (list): Espace mémoire de Bob.
-		max_energy (int): Énergie maximale que Bob peut accumuler.
-		position (tuple): Position actuelle de Bob dans le monde (x, y).
-		en_fuite (bool): État indiquant si Bob est en fuite.
-		world (World): Référence au monde dans lequel Bob évolue.
-	"""
+    Attributes:
+        energy (int): Bob's current energy.
+        velocity (int): Bob's movement speed.
+        mass (int): Bob's mass.
+        perception (int): Bob's perception ability.
+        memory_space (list): Bob's memory space.
+        max_energy (int): The maximum energy Bob can accumulate.
+        position (tuple): Bob's current position in the world (x, y).
+        en_fuite (bool): Indicates whether Bob is fleeing.
+        world (World): Reference to the world in which Bob exists.
+    """
 
 	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
 		"""
-		Initialise une nouvelle instance de Bob.
+        Initializes a new instance of Bob.
 
-		Paramètres:
-			x (int): Position initiale en x de Bob.
-			y (int): Position initiale en y de Bob.
-			world (World): Référence au monde dans lequel Bob évolue.
-			energy (int, optionnel): Énergie initiale de Bob. Par défaut à 100.
-			velocity (int, optionnel): Vitesse initiale de Bob. Par défaut à 1.
-			mass (int, optionnel): Masse initiale de Bob. Par défaut à 1.
-			perception (int, optionnel): Perception initiale de Bob. Par défaut à 0.
-			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
-
-		"""
+        Parameters:
+            x (int): Initial position of Bob in the x-axis.
+            y (int): Initial position of Bob in the y-axis.
+            world (World): Reference to the world in which Bob exists.
+            energy (int, optional): Initial energy of Bob. Default is 100.
+            velocity (int, optional): Initial velocity of Bob. Default is 1.
+            mass (int, optional): Initial mass of Bob. Default is 1.
+            perception (int, optional): Initial perception of Bob. Default is 0.
+            max_energy (int, optional): Maximum energy of Bob. Default is 200.
+        """
 
 		self.energy = energy
 		self.velocity = velocity
@@ -138,7 +137,6 @@ class Bob:
 
 				break
 	
-
 	def velocity_manager(self):
 
 		self.case_to_move += abs(self.velocity)
