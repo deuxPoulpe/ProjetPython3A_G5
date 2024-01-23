@@ -31,18 +31,7 @@ class Bob:
 			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
 
 		"""
-        Initializes a new instance of Bob.
 
-        Parameters:
-            x (int): Initial position of Bob in the x-axis.
-            y (int): Initial position of Bob in the y-axis.
-            world (World): Reference to the world in which Bob exists.
-            energy (int, optional): Initial energy of Bob. Default is 100.
-            velocity (int, optional): Initial velocity of Bob. Default is 1.
-            mass (int, optional): Initial mass of Bob. Default is 1.
-            perception (int, optional): Initial perception of Bob. Default is 0.
-            max_energy (int, optional): Maximum energy of Bob. Default is 200.
-        """
 		self.energy = energy
 		self.velocity = velocity
 		self.mass = mass
@@ -250,15 +239,15 @@ class Bob:
 
 
 
-    #deux bobs doivent etre dans la meme case pour se reproduire 
-    def sexual_reproduction(self ):
-      for partener in self.world.getbobs[self.position]:
-        if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
-          self.reproduce
-          self.loose_energy("sexual_reproduction")
-          new_bob = Bob(self.position , 50)
-          return True
-        else:
-          return False 
+	#deux bobs doivent etre dans la meme case pour se reproduire 
+	def sexual_reproduction(self ):
+		for partener in self.world.getbobs[self.position]:
+			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
+				self.reproduce
+				self.loose_energy("sexual_reproduction")
+				new_bob = Bob(self.position , 50)
+				return True
+			else:
+				return False 
 
 
