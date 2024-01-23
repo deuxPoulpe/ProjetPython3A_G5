@@ -4,6 +4,9 @@ from terrain import Terrain
 from bob import Bob
 from food import Food
 import random
+import time
+
+from Utility.time_function_utility import execute_function_after_it
 
 
 class World:
@@ -39,19 +42,33 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
+		self.water_level = 0
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
 			self.terrain = None
+
+		self.enable_function = {
+			"custom_event" : True,
+		}
+
+		self.enabled_event = 0
+		self.event_timer_day_tick = 100
+
 
 
 		assert all([type(argDict["size"]) == int ,
 		type(argDict["nbFood"]) == int ,
 		type(argDict["dayTick"]) == int
 		])
+
+
+		self.event_type = ["flood","drought"]
 	
 
 	#getters
+	def get_water_level(self):
+		return self.water_level
 	def get_size(self):
 		return self.argDict["size"]
 	def get_terrain_config(self):
@@ -78,6 +95,8 @@ class World:
 	#setter
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
+
+  
 
 
 	#methods
@@ -191,6 +210,26 @@ class World:
 				print("saved",i)
 		output.close()
 
+	def event_update(self):
+		event_type_choice = random.choice(self.event_type)
+
+
+		match event_type_choice:
+			case "flood":
+				self.water_level += 1
+				bobs = self.bobs.copy()
+				for pos in bobs:
+					x,y = pos
+					if self.terrain.get_terrain()[x][y] == self.water_level:
+						for bob in bobs[pos]:
+							self.kill_bob(bob)
+
+			case "drought":
+				if self.water_level >= 0:
+					self.water_level -= 1
+					
+		return event_type_choice
+				
 	
 
 	def update_tick(self):
@@ -198,6 +237,8 @@ class World:
 		Updates the state of the world on each tick
 		"""
 				
+
+		event = None
 		
 		#update tick for all bobs
 		all_bobs_dict = self.bobs.copy()
@@ -209,12 +250,21 @@ class World:
 		if self.tick % self.argDict["dayTick"] == 0 :
 			self.foods = {}
 			self.spawn_food(self.argDict["nbFood"])
-			self.nb_food = self.argDict["nbFood"]		
+			self.nb_food = self.argDict["nbFood"]	
+			if random.randint(0,10) == 3 and self.terrain and self.enable_function["custom_event"] and self.enabled_event == 0:
+				event = self.event_update()
+				self.enabled_event = self.event_timer_day_tick * self.argDict["dayTick"]
+				
 			
 		#ajouter la population de bobs et de food dans des listes pour le graphique final
 		self.population_bob.append(self.nb_bob)
 		self.population_food.append(self.nb_food)
+		
+		if self.enabled_event > 0:
+			self.enabled_event -= 1
+
 
 		self.tick += 1
+		return event
 
 		

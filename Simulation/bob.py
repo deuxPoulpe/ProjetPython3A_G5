@@ -30,6 +30,7 @@ class Bob:
             perception (int, optional): Initial perception of Bob. Default is 0.
             max_energy (int, optional): Maximum energy of Bob. Default is 200.
         """
+
 		self.energy = energy
 		self.velocity = velocity
 		self.mass = mass
@@ -43,15 +44,14 @@ class Bob:
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
-
 	def get_pos(self):
 		return self.position
-
 	def get_energy(self):
 		return self.energy
-
 	def get_mass(self):
 		return self.mass
+	def get_velocity(self):
+		return self.velocity
 
 	
 	def eat_food(self):
@@ -189,4 +189,63 @@ class Bob:
 					perception_list.append(self.world.get_bobs()[(x,y)])
 
 		return perception_list
+
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		perception_list = []
+		
+		def bob_get_things_by_distance(self,distance):
+			"""
+			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
+			"""
+			deplacement=0
+			x=self.get_pos()[0]-distance
+			y=self.get_pos()[1]
+
+			while x <= self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+			deplacement=0
+			x=self.get_pos()[0]+distance
+
+			while x > self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+		
+		distance = self.perception
+		while distance > 0:
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+
+		return perception_list
+
+
+
+	#deux bobs doivent etre dans la meme case pour se reproduire 
+	def sexual_reproduction(self ):
+		for partener in self.world.getbobs[self.position]:
+			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
+				self.reproduce
+				self.loose_energy("sexual_reproduction")
+				new_bob = Bob(self.position , 50)
+				return True
+			else:
+				return False 
+
 

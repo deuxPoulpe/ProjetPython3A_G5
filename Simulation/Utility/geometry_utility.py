@@ -61,7 +61,7 @@ def add_points(courbe):
 
 
 
-def smooth_around_line(terrain, ligne, depth=4):
+def smooth_around_line(terrain, ligne, radius=4):
 		"""
 		Lisse un terrain autour d'une ligne spécifiée.
 		
@@ -73,13 +73,13 @@ def smooth_around_line(terrain, ligne, depth=4):
 		smoothed_terrain = terrain.copy()
 		
 		for x, y in ligne:
-			for dx in range(-depth, depth+1):
-				for dy in range(-depth, depth+1):
+			for dx in range(-radius, radius+1):
+				for dy in range(-radius, radius+1):
 					dist = np.sqrt(dx*dx + dy*dy)
 				
 					xi, yi = x + dx, y + dy
 					if 0 <= xi < terrain.shape[0] and 0 <= yi < terrain.shape[1]:
-						factor = (dist / depth)**2
+						factor = (dist / radius)**2
 						smoothed_terrain[xi, yi] = min(smoothed_terrain[xi, yi], terrain[xi, yi] * factor)
 		
 		return smoothed_terrain
