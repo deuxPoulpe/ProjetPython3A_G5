@@ -1,7 +1,5 @@
 import random
 
-from queue import *
-
 class Bob:
 	"""
     Class representing a character 'Bob' in a simulated world.
@@ -19,7 +17,7 @@ class Bob:
     """
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = Queue(5), max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
 		"""
         Initializes a new instance of Bob.
 
@@ -39,7 +37,7 @@ class Bob:
 		self.mass = mass
 		self.perception = perception
 		self.memory_points = memory_points
-		self.memory_space = memory_space
+		self.memory_space = []
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
@@ -78,7 +76,6 @@ class Bob:
 		elif mode == "stand":
 			self.energy -= 0.5
 			
-	cases_mémoire = Queue(5)	
 
 	def move(self):
 		"""

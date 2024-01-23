@@ -1,5 +1,8 @@
 import pygame
 import sys
+from display import Display
+from api import Api
+from world import World
 
 class Menu:
     def __init__(self):
@@ -87,6 +90,7 @@ class Menu:
                         # Attribuer les valeurs saisies aux variables
                         for i, variable in enumerate(variables):
                             self.valeurs_variables[variable] = int(self.textes_champs[i])
+                    
 
                 if event.type == pygame.KEYDOWN:
                     if self.champ_actif is not None:
@@ -113,8 +117,28 @@ class Menu:
         bouton_quitter = pygame.Rect(300, 400, 200, 50)
         boutton_Retour = pygame.Rect(600, 500, 100, 30)  # Ajuster la taille du bouton
         if bouton_demarrer.collidepoint(x, y):
-            print("Démarrer")
-            self.interface_jeu()
+            pygame.quit()
+            terrain_config = {
+            	"generate_river" : True,
+            	"number_of_river" : 1,
+            	"generate_lake" : False,
+            	"number_of_lake" : 1,
+            	"size_of_lake" : 20,
+            	"max_height" : 10,
+            	"seed" : 6432,
+            	}
+
+            world = World({
+            	"size" : 50,
+            	"nbFood" : 50,
+            	"dayTick" : 100,
+            	"Food_energy" : 100,
+            	"custom_terrain" : True,
+            	}, terrain_config)
+            world.spawn_bob(50)
+            api = Api(world, 500)
+            display = Display(api)
+            display.main_loop()
         elif bouton_options.collidepoint(x, y):
             print("Options")
             variables = ['number_of_river', 'number_of_lake', 'size_of_lake', 'max_height', 'nbFood', 'dayTick', 'Food_energy', 'generate_river', 'generate_lake', 'custo_terrain']

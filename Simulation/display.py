@@ -262,7 +262,7 @@ class Display:
 
 	def draw_sprite(self, sprite_type):
 
-		def add_sprite_to_group_occlusion(key, sprite_mass, velocity):
+		def add_sprite_to_group_occlusion(key, sprite_mass, velocity, sprite_image, sprite_type):
 			i,j = key
 			base = grid_of_height[i][j]
 
@@ -298,19 +298,20 @@ class Display:
 			sprite_group.add(sprite)
 
 
-		def add_sprite_to_group(key, sprite_mass, velocity):
+		def add_sprite_to_group(key, sprite_mass, velocity, sprite_image):
 			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * size
-
    
+      
 			if sprite_type == "bob":
 				if velocity in self.sprite_color_cache.keys():
 					sprite_image = self.sprite_color_cache[velocity]
 				else:
 					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
 					self.sprite_color_cache[velocity] = sprite_image
+
      
 			sprite_group.add(Sprite(x,y, sprite_image, size))
 
@@ -329,7 +330,7 @@ class Display:
 			case "food":
 				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
-		
+    
 		with ThreadPoolExecutor(max_workers=10) as threading_pool:
 			pool = []
 
@@ -337,17 +338,18 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), bob.get_velocity()))
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), bob.get_velocity(), sprite_image))
+							pass
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group, key, 1))
+						pool.append(threading_pool.submit(add_sprite_to_group, key, 1, 1, sprite_image))
 			else:
 				grid_of_height = terrain.get_terrain()
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), bob.get_velocity()))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), bob.get_velocity(), sprite_image, sprite_type))
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1))
+						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1, 1, sprite_image, sprite_type))
 
 			for _ in as_completed(pool):
 				pass
