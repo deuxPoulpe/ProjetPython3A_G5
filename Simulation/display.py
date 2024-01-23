@@ -287,11 +287,19 @@ class Display:
 		
 			sprite_group.add(sprite)
 
-		def add_sprite_to_group(key, sprite_mass):
+		def add_sprite_to_group(key, sprite_mass, velocity):
 			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * size
+   
+			if sprite_type == "bob":
+				if velocity in self.sprite_color_cache.keys():
+					sprite_image = self.sprite_color_cache[velocity]
+				else:
+					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
+					self.sprite_color_cache[velocity] = sprite_image
+     
 			sprite_group.add(Sprite(x,y, sprite_image, size))
 
 		sprite_group = pygame.sprite.Group()
