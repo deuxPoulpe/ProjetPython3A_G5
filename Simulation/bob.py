@@ -1,5 +1,7 @@
 import random
 
+from queue import *
+
 class Bob:
 	"""
 	Classe représentant un personnage 'Bob' dans un monde simulé.
@@ -16,7 +18,8 @@ class Bob:
 		world (World): Référence au monde dans lequel Bob évolue.
 	"""
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
+
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = Queue(5), max_energy=200):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -36,7 +39,8 @@ class Bob:
 		self.velocity = velocity
 		self.mass = mass
 		self.perception = perception
-		self.memory_space = []
+		self.memory_points = memory_points
+		self.memory_space = memory_space
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
@@ -75,7 +79,7 @@ class Bob:
 		elif mode == "stand":
 			self.energy -= 0.5
 			
-		
+	cases_mémoire = Queue(5)	
 
 	def move(self):
 		"""
@@ -91,6 +95,9 @@ class Bob:
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
 		self.loose_energy("move")
+
+	
+
 		return True
 
 	def die(self):
@@ -138,7 +145,6 @@ class Bob:
 
 				break
 	
-
 	def velocity_manager(self):
 
 		self.case_to_move += abs(self.velocity)
@@ -161,6 +167,7 @@ class Bob:
 			return True
 		return False
 	
+
 	def bob_perception(self):
 		"""
 		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
@@ -250,6 +257,43 @@ class Bob:
 			else:
 				return False 
 
+
+
+
+	def memory_store(self):
+
+		"""
+		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
+		"""
+		
+		while(1):
+			
+			if(self.move()):
+			
+				self.memory_space.put(self.perception_list)
+
+
+				if len(self.memory_space) > 5:
+					self.memory_space.get()
+
+		return self.memory_space
+
+
+
+	def mutate_memory_points(self):
+		
+		"""
+		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
+
+		"""
+
+		values = [-1, 0 , 1]
+
+		mutation = random.choice(values)
+
+		self.memory_points += mutation
+
+		return self.memory_points
 
 	def move_smart(self):
 		for i in self.memory_space:

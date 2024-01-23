@@ -27,6 +27,7 @@ class Display:
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
 	
 
+
 		self.data = self.api.get_shared_data()
 		self.world_size = self.data["world_size"]
 		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
@@ -75,11 +76,10 @@ class Display:
 		self.tile_array = tile_to_array(self.assets["clean_grass"], 32, 48)
 		self.bob_array_base = pygame.surfarray.array2d(self.assets["full_bob"])
 
+
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
 	
-
-
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor += self.zoom_speed
@@ -151,7 +151,10 @@ class Display:
 			self.floor.add(rock)
 
 
+
+
 	def draw_better_world(self, load_bar):
+
 		
 		def world_loader(load_percentage, message):
 			"""Fonction qui affiche le chargement du monde et gere l'affichage de la fenetre et des evenements seulement pendant le chargement du monde
@@ -187,11 +190,13 @@ class Display:
 			self.screen.blit(LOADING_BG, LOADING_BG_RECT)
 		
 			pygame.display.flip()
+
 		size = self.api.get_shared_data()["world_size"]
 		self.floor.empty()
 
 
 		start_x = self.floor_display.get_size()[0] // 2
+
 		start_y = self.floor_display.get_size()[1] - 16 * (size+1)
 
 		terrain = self.api.get_shared_data()["terrain"]
@@ -215,7 +220,9 @@ class Display:
 					self.draw_surface_world(start_x,start_y,i,j,grid)
 					self.draw_water_surface_world(start_x,start_y,i,j,grid)
 					self.draw_decoration_world(start_x,start_y,i,j,grid,decoration_to_add)
+
 				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
+
 
 
 		else:
@@ -223,6 +230,7 @@ class Display:
 				for j in range(size):
 					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
 					self.floor.add(tile)
+
 				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
 
 		world_loader(100,"Chargement de l'affichage du monde en cours ...") if load_bar else None
@@ -230,6 +238,7 @@ class Display:
 		self.floor_display.fill(BLACK)
 		self.floor.draw(self.floor_display)
 		self.needs_rescaling = True
+
 
 	def update_bob_color(self, velocity, bob_image):
 		x = max(0, min(velocity, 100))
@@ -260,6 +269,7 @@ class Display:
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
 			y = start_y + (i + j) * 8 - 15 - 9 * base
+
 	
 			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
 			left_tile_cord = min(self.world_size - 1, max(0 , j + 1))
@@ -287,11 +297,13 @@ class Display:
 		
 			sprite_group.add(sprite)
 
+
 		def add_sprite_to_group(key, sprite_mass, velocity):
 			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * size
+
    
 			if sprite_type == "bob":
 				if velocity in self.sprite_color_cache.keys():
@@ -340,6 +352,7 @@ class Display:
 			for _ in as_completed(pool):
 				pass
 
+
 					
 
 		sprite_group.draw(self.sprite_display)
@@ -363,6 +376,7 @@ class Display:
 	
 	def render(self):
 		
+
 		self.sprite_display.fill(BLACK)
   
 		self.draw_sprite("bob")
@@ -506,6 +520,7 @@ class Display:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
+
 					# pygame.quit()
 					# quit()
 					running = False
@@ -522,6 +537,7 @@ class Display:
 						rendering = False
 					else:
 						rendering = True
+
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
@@ -543,11 +559,10 @@ class Display:
 				self.api.set_event(None)
 
 
+
 			
 			self.camera()
 			self.screen.fill(BLUE_SKY)
-
-			
 
 
 			# Drawing the world and the sprites
@@ -571,6 +586,7 @@ class Display:
 			clock.tick()
 
 
+
 	def graph(self):
 		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
 
@@ -591,6 +607,3 @@ class Display:
 
 		plt.tight_layout()
 		plt.show()
-
-
-
