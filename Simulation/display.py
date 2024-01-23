@@ -408,6 +408,7 @@ class Display:
 			if nb_image == nb_total_image:
 				nb_image = nb_imame_start
 	
+
 	def draw_gif(self, gif_generator, pos):
 		self.screen.blit(next(gif_generator), pos)
 

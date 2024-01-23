@@ -1,4 +1,5 @@
 import random
+import food
 
 from queue import *
 
@@ -19,7 +20,7 @@ class Bob:
 	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = Queue(5), max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -40,7 +41,7 @@ class Bob:
 		self.mass = mass
 		self.perception = perception
 		self.memory_points = memory_points
-		self.memory_space = memory_space
+		self.memory_space = []
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
@@ -298,15 +299,49 @@ class Bob:
 	def move_smart(self):
 		for i in self.memory_space:
 			for k in i:
-				if isinstance(k,self.world.get_foods()):
-					self.velocity = 1
+				if isinstance(k,Bob):
+					
+					self.move_dest(self.case_où_fuir(k))
+					break
+				elif isinstance(k,food.Food):
 					self.move()
-					return True
-				elif k == "bob":
-					self.velocity = 1
-					self.move()
-					return True
-				elif k == "wall":
-					self.velocity = -1
-					self.move()
-					return True
+					break
+					
+	def move_dest(self,dest):
+		"""
+        Moves Bob to a destination
+
+        Returns:
+            bool: True after Bob's movement.
+        """
+		old_x, old_y = self.position
+		new_x, new_y = dest
+		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
+						max(0, min(new_y, self.world.get_size() - 1)))
+		self.world.move_bob(self, old_x, old_y)
+		self.loose_energy("move")
+
+
+	def case_où_fuir(self, bob):
+		"""
+		Fonction qui renvoie la case où le bob doit fuir pour éviter la collision avec un autre bob.
+		"""
+
+		x = bob.get_pos()[0]
+		y = bob.get_pos()[1]
+
+		if x > self.get_pos()[0]:
+			x = x + 1
+		elif x < self.get_pos()[0]:
+			x = x - 1
+		else:
+			x = x
+
+		if y > self.get_pos()[1]:
+			y = y + 1
+		elif y < self.get_pos()[1]:
+			y = y - 1
+		else:
+			y = y
+
+		return (x, y)

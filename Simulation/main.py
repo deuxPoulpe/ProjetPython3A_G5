@@ -1,10 +1,13 @@
 from world import World
 from display import Display
 from api import Api
+from menu import *
 
 
 if __name__ == "__main__":
 
+	# menu = Menu()
+	# menu.menu_principal()
 
 	terrain_config = {
 		"generate_river" : True,
@@ -17,7 +20,7 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 50,
+		"size" : 100,
 		"nbFood" : 50,
 		"dayTick" : 100,
 		"Food_energy" : 100,
@@ -25,10 +28,9 @@ if __name__ == "__main__":
 		}, terrain_config)
 	
 
-
-
 	world.spawn_bob(50)
 	api = Api(world, 500)
 	display = Display(api)
 	display.main_loop()
- 
+
+	

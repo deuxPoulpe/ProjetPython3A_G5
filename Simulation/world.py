@@ -53,7 +53,7 @@ class World:
 		}
 
 		self.enabled_event = 0
-		self.event_timer_day_tick = 100
+		self.event_timer_day_tick = 25
 
 
 

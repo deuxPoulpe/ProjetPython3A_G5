@@ -1,5 +1,6 @@
 import pygame
 import sys
+import os
 
 class Menu:
     def __init__(self):
@@ -149,7 +150,8 @@ class Menu:
                     pygame.quit()
                     sys.exit()
 
-            self.mettre_a_jour_fenetre()
+           # self.mettre_a_jour_fenetre()
+            os.system('start C:/Users/julia/Documents/Dossier_INSA/ProjetPython3A_G5/Simulation/main.py')
             # Mettez votre interface de jeu ici
             pygame.display.update()
 
