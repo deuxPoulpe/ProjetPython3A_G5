@@ -2,21 +2,34 @@ import random
 
 class Bob:
 	"""
-    Class representing a character 'Bob' in a simulated world.
+	Classe représentant un personnage 'Bob' dans un monde simulé.
 
-    Attributes:
-        energy (int): Bob's current energy.
-        velocity (int): Bob's movement speed.
-        mass (int): Bob's mass.
-        perception (int): Bob's perception ability.
-        memory_space (list): Bob's memory space.
-        max_energy (int): The maximum energy Bob can accumulate.
-        position (tuple): Bob's current position in the world (x, y).
-        en_fuite (bool): Indicates whether Bob is fleeing.
-        world (World): Reference to the world in which Bob exists.
-    """
+	Attributs:
+		energy (int): Énergie actuelle de Bob.
+		velocity (int): Vitesse de déplacement de Bob.
+		mass (int): Masse de Bob.
+		perception (int): Capacité de perception de Bob.
+		memory_space (list): Espace mémoire de Bob.
+		max_energy (int): Énergie maximale que Bob peut accumuler.
+		position (tuple): Position actuelle de Bob dans le monde (x, y).
+		en_fuite (bool): État indiquant si Bob est en fuite.
+		world (World): Référence au monde dans lequel Bob évolue.
+	"""
 
 	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
+		"""
+		Initialise une nouvelle instance de Bob.
+
+		Paramètres:
+			x (int): Position initiale en x de Bob.
+			y (int): Position initiale en y de Bob.
+			world (World): Référence au monde dans lequel Bob évolue.
+			energy (int, optionnel): Énergie initiale de Bob. Par défaut à 100.
+			velocity (int, optionnel): Vitesse initiale de Bob. Par défaut à 1.
+			mass (int, optionnel): Masse initiale de Bob. Par défaut à 1.
+			perception (int, optionnel): Perception initiale de Bob. Par défaut à 0.
+			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
+
 		"""
         Initializes a new instance of Bob.
 
@@ -190,16 +203,62 @@ class Bob:
 
 		return perception_list
 
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		perception_list = []
+		
+		def bob_get_things_by_distance(self,distance):
+			"""
+			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
+			"""
+			deplacement=0
+			x=self.get_pos()[0]-distance
+			y=self.get_pos()[1]
+
+			while x <= self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+			deplacement=0
+			x=self.get_pos()[0]+distance
+
+			while x > self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+		
+		distance = self.perception
+		while distance > 0:
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+
+		return perception_list
 
 
-	#deux bobs doivent etre dans la meme case pour se reproduire 
-	def sexual_reproduction(self ):
-		for partener in self.world.getbobs[self.position]:
-			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
-				self.reproduce
-				self.loose_energy("sexual_reproduction")
-				new_bob = Bob(self.position , 50)
-				return True
-			else:
-				return False 
+
+    #deux bobs doivent etre dans la meme case pour se reproduire 
+    def sexual_reproduction(self ):
+      for partener in self.world.getbobs[self.position]:
+        if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
+          self.reproduce
+          self.loose_energy("sexual_reproduction")
+          new_bob = Bob(self.position , 50)
+          return True
+        else:
+          return False 
+
 
