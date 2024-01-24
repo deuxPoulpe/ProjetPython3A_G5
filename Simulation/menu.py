@@ -123,6 +123,11 @@ class Menu:
         boutton_Retour = pygame.Rect(600, 500, 100, 30)  # Ajuster la taille du bouton
         if bouton_demarrer.collidepoint(x, y):
             pygame.quit()
+
+            ###################################################
+            #    modifier les varibles pour les options ici   #
+            ###################################################
+
             terrain_config = {
             	"generate_river" : True,
             	"number_of_river" : 1,

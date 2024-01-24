@@ -34,8 +34,6 @@ class Terrain:
 		
 		self.terrain = perlin_noise(size, z_min, z_max, 0.01, self.seed)
 
-		
-		self.terrain = perlin_noise(size, z_min, z_max, 0.01, seed)
 
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
