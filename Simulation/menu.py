@@ -3,6 +3,7 @@ import sys
 from display import Display
 from api import Api
 from world import World
+import os
 
 class Menu:
     def __init__(self):
@@ -20,7 +21,7 @@ class Menu:
         self.ROSE = (255, 192, 203)
 
        # Initialisation de la police
-        self.policeChoisie = "GamepauseddemoRegular-RpmY6.otf"
+        self.policeChoisie = os.path.join("assets", "GamepauseddemoRegular-RpmY6.otf")
         self.police = pygame.font.Font(self.policeChoisie, 36)
         self.policeme = pygame.font.Font(None, 24)        
 
@@ -44,7 +45,7 @@ class Menu:
         self.fenetre.blit(surface_texte, rect_texte)
 
     def afficher_image_de_fond(self, chemin_image):
-        arriere_plan = pygame.image.load(chemin_image)
+        arriere_plan = pygame.image.load(os.path.join("assets", chemin_image))
         arriere_plan = pygame.transform.scale(arriere_plan, (self.LARGEUR, self.HAUTEUR))
         self.fenetre.blit(arriere_plan, (0, 0))
 
@@ -53,7 +54,6 @@ class Menu:
         self.afficher_texte(texte, x + largeur // 2, y + hauteur // 2)
 
     def afficher_formulaire(self, variables):
-        pygame.init()
         self.afficher_image_de_fond("fond.jpeg")
 
         for i, (variable, champ) in enumerate(zip(variables, self.champs_texte)):
