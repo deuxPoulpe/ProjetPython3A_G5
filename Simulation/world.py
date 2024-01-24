@@ -62,9 +62,8 @@ class World:
 		type(argDict["dayTick"]) == int
 		])
 
-
 		self.event_type = ["flood","drought"]
-	
+
 
 	#getters
 	def get_water_level(self):
@@ -236,8 +235,6 @@ class World:
 		"""
 		Updates the state of the world on each tick
 		"""
-				
-
 		event = None
 		
 		#update tick for all bobs

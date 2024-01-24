@@ -5,6 +5,7 @@ from api import Api
 from world import World
 import os
 
+
 class Menu:
     def __init__(self):
         pygame.init()
@@ -28,6 +29,7 @@ class Menu:
         # Champs de texte
         self.champs_texte = [pygame.Rect(350, 50 + i * 50, 300, 30) for i in range(10)]
 
+
         # Couleurs des champs
         self.couleur_active = pygame.Color('dodgerblue2')
         self.couleur_inactive = pygame.Color('lightskyblue3')
@@ -40,12 +42,14 @@ class Menu:
 
     def afficher_texte(self, texte, x, y, taille=36):
         fonte_texte = pygame.font.Font(self.policeChoisie, taille)
+
         surface_texte = fonte_texte.render(texte, True, self.NOIR)
         rect_texte = surface_texte.get_rect(center=(x, y))
         self.fenetre.blit(surface_texte, rect_texte)
 
     def afficher_image_de_fond(self, chemin_image):
         arriere_plan = pygame.image.load(os.path.join("assets", chemin_image))
+
         arriere_plan = pygame.transform.scale(arriere_plan, (self.LARGEUR, self.HAUTEUR))
         self.fenetre.blit(arriere_plan, (0, 0))
 
@@ -71,6 +75,7 @@ class Menu:
             # Bouton de retour
             self.dessiner_bouton(self.ROSE, 600, 505, 150, 50, "Retour")
 
+
         pygame.display.flip()
 
         while True:
@@ -90,7 +95,7 @@ class Menu:
                         # Attribuer les valeurs saisies aux variables
                         for i, variable in enumerate(variables):
                             self.valeurs_variables[variable] = int(self.textes_champs[i])
-                    
+
 
                 if event.type == pygame.KEYDOWN:
                     if self.champ_actif is not None:
@@ -139,6 +144,7 @@ class Menu:
             api = Api(world, 500)
             display = Display(api)
             display.main_loop()
+
         elif bouton_options.collidepoint(x, y):
             print("Options")
             variables = ['number_of_river', 'number_of_lake', 'size_of_lake', 'max_height', 'nbFood', 'dayTick', 'Food_energy', 'generate_river', 'generate_lake', 'custo_terrain']
@@ -158,6 +164,7 @@ class Menu:
                     self.gestion_clic_menu(x_souris, y_souris)
 
             self.afficher_image_de_fond("fond.jpeg")
+
 
             self.afficher_texte("Game Of Life", self.LARGEUR // 2, 100, 56)
             self.dessiner_bouton(self.ROSE, 300, 200, 200, 50, "Start")
@@ -183,3 +190,4 @@ class Menu:
 if __name__ == "__main__":
     menu = Menu()
     menu.menu_principal()
+

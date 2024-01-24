@@ -35,8 +35,8 @@ class Terrain:
 		self.terrain = perlin_noise(size, z_min, z_max, 0.01, self.seed)
 
 		
+		self.terrain = perlin_noise(size, z_min, z_max, 0.01, seed)
 
-		
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
 			y = random.randint(0,size-1)
@@ -62,8 +62,6 @@ class Terrain:
 		
 					self.create_river(p0,p1,p2,p3)
 					
-					
-
 
 			if self.generate_lake:
 				for k in range(self.number_of_lake):

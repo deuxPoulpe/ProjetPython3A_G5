@@ -26,7 +26,6 @@ if __name__ == "__main__":
 	
 
 
-
 	# world.spawn_bob(1)
 	# api = Api(world, 500)
 	# display = Display(api)
