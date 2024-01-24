@@ -2,38 +2,42 @@ import random
 
 class Bob:
 	"""
-    Class representing a character 'Bob' in a simulated world.
+	Classe représentant un personnage 'Bob' dans un monde simulé.
 
-    Attributes:
-        energy (int): Bob's current energy.
-        velocity (int): Bob's movement speed.
-        mass (int): Bob's mass.
-        perception (int): Bob's perception ability.
-        memory_space (list): Bob's memory space.
-        max_energy (int): The maximum energy Bob can accumulate.
-        position (tuple): Bob's current position in the world (x, y).
-        en_fuite (bool): Indicates whether Bob is fleeing.
-        world (World): Reference to the world in which Bob exists.
-    """
+	Attributs:
+		energy (int): Énergie actuelle de Bob.
+		velocity (int): Vitesse de déplacement de Bob.
+		mass (int): Masse de Bob.
+		perception (int): Capacité de perception de Bob.
+		memory_space (list): Espace mémoire de Bob.
+		max_energy (int): Énergie maximale que Bob peut accumuler.
+		position (tuple): Position actuelle de Bob dans le monde (x, y).
+		en_fuite (bool): État indiquant si Bob est en fuite.
+		world (World): Référence au monde dans lequel Bob évolue.
+	"""
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, max_energy=200,velocity_buffer=0,case_to_move=0):
+
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
 		"""
-        Initializes a new instance of Bob.
+		Initialise une nouvelle instance de Bob.
 
-        Parameters:
-            x (int): Initial position of Bob in the x-axis.
-            y (int): Initial position of Bob in the y-axis.
-            world (World): Reference to the world in which Bob exists.
-            energy (int, optional): Initial energy of Bob. Default is 100.
-            velocity (int, optional): Initial velocity of Bob. Default is 1.
-            mass (int, optional): Initial mass of Bob. Default is 1.
-            perception (int, optional): Initial perception of Bob. Default is 0.
-            max_energy (int, optional): Maximum energy of Bob. Default is 200.
-        """
+		Paramètres:
+			x (int): Position initiale en x de Bob.
+			y (int): Position initiale en y de Bob.
+			world (World): Référence au monde dans lequel Bob évolue.
+			energy (int, optionnel): Énergie initiale de Bob. Par défaut à 100.
+			velocity (int, optionnel): Vitesse initiale de Bob. Par défaut à 1.
+			mass (int, optionnel): Masse initiale de Bob. Par défaut à 1.
+			perception (int, optionnel): Perception initiale de Bob. Par défaut à 0.
+			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
+
+		"""
+
 		self.energy = energy
 		self.velocity = velocity
 		self.mass = mass
 		self.perception = perception
+		self.memory_points = memory_points
 		self.memory_space = []
 		self.max_energy = max_energy
 		self.position = (x, y)
@@ -43,15 +47,14 @@ class Bob:
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
-
 	def get_pos(self):
 		return self.position
-
 	def get_energy(self):
 		return self.energy
-
 	def get_mass(self):
 		return self.mass
+	def get_velocity(self):
+		return self.velocity
 
 	
 	def eat_food(self):
@@ -74,7 +77,6 @@ class Bob:
 		elif mode == "stand":
 			self.energy -= 0.5
 			
-		
 
 	def move(self):
 		"""
@@ -90,6 +92,9 @@ class Bob:
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
 		self.loose_energy("move")
+
+	
+
 		return True
 
 	def die(self):
@@ -159,6 +164,7 @@ class Bob:
 			return True
 		return False
 	
+
 	def bob_perception(self):
 		"""
 		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
@@ -190,3 +196,114 @@ class Bob:
 
 		return perception_list
 
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		perception_list = []
+		
+		def bob_get_things_by_distance(self,distance):
+			"""
+			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
+			"""
+			deplacement=0
+			x=self.get_pos()[0]-distance
+			y=self.get_pos()[1]
+
+			while x <= self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+			deplacement=0
+			x=self.get_pos()[0]+distance
+
+			while x > self.get_pos()[0]:
+
+				if (x,y+deplacement) in self.world.get_foods():
+						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				if (x,y-deplacement) in self.world.get_bobs():
+						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+
+				x-=1
+				deplacement+=1
+
+		
+		distance = self.perception
+		while distance > 0:
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+
+		return perception_list
+
+
+
+	#deux bobs doivent etre dans la meme case pour se reproduire 
+	def sexual_reproduction(self ):
+		for partener in self.world.getbobs[self.position]:
+			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
+				self.reproduce
+				self.loose_energy("sexual_reproduction")
+				new_bob = Bob(self.position , 50)
+				return True
+			else:
+				return False 
+
+
+
+
+	def memory_store(self):
+
+		"""
+		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
+		"""
+		
+		while(1):
+			
+			if(self.move()):
+			
+				self.memory_space.put(self.perception_list)
+
+
+				if len(self.memory_space) > 5:
+					self.memory_space.get()
+
+		return self.memory_space
+
+
+
+	def mutate_memory_points(self):
+		
+		"""
+		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
+
+		"""
+
+		values = [-1, 0 , 1]
+
+		mutation = random.choice(values)
+
+		self.memory_points += mutation
+
+		return self.memory_points
+
+	def move_smart(self):
+		for i in self.memory_space:
+			for k in i:
+				if isinstance(k,self.world.get_foods()):
+					self.velocity = 1
+					self.move()
+					return True
+				elif k == "bob":
+					self.velocity = 1
+					self.move()
+					return True
+				elif k == "wall":
+					self.velocity = -1
+					self.move()
+					return True
