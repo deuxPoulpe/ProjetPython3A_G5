@@ -380,22 +380,26 @@ class Bob:
 		return self.memory_points
 
 	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
-		for i in self.memory_space:
-			for j in i:
-				for k in j:
-
-					if isinstance(k,Bob):
-						if (self.get_mass()/k.get_mass())<(2/3):
-							self.move_dest(self.case_ou_aller(k,"fuir"))
-							return True
-						
-						if (self.get_mass()/k.get_mass())>=(3/2):
-							self.move_dest(self.case_ou_aller(k,"aller"))
-							return True
-
-					elif isinstance(k,food.Food):
-						self.move(self.case_ou_aller(k,"aller"))
+		for j in self.perception_list:
+			for k in j:
+				if isinstance(k,Bob):
+					if (self.get_mass()/k.get_mass())<(2/3):
+						self.move_dest(self.case_ou_aller(k,"fuir"))
 						return True
+					
+					if (self.get_mass()/k.get_mass())>=(3/2):
+						self.move_dest(self.case_ou_aller(k,"aller"))
+						return True
+
+				elif isinstance(k,food.Food):
+					self.move(self.case_ou_aller(k,"aller"))
+					return True
+				
+		for i in self.memory_space:
+			if isinstance(i,food.Food):
+				self.move(self.case_ou_aller(i,"aller"))
+				return True
+			
 		self.move()
 		return True
 			
