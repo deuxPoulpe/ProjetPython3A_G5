@@ -55,6 +55,7 @@ class World:
 			"perception" : True,
 			"memory" : True,
 			"eat_bob" : True,
+			"move_smart" : True,
 		}
 
 		self.enabled_event = 0

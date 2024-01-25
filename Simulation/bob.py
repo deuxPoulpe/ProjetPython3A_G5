@@ -139,39 +139,6 @@ class Bob:
             None
         """
 
-		# actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
-
-		# if self.die():
-		# 	return None
-		
-		# self.mutate_memory_points()
-
-		# if self.world.enable_function["perception"] : self.bob_perception_v2()
-
-		# if self.world.enable_function["memory"] : self.memory_store()
-
-		# if self.world.enable_function["reproduce"]:
-		# 	if (self.reproduce()) :
-		# 		self.loose_energy("stand")
-		# 		return None
-
-		# if self.word.enable_function["sexual_reproduction"]:
-		# 	if (self.sexual_reproduction()):
-		# 		self.loose_energy("stand")
-		# 		return None
-			
-		# if self.world.enable_function["eat_bob"] and (self.eat_bob()):
-		# 	self.loose_energy("stand")
-		# 	return None
-
-		# if(self.eat_food()) :
-		# 	self.loose_energy("stand")
-		# 	return None
-
-		# if self.world.enable_function["move_smart"] and (self.move_smart()):
-		# 	self.loose_energy("move")
-		# 	return None
-
 		if self.die():
 			return None
 		
