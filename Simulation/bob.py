@@ -42,6 +42,7 @@ class Bob:
 		self.perception = perception
 		self.memory_points = memory_points
 		self.memory_space = []
+		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
@@ -155,6 +156,10 @@ class Bob:
 			case_to_move += 1
 	
 	def eat_bob(self):
+		"""
+		Permet à Bob de manger un autre Bob. Retourne True si Bob a mangé un autre Bob, False sinon.
+		"""
+		
 		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
 		mass_bob_list = [x.get_mass() for x in copy_bobs]
 		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
@@ -202,10 +207,10 @@ class Bob:
 
 	def bob_perception_v2(self):
 		"""
-		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
-		perception_list = []
-		
+		self.perception_list = []
+
 		def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
@@ -217,9 +222,9 @@ class Bob:
 			while x <= self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
@@ -230,9 +235,9 @@ class Bob:
 			while x > self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
@@ -242,8 +247,7 @@ class Bob:
 		while distance > 0:
 			self.bob_get_things_by_distance(distance)
 			distance-=1
-
-		return perception_list
+		return True
 
 
 
@@ -296,19 +300,22 @@ class Bob:
 
 		return self.memory_points
 
-	def move_smart(self):
+	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
 		for i in self.memory_space:
 			for k in i:
+
 				if isinstance(k,Bob):
-					self.move_dest(self.case_où_fuir(k))
-					break
+					if (self.get_mass()/k.get_mass())<(2/3):
+						self.move_dest(self.case_ou_aller(k,"fuir"))
+						break
+
 				elif isinstance(k,food.Food):
-					self.move()
+					self.move(self.case_ou_aller(k,"aller"))
 					break
 					
 	def move_dest(self,dest):
 		"""
-        Moves Bob to a destination
+        Teleport Bob to a destination
 
         Returns:
             bool: True after Bob's movement.
@@ -321,26 +328,92 @@ class Bob:
 		self.loose_energy("move")
 
 
-	def case_où_fuir(self, bob):
+	def case_ou_aller(self, bob , mode):
 		"""
-		Fonction qui renvoie la case où le bob doit fuir pour éviter la collision avec un autre bob.
+		Fonction qui renvoie la case où le bob doit fuir pour éviter de se faire manger par un autre bob.
 		"""
+
+		if mode == "fuir":
+			d = 1
+		elif mode == "aller":
+			d = -1
+
+		x1 = self.get_pos()[0] #position en abcisse du bob qui doit fuir
+		y1 = self.get_pos()[1] #position en ordonnée du bob qui doit fuir
 
 		x = bob.get_pos()[0]
 		y = bob.get_pos()[1]
+		dx = self.get_pos()[0] - x
+		dy = self.get_pos()[1] - y
 
-		if x > self.get_pos()[0]:
-			x = x + 1
-		elif x < self.get_pos()[0]:
-			x = x - 1
-		else:
-			x = x
 
-		if y > self.get_pos()[1]:
-			y = y + 1
-		elif y < self.get_pos()[1]:
-			y = y - 1
-		else:
-			y = y
+		if dx > 0 and dy>0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 += d
+			else:
+				y1 += d
+		elif dx > 0 and dy<0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 += d
+			else:
+				y1 -= d
+		elif dx < 0 and dy>0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 -= d
+			else:
+				y1 += d
+		elif dx < 0 and dy<0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 -= d
+			else:
+				y1 -= d
+		
+		elif dx == 0 and dy>0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				x1 += d
+			elif randint == 1:
+				x1 -= d
+			else:
+				y1 += d
+		elif dx == 0 and dy<0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				x1 += d
+			elif randint == 1:
+				x1 -= d
+			else:
+				y1 -= d
+		elif dx > 0 and dy==0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				y1 += d
+			elif randint == 1:
+				y1 -= d
+			else:
+				x1 += d
+		elif dx < 0 and dy==0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				y1 += d
+			elif randint == 1:
+				y1 -= d
+			else:
+				x1 -= d
+		elif dx == 0 and dy==0:
+			pass
 
-		return (x, y)
+		elif dx == 0 and dy>0 and mode=="aller":
+			y1+=d
+		elif dx == 0 and dy<0 and mode=="aller":
+			y1 -= d
+		elif dx > 0 and dy==0 and mode=="aller":
+				x1 += d
+		elif dx < 0 and dy==0 and mode=="aller":
+				x1 -= d
+
+		return (x1,y1)
