@@ -175,7 +175,8 @@ class Menu:
             self.dessiner_bouton(self.ROSE, 300, 200, 200, 50, "Start")
             self.dessiner_bouton(self.ROSE, 300, 300, 200, 50, "Options")
             self.dessiner_bouton(self.ROSE, 300, 400, 200, 50, "Quitter")
-
+            self.dessiner_bouton(self.ROSE , 300, 500, 200, 50, "Save")
+            
             pygame.display.update()
 
     def interface_jeu(self):
@@ -191,6 +192,10 @@ class Menu:
 
     def mettre_a_jour_fenetre(self):
         self.afficher_image_de_fond("fond.jpeg")
+    
+    def load
+    
+    
 
 if __name__ == "__main__":
     menu = Menu()
