@@ -309,17 +309,12 @@ def memory_store(self):
 		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
 		"""
 		
-		while(1):
-			
-			if(self.move()):
-			
-				self.memory_space.put(self.perception_list)
-
-
-				if len(self.memory_space) > 5:
-					self.memory_space.get()
-
-		return self.memory_space
+		for k in self.perception_list:
+			for j in k:
+				if isinstance(j, food.Food):
+					self.memory_space[0].append(j)
+				elif isinstance(j, Bob) and (self.get_mass()/j.get_mass())<(2/3):
+					self.memory
 
 
 
