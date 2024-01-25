@@ -162,6 +162,25 @@ class Bob:
 		
 		self.mutate_memory_points()
 
+		self.bob_perception_v2()
+
+		self.memory_store()
+
+		if self.world.enable_function["reproduce"]:
+
+			self.reproduce()
+
+		elif self.word.enable_function["sexual_reproduction"]:
+
+			self.sexual_reproduction()
+
+		self.eat_bob()
+
+		self.eat_food()
+
+		
+
+
 
 
 
@@ -272,15 +291,16 @@ class Bob:
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
-	def sexual_reproduction(self ):
-		for partener in self.world.getbobs[self.position]:
-			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
-				self.reproduce
+	def sexual_reproduction(self):
+		for partener in self.world.get_bobs[self.position]:
+			if (self.position == partener.position and self.energy> 150 and partener.position > 150 ):
+				
 				self.loose_energy("sexual_reproduction")
-				new_bob = Bob(self.position , 50)
+
+				self.world.spawn_reproduce(partener, self) # Modifier fonction spawn_reproduce dans World
 				return True
-			else:
-				return False 
+			
+		return False 
 
 
 

@@ -43,6 +43,7 @@ class World:
 		self.nb_bob = 0
 		self.nb_food = 0
 		self.water_level = 0
+		self.mutation = 0.02
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
@@ -50,6 +51,8 @@ class World:
 
 		self.enable_function = {
 			"custom_event" : True,
+			"reproduce" : True,
+			"sexual_reproduction" : False,
 		}
 
 		self.enabled_event = 0
@@ -194,6 +197,9 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+
+	def spawn_sexual_reproduction: # A implémenter
+		
 
 
 	def save(self,filename,*args):
