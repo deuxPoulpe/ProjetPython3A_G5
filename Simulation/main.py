@@ -20,11 +20,11 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 100,
+		"size" : 5,
 		"nbFood" : 50,
 		"dayTick" : 100,
 		"Food_energy" : 100,
-		"custom_terrain" : True,
+		"custom_terrain" : False,
 		}, terrain_config)
 	
 

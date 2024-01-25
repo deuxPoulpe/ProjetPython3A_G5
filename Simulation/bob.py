@@ -382,6 +382,10 @@ class Bob:
 						if (self.get_mass()/k.get_mass())<(2/3):
 							self.move_dest(self.case_ou_aller(k,"fuir"))
 							return True
+						
+						if (self.get_mass()/k.get_mass())>=(3/2):
+							self.move_dest(self.case_ou_aller(k,"aller"))
+							return True
 
 					elif isinstance(k,food.Food):
 						self.move(self.case_ou_aller(k,"aller"))
