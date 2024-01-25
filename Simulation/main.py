@@ -1,6 +1,3 @@
-from world import World
-from display import Display
-from api import Api
 from menu import Menu
 
 
@@ -14,6 +11,7 @@ if __name__ == "__main__":
 	# 	"size_of_lake" : 20,
 	# 	"max_height" : 10,
 	# 	"seed" : 6432,
+	#	 "water_level" : 0,
 	# 	}
 
 	# world = World({

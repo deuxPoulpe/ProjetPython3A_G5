@@ -7,7 +7,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
 
-
 from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
 from Utility.time_function_utility import execute_function_during_it, execute_function_after_it
 
@@ -19,7 +18,8 @@ BLACK = (0,0,0)
 
 
 class Display:
-	def __init__(self, api):
+	def __init__(self, api, ig_menu):
+		self.in_game_menu = ig_menu
 		self.api = api
 
 		self.screen_width = 800
@@ -412,6 +412,17 @@ class Display:
 	
 	def draw_gif(self, gif_generator, pos):
 		self.screen.blit(next(gif_generator), pos)
+  
+  		
+	def change_api_option(self,options):
+		self.api.change_options(options[0], options[1])
+		self.world_size = options[0]["size"]
+		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		while self.api.is_changed_option():
+			pass
+		self.data = self.api.get_shared_data()
+		self.draw_better_world(True)
 
 		
 	def main_loop(self):
@@ -540,9 +551,19 @@ class Display:
 					else:
 						rendering = True
 
-
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
+     
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+					self.api.pause()
+					self.in_game_menu.main_loop()
+					if self.in_game_menu.is_option_changed():
+						self.change_api_option(self.in_game_menu.get_options())
+						print("option changed" , self.in_game_menu.is_option_changed())
+					self.api.resume()
+
+
+     
 
 				self.zoom(event)
 				self.start_drag(event)
