@@ -196,20 +196,6 @@ class World:
 		self.nb_bob += 1
 
 
-	def save(self,filename,*args):
-		"""
-        Saves the current state of the world to a file.
-
-        Parameters:
-            filename (str): Name of the file to save the state to.
-            *args: Additional arguments or objects to save.
-        """
-		with open(filename, 'wb') as output:
-			for i in args:
-				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
-				print("saved",i)
-		output.close()
-
 	def event_update(self):
 		event_type_choice = random.choice(self.event_type)
 

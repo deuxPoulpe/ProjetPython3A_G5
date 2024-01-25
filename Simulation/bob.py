@@ -300,7 +300,6 @@ class Bob:
 		for i in self.memory_space:
 			for k in i:
 				if isinstance(k,Bob):
-					
 					self.move_dest(self.case_où_fuir(k))
 					break
 				elif isinstance(k,food.Food):
