@@ -4,6 +4,7 @@ from display import Display
 from api import Api
 from world import World
 import os
+from save_load import * 
 
 
 class Menu:
@@ -193,7 +194,7 @@ class Menu:
     def mettre_a_jour_fenetre(self):
         self.afficher_image_de_fond("fond.jpeg")
     
-    def load
+   
     
     
 
