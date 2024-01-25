@@ -78,7 +78,7 @@ class Bob:
 		elif mode == "stand":
 			self.energy -= 0.5
 			
-	cases_mémoire = Queue(5)	
+	
 
 	def move(self):
 		"""
@@ -132,9 +132,19 @@ class Bob:
 
         Returns:
             None
+
+		Incluant les évènements :
+			bob_perception_v2(self)
+			move_smart(self)
+			memory_store(self)
+			mutate_memory_points(self)
+			eat_bob()
+			Implémenter le choix en entre sexual_reproduction(self) et reproduce(self) 
+
+
         """
-		actions = [self.die, self.reproduce, self.move]
-		sub_actions = [self.eat_food]
+		actions = [self.move, self.reproduce, self.die,]
+		sub_actions = []
 		for action in actions:
 			if action():
 				if action.__name__ == "move":
@@ -144,6 +154,22 @@ class Bob:
 
 				break
 	
+
+		actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
+
+		if self.die():
+			return None
+		
+		self.mutate_memory_points()
+
+
+
+
+
+			
+
+
+
 	def velocity_manager(self):
 
 		self.case_to_move += abs(self.velocity)
@@ -285,10 +311,18 @@ class Bob:
 
 		"""
 
-		values = [-1, 0 , 1]
+		if (random.randint(0, 1) > self.word.mutation) :
+			
+			values = [-1, 0 , 1]
 
-		mutation = random.choice(values)
+			mutation = random.choice(values)
 
-		self.memory_points += mutation
+			self.memory_points += mutation
 
 		return self.memory_points
+
+
+
+
+
+		
