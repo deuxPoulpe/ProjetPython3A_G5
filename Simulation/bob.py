@@ -177,9 +177,15 @@ class Bob:
 		self.velocity_manager()
 
 		while self.case_to_move > 0:
-			if self.world.enable_function["perception"] and (self.bob_perception_v2()):
+			if self.world.enable_function["perception"]:
+				self.bob_perception_v2()
+			if self.world.enable_function["memory"]:
 				self.memory_store()
 			if self.world.enable_function["move_smart"] and (self.move_smart()):
+				self.loose_energy("move")
+				self.case_to_move -= 1
+
+			if  self.move() and not self.world.enable_function["move_smart"]:
 				self.loose_energy("move")
 				self.case_to_move -= 1
 
@@ -196,9 +202,7 @@ class Bob:
 
 
 			
-			if  self.move() and not self.world.enable_function["move_smart"]:
-				self.loose_energy("move")
-				self.case_to_move -= 1
+			
 			
 
 			
