@@ -340,7 +340,132 @@ def mutate_memory_points(self):
 
 		return self.memory_points
 
+def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
+		for i in self.memory_space:
+			for j in i:
+				for k in j:
 
+					if isinstance(k,Bob):
+						if (self.get_mass()/k.get_mass())<(2/3):
+							self.move_dest(self.case_ou_aller(k,"fuir"))
+							return True
+						
+						if (self.get_mass()/k.get_mass())>=(3/2):
+							self.move_dest(self.case_ou_aller(k,"aller"))
+							return True
+
+					elif isinstance(k,food.Food):
+						self.move(self.case_ou_aller(k,"aller"))
+						return True
+		self.move()
+		return True
+			
+	
+					
+def move_dest(self,dest):
+		"""
+        Teleport Bob to a destination
+
+        Returns:
+            bool: True after Bob's movement.
+        """
+		old_x, old_y = self.position
+		new_x, new_y = dest
+		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
+						max(0, min(new_y, self.world.get_size() - 1)))
+		self.world.move_bob(self, old_x, old_y)
+		self.loose_energy("move")
+
+
+def case_ou_aller(self, bob , mode):
+		"""
+		Fonction qui renvoie la case où le bob doit fuir pour éviter de se faire manger par un autre bob.
+		"""
+
+		if mode == "fuir":
+			d = 1
+		elif mode == "aller":
+			d = -1
+
+		x1 = self.get_pos()[0] #position en abcisse du bob qui doit fuir
+		y1 = self.get_pos()[1] #position en ordonnée du bob qui doit fuir
+
+		x = bob.get_pos()[0]
+		y = bob.get_pos()[1]
+		dx = self.get_pos()[0] - x
+		dy = self.get_pos()[1] - y
+
+
+		if dx > 0 and dy>0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 += d
+			else:
+				y1 += d
+		elif dx > 0 and dy<0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 += d
+			else:
+				y1 -= d
+		elif dx < 0 and dy>0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 -= d
+			else:
+				y1 += d
+		elif dx < 0 and dy<0:
+			randint = random.randint(0,1)
+			if randint == 0:
+				x1 -= d
+			else:
+				y1 -= d
+		
+		elif dx == 0 and dy>0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				x1 += d
+			elif randint == 1:
+				x1 -= d
+			else:
+				y1 += d
+		elif dx == 0 and dy<0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				x1 += d
+			elif randint == 1:
+				x1 -= d
+			else:
+				y1 -= d
+		elif dx > 0 and dy==0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				y1 += d
+			elif randint == 1:
+				y1 -= d
+			else:
+				x1 += d
+		elif dx < 0 and dy==0 and mode=="fuir":
+			randint = random.randint(0,2)
+			if randint == 0:
+				y1 += d
+			elif randint == 1:
+				y1 -= d
+			else:
+				x1 -= d
+		elif dx == 0 and dy==0:
+			pass
+
+		elif dx == 0 and dy>0 and mode=="aller":
+			y1+=d
+		elif dx == 0 and dy<0 and mode=="aller":
+			y1 -= d
+		elif dx > 0 and dy==0 and mode=="aller":
+				x1 += d
+		elif dx < 0 and dy==0 and mode=="aller":
+				x1 -= d
+
+		return (x1,y1)
 
 
 
