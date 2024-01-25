@@ -57,7 +57,7 @@ class Display:
 			"sand" : pygame.image.load(os.path.join("assets/tiles", "tile_115.png")),
 			"plants": [],
 			"rocks" : [],
-			"full_bob" : pygame.image.load(os.path.join("assets/Sprites","bob.png")).convert(),
+			"full_bob" : pygame.image.load(os.path.join("assets/Sprites",random.choice("bob.png", "bob_green.png", "bob_red.png"))).convert(),
 			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert()
 		}
 

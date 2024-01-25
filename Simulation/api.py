@@ -11,7 +11,7 @@ class Api:
 		self.process = None
 		self.shared_data = mp.Manager().dict()
 		self.quit = False
-		self.update_shared_data()
+		#self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
 
 		self.shared_data['event'] = None

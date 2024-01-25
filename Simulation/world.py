@@ -176,6 +176,10 @@ class World:
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
 			food=Food(x, y, self, value=self.argDict["Food_energy"])
+
+			if y <= self.argDict["water_level"]:
+				continue 
+
 			if (x,y) not in self.foods:
 				self.foods[(x,y)] = food
 			else:

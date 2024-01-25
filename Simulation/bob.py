@@ -45,6 +45,7 @@ class Bob:
 		self.position = (x, y)
 		self.en_fuite = False
 		self.world = world
+		self.color = random.choice("red", "green", "blue")
 
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
