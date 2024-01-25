@@ -294,10 +294,23 @@ class Bob:
 				deplacement+=1
 
 		
-		distance = self.perception
-		while distance > 0:
+		distance = round(self.perception)
+		while distance > 0: #On ajoute les objets que voit bob par distance
+
 			self.bob_get_things_by_distance(distance)
 			distance-=1
+		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+
+		tampon=[]
+		for k in self.perception_list:
+			for j in k:
+				if isinstance(j,food.Food):
+					tampon.append(j)
+					self.perception_list[k].remove(j)
+				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
+				self.perception_list[k].append(tampon)
+				tampon=[]
+				
 		return True
 
 
