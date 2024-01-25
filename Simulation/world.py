@@ -198,7 +198,7 @@ class World:
 
 		self.nb_bob += 1
 
-	def spawn_sexual_reproduction: # A implémenter
+	#def spawn_sexual_reproduction: # A implémenter
 		
 
 
