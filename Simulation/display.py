@@ -46,6 +46,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
+		
 
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")),
@@ -58,7 +59,12 @@ class Display:
 			"plants": [],
 			"rocks" : [],
 			"full_bob" : pygame.image.load(os.path.join("assets/Sprites","bob.png")).convert(),
-			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert()
+			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert(),
+			"pause" : pygame.image.load(os.path.join("assets/UI", "pause.png")),
+			"play" : pygame.image.load(os.path.join("assets/UI", "play.png")),
+			"backforward" : pygame.image.load(os.path.join("assets/UI", "backforward.png")),
+			"fastforward" : pygame.image.load(os.path.join("assets/UI", "fastforward.png")),
+			"option" : pygame.image.load(os.path.join("assets/UI", "option.png")),
 		}
 
 		for k in range(0, 12):
@@ -444,6 +450,7 @@ class Display:
 			play_button.change_color()
 			fastforward.change_color()
 			backforward.change_color()
+			option_button.change_color()
    
 		def ui_tick_modification(pos):
 			"""
@@ -487,7 +494,18 @@ class Display:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 100)
 				else:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 500)
-			
+
+			elif option_button.get_rect().collidepoint(x,y):
+				option_button.set_active(True)
+				option_button.change_color()
+				self.api.pause()
+				self.in_game_menu.main_loop()
+				if self.in_game_menu.is_option_changed():
+					self.change_api_option(self.in_game_menu.get_options())
+				self.api.resume()
+				option_button.set_active(False)
+				option_button.change_color()
+
 					
     
     
@@ -496,13 +514,16 @@ class Display:
 		self.screen.fill(BLUE_SKY)
 		clock = pygame.time.Clock()
 
-		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets/UI", "backforward.png")))
+		backforward = Sprite_UI(self.screen_width - 160, 10, self.assets["backforward"])
 		backforward.set_active(False)
-		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets/UI", "fastforward.png")))
+		fastforward = Sprite_UI(self.screen_width - 40, 10, self.assets["fastforward"])
 		fastforward.set_active(False)
-		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets/UI", "pause.png")))
+		pause_button = Sprite_UI(self.screen_width - 120, 10, self.assets["pause"])
 		pause_button.set_active(False)
-		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets/UI", "play.png")))
+		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
+
+		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
+		option_button.set_active(False)
 		change_color_all_ui()
 
 		self.fastforward_active = GEN_NULL
@@ -519,6 +540,7 @@ class Display:
 		ui_element.add(play_button)
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
+		ui_element.add(option_button)
 
 		self.draw_better_world(True)
 		self.api.start()
@@ -544,6 +566,7 @@ class Display:
 					play_button.update_position((self.screen_width - 80, 10))
 					fastforward.update_position((self.screen_width - 40, 10))
 					backforward.update_position((self.screen_width - 160, 10))
+					option_button.update_position((self.screen_width - 200, 10))
 
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
 					if rendering:
@@ -554,14 +577,6 @@ class Display:
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
      
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-					self.api.pause()
-					self.in_game_menu.main_loop()
-					if self.in_game_menu.is_option_changed():
-						self.change_api_option(self.in_game_menu.get_options())
-						print("option changed" , self.in_game_menu.is_option_changed())
-					self.api.resume()
-
 
      
 
@@ -608,25 +623,3 @@ class Display:
 			pygame.display.flip()
 			clock.tick()
 
-
-
-	def graph(self):
-		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
-
-		# Premier graphique
-		ax1.plot(range(len(self.world.get_population_Bob())), self.world.get_population_Bob(), label="Population")
-		ax1.legend()
-		ax1.set_ylabel('Population')
-		ax1.set_title('Bob Population Over Time')
-		ax1.grid(True)
-
-		# Deuxième graphique
-		ax2.plot(range(len(self.world.get_population_Food())), self.world.get_population_Food(), label="Food", color='orange')
-		ax2.legend()
-		ax2.set_xlabel('Ticks')
-		ax2.set_ylabel('Food')
-		ax2.set_title('Bob Food Over Time')
-		ax2.grid(True)
-
-		plt.tight_layout()
-		plt.show()
