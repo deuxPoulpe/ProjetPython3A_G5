@@ -1,4 +1,5 @@
 import random
+import food
 
 from queue import *
 
@@ -126,13 +127,13 @@ class Bob:
 		else:
 			return False
 
-	def update_tick(self):
+def update_tick(self):
 		"""
         Updates Bob's state at each 'tick' or time interval. Manages various actions like dying, eating, reproducing, and moving.
 
         Returns:
             None
-
+   
 		Incluant les évènements :
 			bob_perception_v2(self)
 			move_smart(self)
@@ -143,40 +144,38 @@ class Bob:
 
 
         """
-		actions = [self.move, self.reproduce, self.die,]
-		sub_actions = []
-		for action in actions:
-			if action():
-				if action.__name__ == "move":
-					for sub_action in sub_actions:
-						sub_action()
-						break
-
-				break
 	
-
-		actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
 
 		if self.die():
 			return None
 		
 		self.mutate_memory_points()
 
-		self.bob_perception_v2()
+		if self.world.enable_function["perception"] : self.bob_perception_v2()
 
-		self.memory_store()
+		if self.world.enable_function["memory"] : self.memory_store()
 
 		if self.world.enable_function["reproduce"]:
+			if (self.reproduce()) :
+				self.loose_energy("stand")
+				return None
 
-			self.reproduce()
+		if self.word.enable_function["sexual_reproduction"]:
+			if (self.sexual_reproduction()):
+				self.loose_energy("stand")
+				return None
+			
+		if self.world.enable_function["eat_bob"] and (self.eat_bob()):
+			self.loose_energy("stand")
+			return None
 
-		elif self.word.enable_function["sexual_reproduction"]:
+		if(self.eat_food()) :
+			self.loose_energy("stand")
+			return None
 
-			self.sexual_reproduction()
-
-		self.eat_bob()
-
-		self.eat_food()
+		if self.world.enable_function["move_smart"] and (self.move_smart()):
+			self.loose_energy("move")
+			return None
 
 		
 
@@ -189,7 +188,7 @@ class Bob:
 
 
 
-	def velocity_manager(self):
+def velocity_manager(self):
 
 		self.case_to_move += abs(self.velocity)
 		self.velocity_buffer += self.velocity-abs(self.velocity)
@@ -197,7 +196,7 @@ class Bob:
 			self.velocity_buffer -= 1
 			case_to_move += 1
 	
-	def eat_bob(self):
+def eat_bob(self):
 		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
 		mass_bob_list = [x.get_mass() for x in copy_bobs]
 		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
@@ -212,7 +211,7 @@ class Bob:
 		return False
 	
 
-	def bob_perception(self):
+def bob_perception(self):
 		"""
 		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
 		"""
@@ -243,7 +242,7 @@ class Bob:
 
 		return perception_list
 
-	def bob_perception_v2(self):
+def bob_perception_v2(self):
 		"""
 		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
 		"""
@@ -291,7 +290,7 @@ class Bob:
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
-	def sexual_reproduction(self):
+def sexual_reproduction(self):
 		for partener in self.world.get_bobs[self.position]:
 			if (self.position == partener.position and self.energy> 150 and partener.position > 150 ):
 				
@@ -304,7 +303,7 @@ class Bob:
 
 
 
-	def memory_store(self):
+def memory_store(self):
 
 		"""
 		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
@@ -324,7 +323,7 @@ class Bob:
 
 
 
-	def mutate_memory_points(self):
+def mutate_memory_points(self):
 		
 		"""
 		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
