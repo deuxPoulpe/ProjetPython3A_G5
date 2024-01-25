@@ -50,6 +50,11 @@ class World:
 
 		self.enable_function = {
 			"custom_event" : True,
+			"reproduce" : True,
+			"sexual_reproduction" : False,
+			"perception" : True,
+			"memory" : True,
+			"eat_bob" : True,
 		}
 
 		self.enabled_event = 0

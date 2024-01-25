@@ -172,9 +172,9 @@ class Bob:
 		
 		self.mutate_memory_points()
 
-		self.bob_perception_v2()
+		if self.world.enable_function["perception"] : self.bob_perception_v2()
 
-		self.memory_store()
+		if self.world.enable_function["memory"] : self.memory_store()
 
 		if self.world.enable_function["reproduce"]:
 			if (self.reproduce()) :
@@ -194,7 +194,9 @@ class Bob:
 			self.loose_energy("stand")
 			return None
 
-		elif()
+		if self.world.enable_function["move_smart"] and (self.move_smart()):
+			self.loose_energy("move")
+			return None
 	
 	def velocity_manager(self):
 
@@ -271,9 +273,9 @@ class Bob:
 			while x <= self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
@@ -284,9 +286,9 @@ class Bob:
 			while x > self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
