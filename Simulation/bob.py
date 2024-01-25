@@ -47,6 +47,8 @@ class Bob:
 		self.position = (x, y)
 		self.en_fuite = False
 		self.world = world
+		self.case_to_move = 0
+		self.velocity_buffer = 0
 
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
@@ -343,19 +345,23 @@ class Bob:
 		"""
 		Fonction qui va stocker dans une file de 5 éléments les 5 dernières cases traversées par le bob
 		"""
+		def distance(self,food):
+			return abs(food.get_pos()[0]-self.get_pos()[0])+abs(food.get_pos()[1]-self.get_pos()[1])
 		
-		while(1):
-			
-			if(self.move()):
-			
-				self.memory_space.put(self.perception_list)
-
-
-				if len(self.memory_space) > 5:
-					self.memory_space.get()
-
-		return self.memory_space
-
+		for k in self.perception_list:
+			for j in k:
+				if isinstance(j,food.Food):
+					if len(self.memory_space) > self.memory_points*2:
+						self.memory_space.pop(0)
+					self.memory_space.append(j)
+					
+		for e in self.memory_space:
+			if distance(self,e) < self.perception:
+				self.memory_space.remove(e)
+		
+		self.memory_space.sort(key=lambda food: food.value, reverse=True)
+		return True
+		
 
 
 	def mutate_memory_points(self):
