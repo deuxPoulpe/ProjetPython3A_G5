@@ -136,67 +136,72 @@ class Bob:
         Returns:
             None
         """
-		def update_tick(self):
-		"""
-        Updates Bob's state at each 'tick' or time interval. Manages various actions like dying, eating, reproducing, and moving.
 
-        Returns:
-            None
+		# actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
 
-		Incluant les évènements :
-			bob_perception_v2(self)
-			move_smart(self)
-			memory_store(self)
-			mutate_memory_points(self)
-			eat_bob()
-			Implémenter le choix en entre sexual_reproduction(self) et reproduce(self) 
+		# if self.die():
+		# 	return None
+		
+		# self.mutate_memory_points()
 
+		# if self.world.enable_function["perception"] : self.bob_perception_v2()
 
-        """
-		actions = [self.move, self.reproduce, self.die,]
-		sub_actions = []
-		for action in actions:
-			if action():
-				if action.__name__ == "move":
-					for sub_action in sub_actions:
-						sub_action()
-						break
+		# if self.world.enable_function["memory"] : self.memory_store()
 
-				break
-	
+		# if self.world.enable_function["reproduce"]:
+		# 	if (self.reproduce()) :
+		# 		self.loose_energy("stand")
+		# 		return None
 
-		actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
+		# if self.word.enable_function["sexual_reproduction"]:
+		# 	if (self.sexual_reproduction()):
+		# 		self.loose_energy("stand")
+		# 		return None
+			
+		# if self.world.enable_function["eat_bob"] and (self.eat_bob()):
+		# 	self.loose_energy("stand")
+		# 	return None
+
+		# if(self.eat_food()) :
+		# 	self.loose_energy("stand")
+		# 	return None
+
+		# if self.world.enable_function["move_smart"] and (self.move_smart()):
+		# 	self.loose_energy("move")
+		# 	return None
 
 		if self.die():
 			return None
 		
 		self.mutate_memory_points()
+		self.velocity_manager()
 
-		if self.world.enable_function["perception"] : self.bob_perception_v2()
+		while self.case_to_move > 0:
+			if self.world.enable_function["perception"] and (self.bob_perception_v2()):
+				self.memory_store()
+			if self.world.enable_function["move_smart"] and (self.move_smart()):
+				self.loose_energy("move")
+				self.case_to_move -= 1
 
-		if self.world.enable_function["memory"] : self.memory_store()
-
-		if self.world.enable_function["reproduce"]:
-			if (self.reproduce()) :
+			if self.world.enable_function["reproduce"] and (self.reproduce()):
 				self.loose_energy("stand")
-				return None
-
-		if self.word.enable_function["sexual_reproduction"]:
-			if (self.sexual_reproduction()):
+			elif self.world.enable_function["sexual_reproduction"] and (self.sexual_reproduction()):
 				self.loose_energy("stand")
-				return None
+
+
+			if self.world.enable_function["eat_bob"] and (self.eat_bob()):
+				self.loose_energy("stand")
+			elif self.eat_food():
+				self.loose_energy("stand")
+
+
 			
-		if self.world.enable_function["eat_bob"] and (self.eat_bob()):
-			self.loose_energy("stand")
-			return None
+			if  self.move() and not self.world.enable_function["move_smart"]:
+				self.loose_energy("move")
+				self.case_to_move -= 1
+			
 
-		if(self.eat_food()) :
-			self.loose_energy("stand")
-			return None
-
-		if self.world.enable_function["move_smart"] and (self.move_smart()):
-			self.loose_energy("move")
-			return None
+			
 	
 	def velocity_manager(self):
 
@@ -302,7 +307,7 @@ class Bob:
 		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
 
 		tampon=[]
-		for k in self.perception_list:
+		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
 			for j in k:
 				if isinstance(j,food.Food):
 					tampon.append(j)
@@ -310,7 +315,7 @@ class Bob:
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
 				self.perception_list[k].append(tampon)
 				tampon=[]
-				
+
 		return True
 
 
@@ -332,7 +337,7 @@ class Bob:
 	def memory_store(self):
 
 		"""
-		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
+		Fonction qui va stocker dans une file de 5 éléments les 5 dernières cases traversées par le bob
 		"""
 		
 		while(1):
@@ -366,16 +371,21 @@ class Bob:
 
 	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
 		for i in self.memory_space:
-			for k in i:
+			for j in i:
+				for k in j:
 
-				if isinstance(k,Bob):
-					if (self.get_mass()/k.get_mass())<(2/3):
-						self.move_dest(self.case_ou_aller(k,"fuir"))
-						break
+					if isinstance(k,Bob):
+						if (self.get_mass()/k.get_mass())<(2/3):
+							self.move_dest(self.case_ou_aller(k,"fuir"))
+							return True
 
-				elif isinstance(k,food.Food):
-					self.move(self.case_ou_aller(k,"aller"))
-					break
+					elif isinstance(k,food.Food):
+						self.move(self.case_ou_aller(k,"aller"))
+						return True
+		self.move()
+		return True
+			
+	
 					
 	def move_dest(self,dest):
 		"""
