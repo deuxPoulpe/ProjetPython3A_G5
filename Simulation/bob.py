@@ -136,8 +136,25 @@ class Bob:
         Returns:
             None
         """
-		actions = [self.die, self.reproduce, self.move]
-		sub_actions = [self.eat_food]
+		def update_tick(self):
+		"""
+        Updates Bob's state at each 'tick' or time interval. Manages various actions like dying, eating, reproducing, and moving.
+
+        Returns:
+            None
+
+		Incluant les évènements :
+			bob_perception_v2(self)
+			move_smart(self)
+			memory_store(self)
+			mutate_memory_points(self)
+			eat_bob()
+			Implémenter le choix en entre sexual_reproduction(self) et reproduce(self) 
+
+
+        """
+		actions = [self.move, self.reproduce, self.die,]
+		sub_actions = []
 		for action in actions:
 			if action():
 				if action.__name__ == "move":
@@ -146,6 +163,38 @@ class Bob:
 						break
 
 				break
+	
+
+		actions = [self.mutate_memory_points, self.die, self.reproduce, self.sexual_reproduction, self.bob_perception_v2, self.memory_store, self.eat_bob, self.eat_food, self.move, self.move_smart]
+
+		if self.die():
+			return None
+		
+		self.mutate_memory_points()
+
+		self.bob_perception_v2()
+
+		self.memory_store()
+
+		if self.world.enable_function["reproduce"]:
+			if (self.reproduce()) :
+				self.loose_energy("stand")
+				return None
+
+		if self.word.enable_function["sexual_reproduction"]:
+			if (self.sexual_reproduction()):
+				self.loose_energy("stand")
+				return None
+			
+		if self.world.enable_function["eat_bob"] and (self.eat_bob()):
+			self.loose_energy("stand")
+			return None
+
+		if(self.eat_food()) :
+			self.loose_energy("stand")
+			return None
+
+		elif()
 	
 	def velocity_manager(self):
 
