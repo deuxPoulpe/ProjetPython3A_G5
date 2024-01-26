@@ -126,8 +126,7 @@ class Bob:
         Returns:
             bool: True if reproduction occurs, False otherwise.
         """
-		print("try reproduce :", self.max_energy)
-		if self.energy == self.max_energy:
+		if self.energy >= self.max_energy:
 			print("try reproduce2")
 			self.world.spawn_reproduce(self)
 			self.energy -= 150
@@ -150,6 +149,13 @@ class Bob:
 		self.velocity_manager()
 
 		while self.case_to_move > 0:
+			if self.world.enable_function["reproduce"]:
+				if (self.reproduce()):
+					self.loose_energy("stand")
+			elif self.world.enable_function["sexual_reproduction"]:
+				if(self.sexual_reproduction()):
+					self.loose_energy("stand")
+
 			if self.world.enable_function["perception"]:
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
@@ -159,18 +165,11 @@ class Bob:
 					self.loose_energy("move")
 				self.case_to_move -= 1
 
-			if  not(self.world.enable_function["move_smart"]):
+			else:
+				self.move()
 				self.loose_energy("move")
 				self.case_to_move -= 1
-
-			if self.world.enable_function["reproduce"]:
-				if (self.reproduce()):
-					self.loose_energy("stand")
-			elif self.world.enable_function["sexual_reproduction"]:
-				if(self.sexual_reproduction()):
-					self.loose_energy("stand")
-
-
+				
 			self.world.enable_function["eat_bob"]: (self.eat_bob())
 			self.eat_food()
 
@@ -321,7 +320,7 @@ class Bob:
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
-	def sexual_reproduction(self ):
+	def sexual_reproduction(self):
 		for partener in self.world.get_bobs()[self.position]:
 			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
 				self.world.spawn_sexuelreproduction(self,partener)
