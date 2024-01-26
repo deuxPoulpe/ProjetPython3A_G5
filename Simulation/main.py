@@ -19,7 +19,7 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 3,
+		"size" : 100,
 		"nbFood" : 50,
 		"dayTick" : 100,
 		"Food_energy" : 100,
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 		}, terrain_config)
 	
 
-	world.spawn_bob(1)
+	world.spawn_bob(100)
 	api = Api(world, 500)
 	ig = Ig_menu()
 	display = Display(api, ig)

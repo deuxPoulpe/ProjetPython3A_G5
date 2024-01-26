@@ -646,9 +646,13 @@ class Ig_menu:
             if not file_path.endswith(".pkl"):
                 file_path += ".pkl"
             print("Fichier sélectionné:", file_path)
-            save(file_path, self.world)
+            world_to_save = self.api.get_world_sim() if self.api else None
+            if world_to_save is None:
+                messagebox.showerror("Error", "You need to start a new simulation before saving it")
+                return -1
+            save(file_path, world_to_save)
+            messagebox.showinfo("Info", "Save successful")
         else:
-            print("Aucun fichier sélectionné.")
             return None
 
 
