@@ -188,7 +188,10 @@ class Menu:
             sys.exit()
         elif bouton_load_save.collidepoint(x,y):
             charge = self.select_file()
-            self.load_game_data(self,charge , )
+            if charge == 1 : 
+                self.load_game_data(self , charge , )
+            else : 
+                pygame.quit()
         
         
 
