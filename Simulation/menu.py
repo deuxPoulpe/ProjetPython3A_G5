@@ -8,6 +8,7 @@ from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
 from Utility.save_utility import save, load
 
+
 class Menu:
     def __init__(self):
         pygame.init()
@@ -27,6 +28,8 @@ class Menu:
 
        # Initialisation de la police
         self.policeChoisie = os.path.join("assets", "GamepauseddemoRegular-RpmY6.otf")
+        self.arial = os.path.join("assets", "arial.ttf")
+
         self.police = pygame.font.Font(self.policeChoisie, 36)
         self.policeme = pygame.font.Font(None, 24)        
 
@@ -43,6 +46,21 @@ class Menu:
 
         # Dictionnaire pour stocker les valeurs des variables
         self.valeurs_variables = {}
+
+        
+
+    def dessiner_rectangle(self, couleur, x, y, largeur, hauteur, texte, taille_texte=36):
+        pygame.draw.rect(self.fenetre, couleur, (x, y, largeur, hauteur))
+        self.afficher_texte(texte, x + largeur // 2, y + hauteur // 2, taille_texte)
+
+    def select_file(self):
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename()
+        #selcted_file = select_file()
+        #print (select_file)
+
+
 
     def afficher_texte(self, texte, x, y, taille=36):
         fonte_texte = pygame.font.Font(self.policeChoisie, taille)
@@ -62,79 +80,66 @@ class Menu:
         self.afficher_texte(texte, x + largeur // 2, y + hauteur // 2)
 
     def afficher_formulaire(self, variables):
-        self.afficher_image_de_fond("fond.jpeg")
-
+        self.afficher_image_de_fond("fond2.jpg")
+       
         for i, (variable, champ) in enumerate(zip(variables, self.champs_texte)):
-            # Affichage de la variable
-            surface_variable = self.police.render(variable, True, self.NOIR)
-            self.fenetre.blit(surface_variable, (50, 50 + i * 50))
+            
+            # # Affichage de la variable
+            #surface_variable = self.police.render(variable, True, self.NOIR)
+            # self.fenetre.blit(surface_variable, (50, 50 + i * 50))
 
-            # Champ de saisie
-            pygame.draw.rect(self.fenetre, self.couleur, champ, 2)
-            surface_texte = self.policeme.render(self.textes_champs[i], True, self.NOIR)
-            largeur_texte = max(200, surface_texte.get_width() + 10)
-            champ.w = largeur_texte
-            self.fenetre.blit(surface_texte, (champ.x + 5, champ.y + 5))
+            # # Champ de saisie
+            # pygame.draw.rect(self.fenetre, self.couleur, champ, 2)
+            # surface_texte = self.policeme.render(self.textes_champs[i], True, self.NOIR)
+            # largeur_texte = max(200, surface_texte.get_width() + 10)
+            # champ.w = largeur_texte
+            # self.fenetre.blit(surface_texte, (champ.x + 5, champ.y + 5))
 
             # Bouton de retour
-            self.dessiner_bouton(self.ROSE, 600, 505, 150, 50, "Retour")
-
+            self.dessiner_bouton(self.ROSE, 600, 505, 140, 50, "Retour")
 
         pygame.display.flip()
 
+
         while True:
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    for i, champ in enumerate(self.champs_texte):
-                        if champ.collidepoint(event.pos):
-                            self.champ_actif = i
-                            self.couleur = self.couleur_active
-                        else:
-                            self.couleur = self.couleur_inactive
+                    # for i, champ in enumerate(self.champs_texte):
+                    #     if champ.collidepoint(event.pos):
+                    #         self.champ_actif = i
+                    #         self.couleur = self.couleur_active
+                    #     else:
+                    #         self.couleur = self.couleur_inactive
                     if 600 <= event.pos[0] <= 700 and 500 <= event.pos[1] <= 530:
                         return True
                         # Attribuer les valeurs saisies aux variables
-                        for i, variable in enumerate(variables):
-                            self.valeurs_variables[variable] = int(self.textes_champs[i])
+                        # for i, variable in enumerate(variables):
+                        #     self.valeurs_variables[variable] = int(self.textes_champs[i])
 
 
-                if event.type == pygame.KEYDOWN:
-                    if self.champ_actif is not None:
-                        if event.key == pygame.K_RETURN:
-                            try:
-                                value = int(self.textes_champs[self.champ_actif])  # Convertir en entier
-                                print("{}: {}".format(variables[self.champ_actif], value))
-                            except ValueError:
-                                print("Veuillez entrer une valeur numérique.")
-
-                            self.textes_champs[self.champ_actif] = ''  # Réinitialiser le champ de texte
-                        elif event.key == pygame.K_BACKSPACE:
-                            self.textes_champs[self.champ_actif] = self.textes_champs[self.champ_actif][:-1]
-                        else:
-                            self.textes_champs[self.champ_actif] += event.unicode
-
-                if self.afficher_formulaire(variables):
-                    print("Retour au menu principal")
-                    self.menu_principal()
+                
 
     def gestion_clic_menu(self, x, y):
         bouton_demarrer = pygame.Rect(300, 200, 200, 50)
-        bouton_options = pygame.Rect(300, 300, 200, 50)
-        bouton_quitter = pygame.Rect(300, 400, 200, 50)
+        bouton_resume = pygame.Rect(300, 300, 200, 50)
+        bouton_quitter = pygame.Rect(300, 500, 200, 50)
+        bouton_load_save = pygame.Rect(300, 400, 200, 50 ) 
         boutton_Retour = pygame.Rect(600, 500, 100, 30)  # Ajuster la taille du bouton
         if bouton_demarrer.collidepoint(x, y):
             pygame.quit()
 
             self.in_game_menu.main_loop()
 
-        elif bouton_options.collidepoint(x, y):
-            print("Options")
+
+        elif bouton_resume.collidepoint(x, y):
             variables = ['number_of_river', 'number_of_lake', 'size_of_lake', 'max_height', 'nbFood', 'dayTick', 'Food_energy', 'generate_river', 'generate_lake', 'custo_terrain']
             self.afficher_formulaire(variables)
         elif bouton_quitter.collidepoint(x, y):
             pygame.quit()
+
 
     def menu_principal(self):
         while True:
@@ -147,11 +152,14 @@ class Menu:
 
             self.afficher_image_de_fond("fond.jpeg")
 
+            text = "This game is centered around a visual and interactive simulation of natural selection.\n The game world is a grid, initially set at 100x100, with creatures named Bob living in it. \n There are 100 Bobs with individual attributes like speed, size, and memory, represented by customizable sprites.\n The graphical representation can be adjusted based on user preferences, such as making faster creatures\n appear bluer and larger ones redder. Each Bob starts in a random cell, and the simulation progresses in\n time increments, with Bobs performing various actions depending on the simulated characteristics.\n The parameters of the simulation are modifiable for experimentation.\n"
 
             self.afficher_texte("Game Of Life", self.LARGEUR // 2, 100, 56)
             self.dessiner_bouton(self.ROSE, 300, 200, 200, 50, "Start")
-            self.dessiner_bouton(self.ROSE, 300, 300, 200, 50, "Options")
-            self.dessiner_bouton(self.ROSE, 300, 400, 200, 50, "Quitter")
+            self.dessiner_bouton(self.ROSE, 300, 300, 200, 50, "Histoire")
+            self.dessiner_bouton(self.ROSE, 300, 400, 200, 50, "Load_Save")
+            self.dessiner_bouton(self.ROSE , 300, 500, 200, 50, "Quitter")
+            
 
             pygame.display.update()
 
@@ -167,8 +175,10 @@ class Menu:
 
     def mettre_a_jour_fenetre(self):
         self.afficher_image_de_fond("fond.jpeg")
-
-
+    
+   
+    
+    
 class Ig_menu: 
 
     def __init__(self):
@@ -760,7 +770,9 @@ class Ig_menu:
           
         
 if __name__ == "__main__":
+
     # menu = Menu()
     # menu.menu_principal()
     ig_menu = Ig_menu()
     ig_menu.main_loop()
+

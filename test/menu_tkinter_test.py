@@ -15,6 +15,7 @@ def update_values():
 def get_current_value(scale_var):
     return '{:.0f}'.format(scale_var.get())
 
+
 def update_slider1_label(event):
     scale_var1_label.config(text=get_current_value(scale_var1))
 
@@ -34,6 +35,7 @@ root.geometry('300x700')
 root.resizable(True, True)
 root.title('Menu de Paramétrage')
 
+
 font_style = ("Pixel", 12)
 
 num_var1 = tk.IntVar()
@@ -42,6 +44,7 @@ str_var1 = tk.StringVar()
 str_var2 = tk.StringVar()
 bool_var1 = tk.BooleanVar()
 bool_var2 = tk.BooleanVar()
+
 
 main_menu_frame = ttk.Frame(root)
 options_menu_frame = ttk.Frame(root)
@@ -86,8 +89,6 @@ scale_var2.bind("<Motion>", update_slider2_label)
 
 update_slider1_label(None)
 update_slider2_label(None)
-
-
 
 options_button = ttk.Button(main_menu_frame, text="Options", command=show_options_menu)
 options_button.pack(pady=10)

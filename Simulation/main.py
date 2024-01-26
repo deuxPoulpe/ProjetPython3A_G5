@@ -61,4 +61,3 @@ if __name__ == "__main__":
 	ig = Ig_menu()
 	display = Display(api, ig)
 	display.main_loop()
-
