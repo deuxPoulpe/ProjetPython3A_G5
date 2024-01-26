@@ -79,6 +79,8 @@ class Bob:
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
 			self.energy -= 0.5
+		elif mode == "sexual_reproduction":
+			self.energy -= 100
 			
 	
 
@@ -128,7 +130,7 @@ class Bob:
 		else:
 			return False
 
-def update_tick(self):
+	def update_tick(self):
 		"""
         Updates Bob's state at each 'tick' or time interval. Manages various actions like dying, eating, reproducing, and moving.
 
@@ -293,7 +295,7 @@ def bob_perception_v2(self):
 	#deux bobs doivent etre dans la meme case pour se reproduire 
 def sexual_reproduction(self):
 		for partener in self.world.get_bobs[self.position]:
-			if (self.position == partener.position and self.energy> 150 and partener.position > 150 ):
+			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
 				
 				self.loose_energy("sexual_reproduction")
 
