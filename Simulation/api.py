@@ -11,15 +11,27 @@ class Api:
 		self.process = None
 		self.shared_data = mp.Manager().dict()
 		self.quit = False
-		#self.update_shared_data()
+		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
 
 		self.shared_data['event'] = None
 		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
 		self.paused = mp.Manager().Value('i', False)
+		self.option_shared_data = mp.Manager().list()
+		self.option_shared_data.append(None)
+		self.option_shared_data.append(None)
+		self.option_shared_data.append(False)
 		
-
+	def change_options(self, argDict, terrain_config_dict):
+		with self.data_lock:
+			self.option_shared_data[0] = argDict
+			self.option_shared_data[1] = terrain_config_dict
+			self.option_shared_data[2] = True
+   
+	def is_changed_option(self):
+		return self.option_shared_data[2]
+		
 
 
 	def get_tick_interval(self):
@@ -75,7 +87,11 @@ class Api:
 						self.shared_data['event'] = event
 
 				self.update_shared_data()
-
+			elif self.option_shared_data[2]:
+				self.world_sim.change_options(self.option_shared_data[0], self.option_shared_data[1])
+				self.update_shared_data()
+				self.option_shared_data[2] = False
+				
 			time.sleep(self.tick_interval.value/1000)
 			with self.data_lock:
 				self.shared_data['real_tick_time'] = time.time() - start
@@ -89,5 +105,8 @@ class Api:
 			self.process.join()
    
    
-			
+
+   
+   
+	#faire un booléan . crée une variable qui va stocké l'objet et sera accesible des 2 côtés.	
    

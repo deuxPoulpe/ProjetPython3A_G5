@@ -1,10 +1,11 @@
+from menu import Menu, Ig_menu
 from world import World
-from display import Display
 from api import Api
+from bob import Bob
+from display import Display
 
 
 if __name__ == "__main__":
-
 
 	terrain_config = {
 		"generate_river" : True,
@@ -14,21 +15,23 @@ if __name__ == "__main__":
 		"size_of_lake" : 20,
 		"max_height" : 10,
 		"seed" : 6432,
+		 "water_level" : 0,
 		}
 
 	world = World({
-		"size" : 50,
+		"size" : 20,
 		"nbFood" : 50,
 		"dayTick" : 100,
 		"Food_energy" : 100,
-		"custom_terrain" : True,
+		"custom_terrain" : False,
 		}, terrain_config)
 	
 
-
-
-	world.spawn_bob(50)
+	world.spawn_bob(1)
 	api = Api(world, 500)
-	display = Display(api)
+	ig = Ig_menu()
+	display = Display(api, ig)
 	display.main_loop()
- 
+
+	# menu = Menu()
+	# menu.menu_principal()
