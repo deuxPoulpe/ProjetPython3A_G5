@@ -774,4 +774,3 @@ if __name__ == "__main__":
     ig_menu = Ig_menu()
     ig_menu.main_loop()
 
-

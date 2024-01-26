@@ -61,6 +61,7 @@ class Terrain:
 					self.create_river(p0,p1,p2,p3)
 					
 
+
 			if self.generate_lake:
 				for k in range(self.number_of_lake):
 

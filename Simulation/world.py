@@ -50,10 +50,16 @@ class World:
 
 		self.enable_function = {
 			"custom_event" : True,
+			"reproduce" : True,
+			"sexual_reproduction" : False,
+			"perception" : True,
+			"memory" : True,
+			"eat_bob" : True,
+			"move_smart" : True,
 		}
 
 		self.enabled_event = 0
-		self.event_timer_day_tick = 100
+		self.event_timer_day_tick = 25
 
 
 
@@ -61,6 +67,7 @@ class World:
 		type(argDict["nbFood"]) == int ,
 		type(argDict["dayTick"]) == int
 		])
+
 
 		self.event_type = ["flood","drought"]
 
@@ -144,7 +151,7 @@ class World:
 		self.nb_food -= 1
 
 
-	def spawn_bob(self,num_bobs):
+	def spawn_bob(self, num_bobs, energy=100, velocity=1, mass=1, perception=0, memory_points=0, max_energy=200):
 		"""
         Generates a specified number of 'Bob' in the world.
 
@@ -154,7 +161,7 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self)
+			bob=Bob(x, y,self,mass=mass, velocity=velocity)
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
 			self.bobs[(x,y)].append(bob)
@@ -195,21 +202,16 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+		
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
 
+		self.nb_bob += 1
 
-	def save(self,filename,*args):
-		"""
-        Saves the current state of the world to a file.
-
-        Parameters:
-            filename (str): Name of the file to save the state to.
-            *args: Additional arguments or objects to save.
-        """
-		with open(filename, 'wb') as output:
-			for i in args:
-				pickle.dump(i, output, pickle.HIGHEST_PROTOCOL)
-				print("saved",i)
-		output.close()
 
 	def event_update(self):
 		event_type_choice = random.choice(self.event_type)
@@ -264,6 +266,9 @@ class World:
 
 
 		self.tick += 1
+		for position, liste_objets in self.get_bobs().items():
+			for objet in liste_objets:
+				print(objet.get_energy())
 		return event
 
 	def change_options(self, arg_dict, terrain_config_dict):
