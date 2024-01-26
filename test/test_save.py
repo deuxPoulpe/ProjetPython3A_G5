@@ -16,12 +16,3 @@ def save(filename,*args):
     output.close()
 
 
-def load(file):
-    with open(file, 'rb') as input:
-        bob = pickle.load(input)
-        print(bob.getpoids())
-    input.close()
-
-bob1= Bob(50)
-save("save.pkl",bob1)
-load("save.pkl")

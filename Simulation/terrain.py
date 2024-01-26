@@ -105,6 +105,8 @@ class Terrain:
 		return self.decoration_to_add
 	def get_generation_point(self):
 		return self.generation_point
+	def get_height(self):
+		return self.height
 
 	def set_new_generation(self, bool):
 		self.new_generation = bool

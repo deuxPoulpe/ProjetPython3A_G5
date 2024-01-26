@@ -29,13 +29,14 @@ class Display:
 
 		self.data = self.api.get_shared_data()
 		self.world_size = self.data["world_size"]
-		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
-		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		self.max_height = self.api.get_shared_data()["terrain"].get_height() if self.data["argDict"]["custom_terrain"] else 0
+		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
 		self.floor_display_temp = pygame.Surface((0,0))
 		self.sprite_display_temp = pygame.Surface((0,0))
 		
-		self.zoom_factor = 100
-		self.zoom_speed = 50
+		self.zoom_factor = 1
+		self.zoom_speed = 0.1
 		self.previous_zoom_factor = self.zoom_factor 
 		self.needs_rescaling = True
 
@@ -87,11 +88,13 @@ class Display:
 	
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
-			self.zoom_factor += self.zoom_speed
-		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 or pygame.key.get_pressed()[pygame.K_PAGEDOWN]:
 			self.zoom_factor -= self.zoom_speed
-			if self.zoom_factor < 10:  
-				self.zoom_factor = 10
+			if self.zoom_factor < 0.3 and self.data["world_size"] > 40:  
+				self.zoom_factor = 0.3
+			elif self.zoom_factor < 0.1:
+				self.zoom_factor = 0.1
+		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 or pygame.key.get_pressed()[pygame.K_PAGEDOWN]:
+			self.zoom_factor += self.zoom_speed
 
 		if self.previous_zoom_factor != self.zoom_factor:
 			self.needs_rescaling = True
@@ -118,7 +121,7 @@ class Display:
     
 		for k in range(height, grid[i][j]):
 			x = start_x + (i - j) * 32 / 2 - 16
-			y = start_y + (i + j) * 32 / 4 - 9 * k - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * k
 			if k < grid[i][j] - 1:
 				under_tile = Tile(x,y, self.assets["stone"])
 				self.floor.add(under_tile)
@@ -126,10 +129,10 @@ class Display:
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= 1:
-			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16 
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j]
 			tile = Tile(x,y, self.assets["sand"])
 		else:
-			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j]
 			tile = Tile(x,y, self.assets["clean_grass"])
 			dirt = Tile(x,y + 9, self.assets["dirt"])
 			self.floor.add(dirt)
@@ -140,18 +143,18 @@ class Display:
 	def draw_water_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= self.data["water_level"]:
-			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1) - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1)
 			tile = Tile(x,y, self.assets["water"])
 			self.floor.add(tile)
    
 	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if decoration_to_add[i][j] == 1 and grid[i][j] > 2:
-			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1)
 			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
 		elif decoration_to_add[i][j] == 2 and self.data["water_level"] == 0:
-			y = start_y + (i + j) * 32 / 4 - 8 - 16
+			y = start_y + (i + j) * 32 / 4 - 8
 			rock = Tile(x,y, self.assets["rocks"][random.randint(0,10)])
 			self.floor.add(rock)
 
@@ -233,7 +236,7 @@ class Display:
 		else:
 			for i in range(size):
 				for j in range(size):
-					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
+					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4, self.assets["clean_grass"])
 					self.floor.add(tile)
 
 				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
@@ -241,6 +244,7 @@ class Display:
 		world_loader(100,"Chargement de l'affichage du monde en cours ...") if load_bar else None
 
 		self.floor_display.fill(BLACK)
+		self.floor2 = self.floor.copy()
 		self.floor.draw(self.floor_display)
 		self.needs_rescaling = True
 
@@ -273,7 +277,7 @@ class Display:
 
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
-			y = start_y + (i + j) * 8 - 15 - 9 * base
+			y = start_y + (i + j) * 8 - 9 * base
 
 	
 			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
@@ -307,7 +311,7 @@ class Display:
 			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
-			y = start_y + (i + j) * 8 - 15 * size
+			y = start_y + (i + j) * 8 - 15 * (size - 1)
    
       
 			if sprite_type == "bob":
@@ -370,8 +374,11 @@ class Display:
 		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
-		scale_x = 6*self.zoom_factor
-		scale_y = 3*self.zoom_factor
+		scale_x = int(self.zoom_factor * (32/24))
+		scale_y = self.zoom_factor
+
+		scale_x = 32 * self.world_size // self.zoom_factor
+		scale_y = (24 * self.world_size + 9*self.max_height) // self.zoom_factor
 				
 		if self.needs_rescaling:
 			self.needs_rescaling = False
@@ -400,7 +407,6 @@ class Display:
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
 		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
-		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
 		
@@ -427,8 +433,8 @@ class Display:
 	def change_api_option(self,options):
 		self.api.change_options(options[0], options[1])
 		self.world_size = options[0]["size"]
-		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
-		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
 		while self.api.is_changed_option():
 			pass
 		self.data = self.api.get_shared_data()
@@ -447,7 +453,6 @@ class Display:
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, BLACK),(20,80))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, BLACK),(20,100))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, BLACK),(20,120))
-
 
 		def change_color_all_ui():
 			pause_button.change_color()
@@ -507,9 +512,6 @@ class Display:
 				self.api.resume()
 
 
-					
-    
-    
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill(BLUE_SKY)
@@ -609,6 +611,7 @@ class Display:
 			if rendering:
 				self.render()
 
+		
 			# all fonction that need to be executed after or during a certain number of iteration
 			next(flood_gif_active,None)
 			next(drought_gif_active,None)

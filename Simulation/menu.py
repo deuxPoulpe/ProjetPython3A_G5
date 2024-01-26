@@ -1,5 +1,4 @@
 import pygame
-import sys
 from display import Display
 from api import Api
 from world import World
@@ -7,7 +6,7 @@ import os
 import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
-
+from Utility.save_utility import save, load
 
 class Menu:
     def __init__(self):
@@ -88,7 +87,6 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for i, champ in enumerate(self.champs_texte):
                         if champ.collidepoint(event.pos):
@@ -138,14 +136,12 @@ class Menu:
             self.afficher_formulaire(variables)
         elif bouton_quitter.collidepoint(x, y):
             pygame.quit()
-            sys.exit()
 
     def menu_principal(self):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x_souris, y_souris = pygame.mouse.get_pos()
                     self.gestion_clic_menu(x_souris, y_souris)
@@ -165,7 +161,6 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
 
             self.mettre_a_jour_fenetre()
             # Mettez votre interface de jeu ici
@@ -176,7 +171,11 @@ class Menu:
 
 
 class Ig_menu: 
-    def __init__(self):      
+    def __init__(self):
+
+        self.world = None
+        self.api = None
+        self.display = None
         
         self.toggle_fonction = {
             "move_smart" : False,
@@ -422,29 +421,46 @@ class Ig_menu:
         self.option_terrain_frame.pack_forget()
         self.toggle_fonction_menu.pack_forget()
         self.main_menu_frame.pack_forget()
+        self.bind_escape_key(self.options_menu_frame)
+        self.root.bind("<Return>", lambda event: self.validation_option())
         self.update_geometry()
 
     def show_main_menu(self):
         self.options_menu_frame.pack_forget()
         self.main_menu_frame.pack(expand=True, fill=tk.BOTH)  
+        self.bind_escape_key(self.main_menu_frame)
         self.update_geometry()
         
     def show_option_terrain(self):
         self.option_terrain_frame.pack(expand=True, fill=tk.BOTH)  
         self.options_menu_frame.pack_forget()
         self.main_menu_frame.pack_forget()
+        self.bind_escape_key(self.option_terrain_frame)
         self.update_geometry()
         
     def show_toggle_foncion(self):
         self.toggle_fonction_menu.pack(expand=True, fill=tk.BOTH)  
         self.options_menu_frame.pack_forget()
         self.main_menu_frame.pack_forget()
+        self.bind_escape_key(self.toggle_fonction_menu)
         self.update_geometry()
-        
+
+    def bind_escape_key(self, frame):
+        self.root.bind("<Escape>", lambda event, frame=frame: self.handle_escape_key(frame))
+
+    def handle_escape_key(self, frame):
+        if frame == self.options_menu_frame:
+            self.show_main_menu()
+        elif frame == self.option_terrain_frame or frame == self.toggle_fonction_menu:
+            self.show_options_menu()
+        else:
+            self.root.destroy()
+            
     def main_loop(self):
         
         self.option_value_terrain = self.option_value_terrain_validate if self.option_changed else self.option_value_terrain
         self.option_values_sim = self.option_values_sim_validate if self.option_changed else self.option_values_sim
+        self.toggle_custom_event = self.toggle_fonction_validate if self.option_changed else self.toggle_fonction
         self.option_changed = False
         self.validated = False
 
@@ -461,22 +477,23 @@ class Ig_menu:
         screen_height = min(1080, self.root.winfo_screenheight())
         
         x_position = (screen_width - 300) // 2
-        y_position = (screen_height - 300) // 4
+        y_position = (screen_height - 300) // 5
         
         self.root.geometry(f'280x300+{x_position}+{y_position}')
         self.root.title('Game Of Life')
+        self.root.iconbitmap(os.path.join("assets/UI", "bob.ico"))
+
+        self.root.bind("<Escape>", lambda event: self.root.destroy())
 
         self.options_menu_frame = ttk.Frame(self.root)
         self.main_menu_frame = ttk.Frame(self.root)
         self.option_terrain_frame = ttk.Frame(self.root)
         self.toggle_fonction_menu = ttk.Frame(self.root)
-        
-        self.main_menu_frame.pack(expand=True, fill=tk.BOTH)  
-        
+                
         start_sim_button = ttk.Button(self.main_menu_frame, text="Start New\nSimulation", command=self.start_new_simulation, width=15)
         start_sim_button.pack(pady=15)
         
-        exit_sim_button = ttk.Button(self.main_menu_frame, text="     Exit\nSimulation", command=self.exit_simulation, width=15)
+        exit_sim_button = ttk.Button(self.main_menu_frame, text="     Stop\nSimulation", command=self.stop_simulation, width=15)
         exit_sim_button.pack(pady=15)
         
         change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
@@ -485,17 +502,18 @@ class Ig_menu:
         options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu, width=15)
         options_button.pack(pady=15)
 
-        save_button = ttk.Button(self.main_menu_frame, text="Save", command=lambda: print("Sauvegardé"), width=15)
+        save_button = ttk.Button(self.main_menu_frame, text="Save", command=self.save_world, width=15)
         save_button.pack(pady=15)
         
-        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save, width=15)
+        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_workd, width=15)
         load_save_button.pack(pady=15)
         
-        exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=exit, width=15)
+        exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=self.exit, width=15)
         exit_button.pack(pady=15, side=tk.BOTTOM)
        
         close_button = ttk.Button(self.main_menu_frame, text="Return", command=self.root.destroy, width=15)
         close_button.pack(pady=15, side=tk.BOTTOM)
+
         
         
 
@@ -504,6 +522,7 @@ class Ig_menu:
         self.set_up_toggle_fonction_menu()
                 
         self.update_geometry()
+        self.show_main_menu()
 
         self.root.mainloop()
         
@@ -584,18 +603,55 @@ class Ig_menu:
             messagebox.showerror("Error", "You need to validate the option before changing it")
     
     def open_file_dialog(self):
-        file_path = filedialog.askopenfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.txt"), ("Tous les fichiers", "*.*")])
+        file_path = filedialog.askopenfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.pkl"), ("Tous les fichiers", "*.*")])
 
         if file_path:
-            print("Fichier sélectionné:", file_path)
             return file_path
+        else:
+            return None
+        
+    def load_save_workd(self):
+        file_path = self.open_file_dialog()
+        if file_path:
+            objs_gen = load(file_path)
+            obj = next(objs_gen)
+            if isinstance(obj, World):
+                messagebox.showinfo("Info", "Save loaded")
+                self.world = obj
+                self.option_values_sim = self.world.get_argDict()
+                self.option_value_terrain = self.world.get_terrain_config()
+                self.toggle_fonction = self.world.get_argDict()["toggle_fonction"]
+                self.option_values_sim_validate = self.option_values_sim
+                self.option_value_terrain_validate = self.option_value_terrain
+                self.toggle_fonction_validate = self.toggle_fonction
+                self.option_changed = True
+                self.validated = True
+                self.set_up_options_menu()
+                self.set_up_options_terrain_menu()
+                self.set_up_toggle_fonction_menu()
+
+            else:
+                messagebox.showerror("Error", "Invalid save file")
+        else:
+            messagebox.showerror("Error", "Path not found")
+
+    def save_world(self):
+        if not self.is_running and self.world is None:
+            messagebox.showerror("Error", "You need to start a new simulation before saving it")
+            return -1
+
+        file_path = filedialog.asksaveasfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.pkl"), ("Tous les fichiers", "*.*")])
+
+        if file_path:
+            if not file_path.endswith(".pkl"):
+                file_path += ".pkl"
+            print("Fichier sélectionné:", file_path)
+            save(file_path, self.world)
         else:
             print("Aucun fichier sélectionné.")
             return None
-        
-    def load_save(self):
-        file_path = self.open_file_dialog()
-        print(file_path)
+
+
         
         
     def start_new_simulation(self):
@@ -603,16 +659,22 @@ class Ig_menu:
             messagebox.showerror("Error", "You need to stop the current simulation before starting a new one")
             return -1
         elif self.validated:
+
+            self.option_changed = True
+
+            if self.world is None:
+                self.world = World(self.option_values_sim_validate, self.option_value_terrain_validate)
+        
+                ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=self.root, minvalue=1, maxvalue=self.world.get_size()**2)
+                if ask_number_of_bob is None:
+                    return -1
                 
-            self.world = World(self.option_values_sim_validate, self.option_value_terrain_validate)
-            
-            ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=self.root, minvalue=1, maxvalue=self.world.get_size()**2)
-            
-            self.world.spawn_bob(ask_number_of_bob)
+                self.world.spawn_bob(ask_number_of_bob)
+
             self.api = Api(self.world, 100)
             self.display = Display(self.api, self)
             self.is_running = True
-            
+                
             self.root.destroy()
             self.display.main_loop()
             
@@ -620,16 +682,26 @@ class Ig_menu:
             messagebox.showerror("Error", "You need to validate the option before starting a new simulation")
             return -1
         
-    def exit_simulation(self):
+    def stop_simulation(self):
         if not self.is_running:
             messagebox.showerror("Error", "You need to start a new simulation before changing the option")
             return -1
         else:
             self.is_running = False
-            self.validated = False
-            self.option_changed = False
             self.display.close_display()
+            self.world = None
+            self.api = None
+            self.display = None
             return 0
+        
+    def exit(self):
+        self.root.destroy()
+        if self.is_running:
+            self.stop_simulation()
+        exit()
+
+
+        
             
 
         
