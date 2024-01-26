@@ -126,9 +126,11 @@ class Bob:
         Returns:
             bool: True if reproduction occurs, False otherwise.
         """
-		if self.energy >= self.max_energy:
-			self.energy -= 150
+		print("try reproduce :", self.max_energy)
+		if self.energy == self.max_energy:
+			print("try reproduce2")
 			self.world.spawn_reproduce(self)
+			self.energy -= 150
 			return True
 		else:
 			return False
@@ -152,24 +154,25 @@ class Bob:
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
 				self.memory_store()
-			if self.world.enable_function["move_smart"] and (self.move_smart()):
+			if self.world.enable_function["move_smart"]:
+				if (self.move_smart()):
+					self.loose_energy("move")
+				self.case_to_move -= 1
+
+			if  not(self.world.enable_function["move_smart"]):
 				self.loose_energy("move")
 				self.case_to_move -= 1
 
-			if  self.move() and not self.world.enable_function["move_smart"]:
-				self.loose_energy("move")
-				self.case_to_move -= 1
-
-			if self.world.enable_function["reproduce"] and (self.reproduce()):
-				self.loose_energy("stand")
-			elif self.world.enable_function["sexual_reproduction"] and (self.sexual_reproduction()):
-				self.loose_energy("stand")
+			if self.world.enable_function["reproduce"]:
+				if (self.reproduce()):
+					self.loose_energy("stand")
+			elif self.world.enable_function["sexual_reproduction"]:
+				if(self.sexual_reproduction()):
+					self.loose_energy("stand")
 
 
-			if self.world.enable_function["eat_bob"] and (self.eat_bob()):
-				self.loose_energy("stand")
-			elif self.eat_food():
-				self.loose_energy("stand")
+			self.world.enable_function["eat_bob"]: (self.eat_bob())
+			self.eat_food()
 
 
 			
@@ -243,8 +246,26 @@ class Bob:
 		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
 		self.perception_list = []
+		distance = round(self.perception)
+		while distance > 0: #On ajoute les objets que voit bob par distance
 
-		def bob_get_things_by_distance(self,distance):
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+
+		tampon=[]
+		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
+			for j in k:
+				if isinstance(j,food.Food):
+					tampon.append(j)
+					self.perception_list[k].remove(j)
+				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
+				self.perception_list[k].append(tampon)
+				tampon=[]
+
+		return True
+
+	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
 			"""
@@ -274,8 +295,11 @@ class Bob:
 
 				x-=1
 				deplacement+=1
-
-		
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		self.perception_list = []
 		distance = round(self.perception)
 		while distance > 0: #On ajoute les objets que voit bob par distance
 
@@ -294,7 +318,6 @@ class Bob:
 				tampon=[]
 
 		return True
-
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 

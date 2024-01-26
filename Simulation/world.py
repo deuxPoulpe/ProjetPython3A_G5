@@ -266,6 +266,9 @@ class World:
 
 
 		self.tick += 1
+		for position, liste_objets in self.get_bobs().items():
+			for objet in liste_objets:
+				print(objet.get_energy())
 		return event
 
 		
