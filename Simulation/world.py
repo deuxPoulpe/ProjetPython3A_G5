@@ -151,7 +151,7 @@ class World:
 		self.nb_food -= 1
 
 
-	def spawn_bob(self,num_bobs):
+	def spawn_bob(self, num_bobs, energy=100, velocity=1, mass=1, perception=0, memory_points=0, max_energy=200):
 		"""
         Generates a specified number of 'Bob' in the world.
 
@@ -161,7 +161,7 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self)
+			bob=Bob(x, y,self,mass=mass, velocity=velocity)
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
 			self.bobs[(x,y)].append(bob)

@@ -20,17 +20,32 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 5,
-		"nbFood" : 50,
+		"size" : 3,
+		"nbFood" : 10,
 		"dayTick" : 100,
 		"Food_energy" : 100,
 		"custom_terrain" : False,
 		}, terrain_config)
 	
+#------------------------BATTERIE DE TESTS------------------------#
+	#Test prédation
+	""""
+	world.enable_function["eat_bob"] = True
+	world.enable_function["move_smart"] = True
 
-	world.spawn_bob(50)
+	world.spawn_bob(1,velocity=5,mass=3)
+	world.spawn_bob(1,velocity=1,mass=1)
+	
+
+	"""
+
+	#Test reproduction
+	world.enable_function["reproduce"] = False
+	world.enable_function["sexual_reproduction"] = True
+	world.spawn_bob(1,velocity=5,mass=3)
+	world.spawn_bob(1,velocity=5,mass=3)
+				 
 	api = Api(world, 500)
 	display = Display(api)
 	display.main_loop()
-
 	
