@@ -117,18 +117,24 @@ class Bob:
 			return False
 
 	def reproduce(self):
+
 		"""
         Handles Bob's reproduction. Reproduction occurs if Bob's energy is sufficient.
 
         Returns:
             bool: True if reproduction occurs, False otherwise.
         """
+		
 		if self.energy >= self.max_energy:
-			self.energy = 3 * self.energy // 4
+
+			self.energy -= 3 * self.energy // 4
+			
 			self.world.spawn_reproduce(self)
 			return True
 		else:
+
 			return False
+
 
 	def update_tick(self):
 		"""

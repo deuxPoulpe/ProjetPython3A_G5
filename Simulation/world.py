@@ -1,7 +1,7 @@
 
 import pickle
 from terrain import Terrain
-from bob import Bob
+from bob import *
 from food import Food
 import random
 import time
@@ -43,7 +43,7 @@ class World:
 		self.nb_bob = 0
 		self.nb_food = 0
 		self.water_level = 0
-		self.mutation = 0.02
+		self.mutation = 0.1
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
@@ -57,6 +57,8 @@ class World:
 
 		self.enabled_event = 0
 		self.event_timer_day_tick = 100
+
+
 
 
 
@@ -194,7 +196,13 @@ class World:
         Parameters:
             mother_bob (Bob): The 'Bob' that is reproducing.
         """
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()*1/4)
+		if random.random() < self.mutation :
+
+			
+			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
+
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity )
+		
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
@@ -207,7 +215,7 @@ class World:
 		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
 
 		new_born_pos = new_born.get_pos()
-		
+
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
 		self.bobs[new_born_pos].append(new_born)
