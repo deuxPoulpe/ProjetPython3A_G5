@@ -5,9 +5,8 @@ from api import Api
 from world import World
 import os
 import tkinter as tk
-from tkinter import ttk
 from ttkthemes import ThemedTk
-from tkinter import messagebox
+from tkinter import filedialog, messagebox, ttk
 
 
 class Menu:
@@ -202,7 +201,14 @@ class Menu:
 
 
 class Ig_menu: 
-    def __init__(self):           
+    def __init__(self):      
+        
+        self.toggle_fonction = {
+            "move_smart" : False,
+            "self_reproduce" : False,
+            "custom_event" : False,
+        }
+             
         self.option_value_terrain = {
             "generate_river" : True,
             "number_of_river" : 1,
@@ -228,6 +234,7 @@ class Ig_menu:
             "bob_memory_point": 0,
             "custom_terrain" : False,
             "event_days_rate" : 100,
+            "toggle_fonction" : self.toggle_fonction,
         }
         self.option_changed = False
 
@@ -303,21 +310,21 @@ class Ig_menu:
         self.options_menu_frame.columnconfigure(2, weight=1)
         self.options_menu_frame.rowconfigure(len(labels) + 1, weight=1)
         
-        terrain_option_button = ttk.Button(self.options_menu_frame, text="Terrain Option", command=self.show_option_terrain)
+        terrain_option_button = ttk.Button(self.options_menu_frame, text="Terrain Option", command=self.show_option_terrain, width=15)
         terrain_option_button.grid(row=len(labels) + 1, column=0, columnspan=3, pady=15, sticky="n")
         toggle_terrain_button_visibility()
         
-        toggle_function_button = ttk.Button(self.options_menu_frame, text="Toggle Function", command=lambda: print("Toggle"))
-        toggle_function_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15)
+        toggle_function_button = ttk.Button(self.options_menu_frame, text="Toggle Function", command=self.show_toggle_foncion, width=15)
+        toggle_function_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15, sticky="n")
         
-        load_button = ttk.Button(self.options_menu_frame, text="Charger une sauvegarde de paramètre", command=self.validation_option)
+        load_button = ttk.Button(self.options_menu_frame, text="Load Save", command=self.validation_option, width=15)
         load_button.grid(row=len(labels) + 3, column=0, columnspan=3, pady=15, sticky="s")
         
-        validate_button = ttk.Button(self.options_menu_frame, text="Valider Option", command=self.validation_option)
+        validate_button = ttk.Button(self.options_menu_frame, text="Validate Options", command=self.validation_option, width=15)
         validate_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
 
         
-        return_button = ttk.Button(self.options_menu_frame, text="Retour", command=self.show_main_menu)
+        return_button = ttk.Button(self.options_menu_frame, text="Return", command=self.show_main_menu, width=15)
         return_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
         
         
@@ -340,7 +347,7 @@ class Ig_menu:
 
         
         
-        labels = [ "Génération de rivière", "Nombre de rivière", "Génération de lac", "Nombre de lac", "Taille des lac", "Hauteur max", "Niveau de l'eau", "seed"]
+        labels = ["River generation", "Number of rivers", "Lake generation", "Number of lakes", "Lake size", "Max height", "Water level", "Seed"]
 
         widget = [ ttk.Checkbutton(self.option_terrain_frame, text="", variable=self.generate_river),
                 ttk.Scale(self.option_terrain_frame, from_=0, to=5, orient="horizontal", variable=self.number_of_river),
@@ -380,10 +387,39 @@ class Ig_menu:
         self.option_terrain_frame.rowconfigure(len(labels) + 1, weight=1)
         
               
-        return_button = ttk.Button(self.option_terrain_frame, text="Retour", command=self.show_options_menu)
+        return_button = ttk.Button(self.option_terrain_frame, text="Return", command=self.show_options_menu, width=15)
         return_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15, sticky="s")
-
         
+        
+    def set_up_toggle_fonction_menu(self):
+        
+        self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
+        self.toggle_self_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
+
+        labels = ["Move Smart", "Self reproduce", "Custom event"]
+
+        widget = [ 
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_move_smart),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_self_reproduce),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_custom_event),
+                ]
+
+        for i, label_text in enumerate(labels):
+            label = ttk.Label(self.toggle_fonction_menu, text=label_text, font=("Pixel", 12))
+            pady_value = 20 if i == 0 else 2
+            label.grid(row=i + 1, column=0, pady=(pady_value, 5), padx=(10, 20), sticky="e")
+            
+            scale_var = widget[i]
+            scale_var.grid(row=i + 1, column=1, pady=(pady_value, 5), padx=(0, 0), sticky="w")
+            
+        self.toggle_fonction_menu.columnconfigure(0, weight=1)
+        self.toggle_fonction_menu.columnconfigure(1, weight=1)
+        self.toggle_fonction_menu.columnconfigure(2, weight=1)
+        self.toggle_fonction_menu.rowconfigure(len(labels) + 1, weight=1)
+                  
+        return_button = ttk.Button(self.toggle_fonction_menu, text="Return", command=self.show_options_menu, width=15)
+        return_button.grid(row=len(labels) + 1, column=0, columnspan=3, pady=15, sticky="s")       
         
     def update_geometry(self):
         width = 400
@@ -395,6 +431,8 @@ class Ig_menu:
             height = self.main_menu_frame.winfo_reqheight() + 50
         elif self.option_terrain_frame.winfo_ismapped():
             height = self.option_terrain_frame.winfo_reqheight() + 50
+        elif self.toggle_fonction_menu.winfo_ismapped():
+            height = self.toggle_fonction_menu.winfo_reqheight() + 50
         self.root.geometry(f"{width}x{height}")
         
     def slider_changed(self, event, scale_var, label_var, nb_decimals=0):
@@ -407,6 +445,7 @@ class Ig_menu:
     def show_options_menu(self):
         self.options_menu_frame.pack(expand=True, fill=tk.BOTH)
         self.option_terrain_frame.pack_forget()
+        self.toggle_fonction_menu.pack_forget()
         self.main_menu_frame.pack_forget()
         self.update_geometry()
 
@@ -417,6 +456,12 @@ class Ig_menu:
         
     def show_option_terrain(self):
         self.option_terrain_frame.pack(expand=True, fill=tk.BOTH)  
+        self.options_menu_frame.pack_forget()
+        self.main_menu_frame.pack_forget()
+        self.update_geometry()
+        
+    def show_toggle_foncion(self):
+        self.toggle_fonction_menu.pack(expand=True, fill=tk.BOTH)  
         self.options_menu_frame.pack_forget()
         self.main_menu_frame.pack_forget()
         self.update_geometry()
@@ -444,36 +489,44 @@ class Ig_menu:
         y_position = (screen_height - 300) // 4
         
         self.root.geometry(f'280x300+{x_position}+{y_position}')
-        self.root.title('Menu de Paramétrage')
+        self.root.title('Game Of Life')
 
         self.options_menu_frame = ttk.Frame(self.root)
         self.main_menu_frame = ttk.Frame(self.root)
         self.option_terrain_frame = ttk.Frame(self.root)
+        self.toggle_fonction_menu = ttk.Frame(self.root)
         
         self.main_menu_frame.pack(expand=True, fill=tk.BOTH)  
         
-        start_sim_button = ttk.Button(self.main_menu_frame, text="Lancer une simulation", command=lambda: print("Simulation lancée"))
+        start_sim_button = ttk.Button(self.main_menu_frame, text="    Start\nSimulation", command=lambda: print("Simulation lancée"), width=15, compound="center")
         start_sim_button.pack(pady=15)
         
-        change_sim_button = ttk.Button(self.main_menu_frame, text="Changer les options de la simulation", command=self.change_the_option)
+        change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
         change_sim_button.pack(pady=15)
         
-        options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu)
+        options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu, width=15)
         options_button.pack(pady=15)
 
-        save_button = ttk.Button(self.main_menu_frame, text="Sauvegarder", command=lambda: print("Sauvegardé"))
+        save_button = ttk.Button(self.main_menu_frame, text="Save", command=lambda: print("Sauvegardé"), width=15)
         save_button.pack(pady=15)
         
-        load_save_button = ttk.Button(self.main_menu_frame, text="Charger une sauvegarde", command=lambda: print("Chargé"))
+        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save, width=15)
         load_save_button.pack(pady=15)
+        
+        exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=exit, width=15)
+        exit_button.pack(pady=15, side=tk.BOTTOM)
        
-        close_button = ttk.Button(self.main_menu_frame, text="Retour", command=self.root.destroy)
+        close_button = ttk.Button(self.main_menu_frame, text="Return", command=self.root.destroy, width=15)
         close_button.pack(pady=15, side=tk.BOTTOM)
+        
+        
 
         self.set_up_options_menu()
         self.set_up_options_terrain_menu()
+        self.set_up_toggle_fonction_menu()
                 
         self.update_geometry()
+
         self.root.mainloop()
         
     def error_invalid_input(self):
@@ -493,9 +546,16 @@ class Ig_menu:
             self.day_tick.get()
             self.mutation_rate.get()
             self.bob_initial_memory_point.get()
+            self.seed.get()
         except:
             self.error_invalid_input()
             return -1
+        
+        self.toggle_fonction_validate = {
+            "move_smart" : self.toggle_move_smart.get(),
+            "self_reproduce" : self.toggle_self_reproduce.get(),
+            "custom_event" : self.toggle_custom_event.get(),
+        }
         
         self.option_values_sim_validate = {
             "size": self.world_size.get(),
@@ -511,6 +571,7 @@ class Ig_menu:
             "bob_memory_point": self.bob_initial_memory_point.get(),
             "custom_terrain" : self.custom_terrain.get(),
             "event_days_rate" : self.event_days_rate.get(),
+            "toggle_fonction" : self.toggle_fonction_validate,
         }
         
         self.option_value_terrain_validate = {
@@ -538,6 +599,21 @@ class Ig_menu:
             self.root.destroy()
         else:
             messagebox.showerror("Error", "You need to validate the option before changing it")
+    
+    def open_file_dialog(self):
+        file_path = filedialog.askopenfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.txt"), ("Tous les fichiers", "*.*")])
+
+        if file_path:
+            print("Fichier sélectionné:", file_path)
+            return file_path
+        else:
+            print("Aucun fichier sélectionné.")
+            return None
+        
+    def load_save(self):
+        file_path = self.open_file_dialog()
+        print(file_path)
+        
         
        
         

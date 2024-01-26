@@ -1,7 +1,6 @@
 import pygame
 from sprite import Sprite, Sprite_UI, Tile
 import os
-import matplotlib.pyplot as plt
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
@@ -337,6 +336,9 @@ class Display:
 				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
     
+		velocity_max = max(bob.get_velocity() for bobs in sprite_dict.values() for bob in bobs) if sprite_type == "bob" else 1
+  
+    
 		with ThreadPoolExecutor(max_workers=10) as threading_pool:
 			pool = []
 
@@ -344,7 +346,7 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), bob.get_velocity(), sprite_image))
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 							pass
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group, key, 1, 1, sprite_image))
@@ -353,7 +355,7 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), bob.get_velocity(), sprite_image, sprite_type))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1, 1, sprite_image, sprite_type))
 
@@ -494,17 +496,14 @@ class Display:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 100)
 				else:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 500)
-
-			elif option_button.get_rect().collidepoint(x,y):
-				option_button.set_active(True)
-				option_button.change_color()
+     
+			elif option_button.get_rect().collidepoint(x,y) and os.name == 'nt': # os.name == 'nt' is for windows only because the click on the option button is not working on linux
 				self.api.pause()
 				self.in_game_menu.main_loop()
 				if self.in_game_menu.is_option_changed():
 					self.change_api_option(self.in_game_menu.get_options())
 				self.api.resume()
-				option_button.set_active(False)
-				option_button.change_color()
+
 
 					
     
@@ -576,10 +575,14 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
-     
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+					self.api.pause()
+					self.in_game_menu.main_loop()
+					if self.in_game_menu.is_option_changed():
+						self.change_api_option(self.in_game_menu.get_options())
+					self.api.resume()
 
-     
-
+  
 				self.zoom(event)
 				self.start_drag(event)
 
