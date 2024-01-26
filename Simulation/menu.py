@@ -292,16 +292,19 @@ class Ig_menu:
         
         toggle_function_button = ttk.Button(self.options_menu_frame, text="Toggle Function", command=self.show_toggle_foncion, width=15)
         toggle_function_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15, sticky="n")
+
+        save_button = ttk.Button(self.options_menu_frame, text="Save Options", command=self.save_options, width=15)
+        save_button.grid(row=len(labels) + 3, column=0, columnspan=3, pady=15, sticky="s")
         
-        load_button = ttk.Button(self.options_menu_frame, text="Load Save", command=self.validation_option, width=15)
-        load_button.grid(row=len(labels) + 3, column=0, columnspan=3, pady=15, sticky="s")
+        load_button = ttk.Button(self.options_menu_frame, text="Load Option", command=self.load_options, width=15)
+        load_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
         
         validate_button = ttk.Button(self.options_menu_frame, text="Validate Options", command=self.validation_option, width=15)
-        validate_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
+        validate_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
 
         
         return_button = ttk.Button(self.options_menu_frame, text="Return", command=self.show_main_menu, width=15)
-        return_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
+        return_button.grid(row=len(labels) + 6, column=0, columnspan=3, pady=15, sticky="s")
         
         
         self.custom_terrain.trace_add('write', toggle_terrain_button_visibility)
@@ -477,7 +480,7 @@ class Ig_menu:
         screen_height = min(1080, self.root.winfo_screenheight())
         
         x_position = (screen_width - 300) // 2
-        y_position = (screen_height - 300) // 5
+        y_position = (screen_height - 300) // 6
         
         self.root.geometry(f'280x300+{x_position}+{y_position}')
         self.root.title('Game Of Life')
@@ -612,6 +615,9 @@ class Ig_menu:
         
     def load_save_workd(self):
         file_path = self.open_file_dialog()
+        if file_path is None:
+            return -1
+        
         if file_path:
             objs_gen = load(file_path)
             obj = next(objs_gen)
@@ -641,6 +647,8 @@ class Ig_menu:
             return -1
 
         file_path = filedialog.asksaveasfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.pkl"), ("Tous les fichiers", "*.*")])
+        if file_path is None:
+            return -1
 
         if file_path:
             if not file_path.endswith(".pkl"):
@@ -653,7 +661,55 @@ class Ig_menu:
             save(file_path, world_to_save)
             messagebox.showinfo("Info", "Save successful")
         else:
-            return None
+            messagebox.showerror("Error", "Path not found")
+            return -1
+        
+        
+    def save_options(self):
+        if self.validated:
+            file_path = filedialog.asksaveasfilename(title="Sélectionnez un fichier", filetypes=[("Fichiers textes", "*.pkl"), ("Tous les fichiers", "*.*")])
+            if file_path is None:
+                return -1
+        
+            if file_path:
+                if not file_path.endswith(".pkl"):
+                    file_path += ".pkl"
+                save(file_path, "valide_option", (self.option_value_terrain_validate, self.option_values_sim_validate))
+                messagebox.showinfo("Info", "Save successful")
+            else:
+                messagebox.showerror("Error", "Path not found")
+                return -1
+        else:
+            messagebox.showerror("Error", "You need to validate the option before saving it")
+            return -1
+        
+    def load_options(self):
+        file_path = self.open_file_dialog()
+        if file_path is None:
+            return -1
+        
+        if file_path:
+            objs_gen = load(file_path)
+            obj = next(objs_gen)
+            if obj == "valide_option":
+                obj = next(objs_gen)
+                messagebox.showinfo("Info", "Save loaded")
+                self.option_values_sim = obj[1]
+                self.option_value_terrain = obj[0]
+                self.toggle_fonction = self.option_values_sim["toggle_fonction"]
+                self.option_values_sim_validate = self.option_values_sim
+                self.option_value_terrain_validate = self.option_value_terrain
+                self.toggle_fonction_validate = self.toggle_fonction 
+                self.option_changed = True
+                self.validated = True
+                self.set_up_options_menu()
+                self.set_up_options_terrain_menu()
+                self.set_up_toggle_fonction_menu()
+            else:
+                messagebox.showerror("Error", "Invalid save file")
+        else:
+            messagebox.showerror("Error", "Path not found")
+            return -1
 
 
         
