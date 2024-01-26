@@ -70,16 +70,6 @@ class Menu:
         rect_texte = surface_texte.get_rect(center=(x, y))
         self.fenetre.blit(surface_texte, rect_texte)
 
-    def afficher_texte_multiligne(self, texte, x, y, taille=24):
-        fonte_texte = pygame.font.Font(self.policeChoisie, taille)
-        lignes = texte.split('\n')
-        y_actuel = y
-        for ligne in lignes:
-            surface_texte = fonte_texte.render(ligne, True, self.NOIR)
-            rect_texte = surface_texte.get_rect(center=(x, y_actuel))
-            self.fenetre.blit(surface_texte, rect_texte)
-            y_actuel += surface_texte.get_height()
-
     def afficher_image_de_fond(self, chemin_image):
         arriere_plan = pygame.image.load(os.path.join("assets", chemin_image))
 
@@ -91,12 +81,12 @@ class Menu:
         self.afficher_texte(texte, x + largeur // 2, y + hauteur // 2)
 
     def afficher_formulaire(self, variables):
-        self.afficher_image_de_fond("fond.jpeg")
+        self.afficher_image_de_fond("fond2.jpg")
        
         for i, (variable, champ) in enumerate(zip(variables, self.champs_texte)):
             
             # # Affichage de la variable
-            surface_variable = self.police.render(variable, True, self.NOIR)
+            #surface_variable = self.police.render(variable, True, self.NOIR)
             # self.fenetre.blit(surface_variable, (50, 50 + i * 50))
 
             # # Champ de saisie
@@ -108,16 +98,6 @@ class Menu:
 
             # Bouton de retour
             self.dessiner_bouton(self.ROSE, 600, 505, 140, 50, "Retour")
-            
-            text = "This game is centered around a visual and interactive simulation of natural selection.\n The game world is a grid, initially set at , with creatures named Bob living in it. \n There are 100 Bobs with individual attributes like speed, size, and memory, represented by customizable sprites.\n The graphical representation can be adjusted based on user preferences, such as making faster creatures\n appear bluer and larger ones redder. Each Bob starts in a random cell, and the simulation progresses in\n time increments, with Bobs performing various actions depending on the simulated characteristics.\n The parameters of the simulation are modifiable for experimentation.\n"
-
-            
-            self.afficher_texte_multiligne(text , 400 , 250 , 20)
-            
-
-
-
-            
 
         pygame.display.flip()
 
@@ -180,7 +160,6 @@ class Menu:
             display.main_loop()
 
         elif bouton_resume.collidepoint(x, y):
-            print("Options")
             variables = ['number_of_river', 'number_of_lake', 'size_of_lake', 'max_height', 'nbFood', 'dayTick', 'Food_energy', 'generate_river', 'generate_lake', 'custo_terrain']
             self.afficher_formulaire(variables)
         elif bouton_quitter.collidepoint(x, y):
