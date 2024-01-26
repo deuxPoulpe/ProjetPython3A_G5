@@ -42,8 +42,8 @@ if __name__ == "__main__":
 	#Test reproduction
 	world.enable_function["reproduce"] = False
 	world.enable_function["sexual_reproduction"] = True
-	world.spawn_bob(1,velocity=5,mass=3)
-	world.spawn_bob(1,velocity=5,mass=3)
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=1,mass=1)
 				 
 	api = Api(world, 500)
 	display = Display(api)

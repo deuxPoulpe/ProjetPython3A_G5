@@ -61,6 +61,8 @@ class Bob:
 		return self.mass
 	def get_velocity(self):
 		return self.velocity
+	def get_perception(self):
+		return self.perception
 
 	
 	def eat_food(self):
@@ -297,14 +299,13 @@ class Bob:
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
 	def sexual_reproduction(self ):
-		for partener in self.world.get_bobs[self.position]:
-			if (self.position == partener.possition and self.energy> 150 and partener.position > 150 ):
-				self.reproduce
-				self.loose_energy("sexual_reproduction")
-				new_bob = Bob(self.position , 50)
+		for partener in self.world.get_bobs()[self.position]:
+			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
+				self.world.spawn_sexuelreproduction(self,partener)
+				self.energy -=100
+				partener.energy -=100
 				return True
-			else:
-				return False 
+		return False 
 
 
 
