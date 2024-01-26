@@ -1,44 +1,37 @@
 import pickle
 import os
 
-class GestionnaireSauvegarde:
-    def __init__(self, extension_fichier, dossier_sauvegarde):
-        # Constructeur de la classe GestionnaireSauvegarde
-        self.extension_fichier = extension_fichier  # Extension du fichier pour les données sauvegardées
-        self.dossier_sauvegarde = dossier_sauvegarde  # Dossier où les fichiers de sauvegarde seront stockés
+class SaveLoadSystem:
+    def __init__(self, file_extension, save_folder):
+        self.file_extension = file_extension
+        self.save_folder = save_folder
 
-    def sauvegarder_donnees(self, donnees, nom):
-        # Sauvegarder des données dans un fichier
-        fichier_sauvegarde = open(self.dossier_sauvegarde+"/"+nom+self.extension_fichier, "wb")
-        pickle.dump(donnees, fichier_sauvegarde)
-        fichier_sauvegarde.close()
+    def save_data(self, data, name):
+        data_file = open(self.save_folder+"/"+name+self.file_extension, "wb")
+        pickle.dump(data, data_file)
 
-    def charger_donnees(self, nom):
-        # Charger des données à partir d'un fichier
-        fichier_sauvegarde = open(self.dossier_sauvegarde+"/"+nom+self.extension_fichier, "rb")
-        donnees = pickle.load(fichier_sauvegarde)
-        fichier_sauvegarde.close()
-        return donnees
+    def load_data(self, name):
+        data_file = open(self.save_folder+"/"+name+self.file_extension, "rb")
+        data = pickle.load(data_file)
+        return data
 
-    def verifier_existence_fichier(self, nom):
-        # Vérifier si un fichier avec un nom donné existe dans le dossier de sauvegarde
-        return os.path.exists(self.dossier_sauvegarde+"/"+nom+self.extension_fichier)
+    def check_for_file(self, name):
+        return os.path.exists(self.save_folder+"/"+name+self.file_extension)
 
-    def charger_donnees_jeu(self, fichiers_a_charger, donnees_par_defaut):
-        # Charger les données du jeu depuis des fichiers ou utiliser des données par défaut si les fichiers n'existent pas
+    def load_game_data(self, files_to_load, default_data):
         variables = []
-        for index, fichier in enumerate(fichiers_a_charger):
-            if self.verifier_existence_fichier(fichier):
-                variables.append(self.charger_donnees(fichier))
+        for index, file in enumerate(files_to_load):
+            if self.check_for_file(file):
+                variables.append(self.load_data(file))
             else:
-                variables.append(donnees_par_defaut[index])
+                variables.append(default_data[index])
 
         if len(variables) > 1:
             return tuple(variables)
         else:
             return variables[0]
 
-    def sauvegarder_donnees_jeu(self, donnees_a_sauvegarder, noms_fichiers):
-        # Sauvegarder les données du jeu dans des fichiers
-        for index, fichier in enumerate(donnees_a_sauvegarder):
-            self.sauvegarder_donnees(fichier, noms_fichiers[index])
+    def save_game_data(self, data_to_save, file_names):
+        for index, file in enumerate(data_to_save):
+            self.save_data(file, file_names[index])
+ 
