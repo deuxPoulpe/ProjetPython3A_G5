@@ -336,7 +336,9 @@ class Display:
 				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
     
-		velocity_max = max(bob.get_velocity() for bobs in sprite_dict.values() for bob in bobs) if sprite_type == "bob" else 1
+		vel_list = [bob.get_velocity() for bobs in sprite_dict.values() for bob in bobs] if sprite_type == "bob" else []
+		vel_list.append(1)
+		velocity_max = max(vel_list) if sprite_type == "bob" else 1
   
     
 		with ThreadPoolExecutor(max_workers=10) as threading_pool:
@@ -546,18 +548,15 @@ class Display:
 
 
 		rendering = True
-		running = True
+		self.running = True
 
-		while running:
+		while self.running:
 			self.data = self.api.get_shared_data()
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
-
-					# pygame.quit()
-					# quit()
-					running = False
+					self.running = False
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
@@ -626,3 +625,7 @@ class Display:
 			pygame.display.flip()
 			clock.tick()
 
+	def close_display(self):
+		self.running = False
+		self.api.stop()
+		pygame.quit()

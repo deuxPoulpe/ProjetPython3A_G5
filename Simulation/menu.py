@@ -6,7 +6,7 @@ from world import World
 import os
 import tkinter as tk
 from ttkthemes import ThemedTk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, simpledialog
 
 
 class Menu:
@@ -14,6 +14,7 @@ class Menu:
         pygame.init()
         
         self.in_game_menu = Ig_menu()
+        
         
         # Dimensions de la fenêtre
         self.LARGEUR, self.HAUTEUR = 800, 600
@@ -129,33 +130,7 @@ class Menu:
         if bouton_demarrer.collidepoint(x, y):
             pygame.quit()
 
-            ###################################################
-            #    modifier les varibles pour les options ici   #
-            ###################################################
-
-            terrain_config = {
-            	"generate_river" : True,
-            	"number_of_river" : 1,
-            	"generate_lake" : False,
-            	"number_of_lake" : 1,
-            	"size_of_lake" : 20,
-            	"max_height" : 10,
-            	"seed" : 6432,
-                "water_level" : 0,
-            	}
-
-            world = World({
-            	"size" : 50,
-            	"nbFood" : 50,
-            	"dayTick" : 100,
-            	"Food_energy" : 100,
-            	"custom_terrain" : True,
-            	}, terrain_config)
-            
-            world.spawn_bob(50)
-            api = Api(world, 1)
-            display = Display(api, self.in_game_menu)
-            display.main_loop()
+            self.in_game_menu.main_loop()
 
         elif bouton_options.collidepoint(x, y):
             print("Options")
@@ -237,6 +212,8 @@ class Ig_menu:
             "toggle_fonction" : self.toggle_fonction,
         }
         self.option_changed = False
+        self.is_running = False
+
 
         
                 
@@ -285,7 +262,7 @@ class Ig_menu:
         for i, label_text in enumerate(labels):
             label = ttk.Label(self.options_menu_frame, text=label_text, font=("Pixel", 12))
             pady_value = 20 if i == 0 else 2
-            label.grid(row=i + 1, column=0, pady=(pady_value, 0), padx=(10, 20), sticky="e")
+            label.grid(row=i + 1, column=0, pady=(pady_value, 5), padx=(10, 20), sticky="e")
 
             scale_var = widget[i]
             scale_var.grid(row=i + 1, column=1, pady=(pady_value, 5), padx=(0, 0), sticky="w")
@@ -329,8 +306,6 @@ class Ig_menu:
         
         
         self.custom_terrain.trace_add('write', toggle_terrain_button_visibility)
-                
-
 
     def set_up_options_terrain_menu(self):
         
@@ -394,14 +369,14 @@ class Ig_menu:
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
-        self.toggle_self_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
 
-        labels = ["Move Smart", "Self reproduce", "Custom event"]
+        labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
 
         widget = [ 
                 ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_move_smart),
-                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_self_reproduce),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_sexual_reproduce),
                 ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_custom_event),
                 ]
 
@@ -498,8 +473,11 @@ class Ig_menu:
         
         self.main_menu_frame.pack(expand=True, fill=tk.BOTH)  
         
-        start_sim_button = ttk.Button(self.main_menu_frame, text="    Start\nSimulation", command=lambda: print("Simulation lancée"), width=15, compound="center")
+        start_sim_button = ttk.Button(self.main_menu_frame, text="Start New\nSimulation", command=self.start_new_simulation, width=15)
         start_sim_button.pack(pady=15)
+        
+        exit_sim_button = ttk.Button(self.main_menu_frame, text="     Exit\nSimulation", command=self.exit_simulation, width=15)
+        exit_sim_button.pack(pady=15)
         
         change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
         change_sim_button.pack(pady=15)
@@ -553,7 +531,7 @@ class Ig_menu:
         
         self.toggle_fonction_validate = {
             "move_smart" : self.toggle_move_smart.get(),
-            "self_reproduce" : self.toggle_self_reproduce.get(),
+            "self_reproduce" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
         
@@ -585,7 +563,9 @@ class Ig_menu:
             "water_level" : self.water_level.get(),
         }
         
-        self.validated = True      
+        self.validated = True
+        
+        messagebox.showinfo("Info", "Options validated")
         
     def get_options(self):
         return self.option_values_sim_validate, self.option_value_terrain_validate
@@ -594,8 +574,11 @@ class Ig_menu:
     
     
     def change_the_option(self):
-        if self.validated:
+        if not self.is_running:
+            messagebox.showerror("Error", "You need to start a new simulation before changing the option")
+        elif self.validated:
             self.option_changed = True
+            self.validated = False
             self.root.destroy()
         else:
             messagebox.showerror("Error", "You need to validate the option before changing it")
@@ -613,6 +596,42 @@ class Ig_menu:
     def load_save(self):
         file_path = self.open_file_dialog()
         print(file_path)
+        
+        
+    def start_new_simulation(self):
+        if self.is_running:
+            messagebox.showerror("Error", "You need to stop the current simulation before starting a new one")
+            return -1
+        elif self.validated:
+                
+            self.world = World(self.option_values_sim_validate, self.option_value_terrain_validate)
+            
+            ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=self.root, minvalue=1, maxvalue=self.world.get_size()**2)
+            
+            self.world.spawn_bob(ask_number_of_bob)
+            self.api = Api(self.world, 100)
+            self.display = Display(self.api, self)
+            self.is_running = True
+            
+            self.root.destroy()
+            self.display.main_loop()
+            
+        else:
+            messagebox.showerror("Error", "You need to validate the option before starting a new simulation")
+            return -1
+        
+    def exit_simulation(self):
+        if not self.is_running:
+            messagebox.showerror("Error", "You need to start a new simulation before changing the option")
+            return -1
+        else:
+            self.is_running = False
+            self.validated = False
+            self.option_changed = False
+            self.display.close_display()
+            return 0
+            
+
         
         
        
