@@ -53,8 +53,11 @@ class World:
 			"custom_event" : True,
 			"reproduce" : True,
 			"sexual_reproduction" : False,
+			"perception" : True,
+			"memory" : True,
+			"eat_bob" : True,
+			"move_smart" : True,
 		}
-
 		self.enabled_event = 0
 		self.event_timer_day_tick = 100
 
@@ -150,7 +153,7 @@ class World:
 		self.nb_food -= 1
 
 
-	def spawn_bob(self,num_bobs):
+	def spawn_bob(self,num_bobs, velocity = 1, mass = 1, perception = 0):
 		"""
         Generates a specified number of 'Bob' in the world.
 
@@ -160,7 +163,7 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self)
+			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception)
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
 			self.bobs[(x,y)].append(bob)
@@ -179,8 +182,7 @@ class World:
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
 			food=Food(x, y, self, value=self.argDict["Food_energy"])
 
-			if y <= self.argDict["water_level"]:
-				continue 
+			 
 
 			if (x,y) not in self.foods:
 				self.foods[(x,y)] = food

@@ -5,7 +5,7 @@ from api import Api
 from world import World
 import os
 import tkinter as tk
-from ttkthemes import ThemedTk
+#from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk
 
 

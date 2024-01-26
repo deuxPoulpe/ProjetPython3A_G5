@@ -5,47 +5,50 @@ from queue import *
 
 class Bob:
 	"""
-    Class representing a character 'Bob' in a simulated world.
+	Classe représentant un personnage 'Bob' dans un monde simulé.
 
-    Attributes:
-        energy (int): Bob's current energy.
-        velocity (int): Bob's movement speed.
-        mass (int): Bob's mass.
-        perception (int): Bob's perception ability.
-        memory_space (list): Bob's memory space.
-        max_energy (int): The maximum energy Bob can accumulate.
-        position (tuple): Bob's current position in the world (x, y).
-        en_fuite (bool): Indicates whether Bob is fleeing.
-        world (World): Reference to the world in which Bob exists.
-    """
+	Attributs:
+		energy (int): Énergie actuelle de Bob.
+		velocity (int): Vitesse de déplacement de Bob.
+		mass (int): Masse de Bob.
+		perception (int): Capacité de perception de Bob.
+		memory_space (list): Espace mémoire de Bob.
+		max_energy (int): Énergie maximale que Bob peut accumuler.
+		position (tuple): Position actuelle de Bob dans le monde (x, y).
+		en_fuite (bool): État indiquant si Bob est en fuite.
+		world (World): Référence au monde dans lequel Bob évolue.
+	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, memory_space = Queue(5), max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
 		"""
-        Initializes a new instance of Bob.
+		Initialise une nouvelle instance de Bob.
 
-        Parameters:
-            x (int): Initial position of Bob in the x-axis.
-            y (int): Initial position of Bob in the y-axis.
-            world (World): Reference to the world in which Bob exists.
-            energy (int, optional): Initial energy of Bob. Default is 100.
-            velocity (int, optional): Initial velocity of Bob. Default is 1.
-            mass (int, optional): Initial mass of Bob. Default is 1.
-            perception (int, optional): Initial perception of Bob. Default is 0.
-            max_energy (int, optional): Maximum energy of Bob. Default is 200.
-        """
+		Paramètres:
+			x (int): Position initiale en x de Bob.
+			y (int): Position initiale en y de Bob.
+			world (World): Référence au monde dans lequel Bob évolue.
+			energy (int, optionnel): Énergie initiale de Bob. Par défaut à 100.
+			velocity (int, optionnel): Vitesse initiale de Bob. Par défaut à 1.
+			mass (int, optionnel): Masse initiale de Bob. Par défaut à 1.
+			perception (int, optionnel): Perception initiale de Bob. Par défaut à 0.
+			max_energy (int, optionnel): Énergie maximale de Bob. Par défaut à 200.
+
+		"""
 
 		self.energy = energy
 		self.velocity = velocity
 		self.mass = mass
 		self.perception = perception
 		self.memory_points = memory_points
-		self.memory_space = memory_space
+		self.memory_space = []
+		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
 		self.en_fuite = False
 		self.world = world
-		self.color = random.choice("red", "green", "blue")
+		self.case_to_move = 0
+		self.velocity_buffer = 0
 
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
@@ -58,6 +61,8 @@ class Bob:
 		return self.mass
 	def get_velocity(self):
 		return self.velocity
+	def get_perception(self):
+		return self.perception
 
 	
 	def eat_food(self):
@@ -79,10 +84,8 @@ class Bob:
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
 			self.energy -= 0.5
-		elif mode == "sexual_reproduction":
-			self.energy -= 100
 			
-	
+	cases_mémoire = Queue(5)	
 
 	def move(self):
 		"""
@@ -97,7 +100,7 @@ class Bob:
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		#self.loose_energy("move")
 
 	
 
@@ -117,24 +120,18 @@ class Bob:
 			return False
 
 	def reproduce(self):
-
 		"""
         Handles Bob's reproduction. Reproduction occurs if Bob's energy is sufficient.
 
         Returns:
             bool: True if reproduction occurs, False otherwise.
         """
-		
 		if self.energy >= self.max_energy:
-
-			self.energy -= 3 * self.energy // 4
-			
+			self.energy -= 150
 			self.world.spawn_reproduce(self)
 			return True
 		else:
-
 			return False
-
 
 	def update_tick(self):
 		"""
@@ -142,62 +139,48 @@ class Bob:
 
         Returns:
             None
-   
-		Incluant les évènements :
-			bob_perception_v2(self)
-			move_smart(self)
-			memory_store(self)
-			mutate_memory_points(self)
-			eat_bob()
-			Implémenter le choix en entre sexual_reproduction(self) et reproduce(self) 
-
-
         """
-	
 
 		if self.die():
 			return None
 		
 		self.mutate_memory_points()
+		self.velocity_manager()
 
-		if self.world.enable_function["perception"] : self.bob_perception_v2()
+		while self.case_to_move > 0:
+			if self.world.enable_function["perception"]:
+				self.bob_perception_v2()
+			if self.world.enable_function["memory"]:
+				self.memory_store()
+			if self.world.enable_function["move_smart"] :
+				if self.move_smart():
+				#self.loose_energy("move")
+					self.case_to_move -= 1
 
-		if self.world.enable_function["memory"] : self.memory_store()
+			if  self.move() :
+				if not self.world.enable_function["move_smart"]:
+					#self.loose_energy("move")
+					self.case_to_move -= 1
 
-		if self.world.enable_function["reproduce"]:
-			if (self.reproduce()) :
-				self.loose_energy("stand")
-				return None
-
-		if self.word.enable_function["sexual_reproduction"]:
-			if (self.sexual_reproduction()):
-				self.loose_energy("stand")
-				return None
-			
-		if self.world.enable_function["eat_bob"] and (self.eat_bob()):
-			self.loose_energy("stand")
-			return None
-
-		if(self.eat_food()) :
-			self.loose_energy("stand")
-			return None
-
-		if self.world.enable_function["move_smart"] and (self.move_smart()):
-			self.loose_energy("move")
-			return None
-
-		
+			#if self.world.enable_function["reproduce"] and (self.reproduce()):
+				#self.loose_energy("stand")
+			#elif self.world.enable_function["sexual_reproduction"] and (self.sexual_reproduction()):
+				#self.loose_energy("stand")
 
 
-
-
+			#if self.world.enable_function["eat_bob"] and (self.eat_bob()):
+				#self.loose_energy("stand")
+			#elif self.eat_food():
+				#self.loose_energy("stand")
 
 
 			
+			
+			
 
-
-
-def velocity_manager(self):
+			
+	
+	def velocity_manager(self):
 
 		self.case_to_move += abs(self.velocity)
 		self.velocity_buffer += self.velocity-abs(self.velocity)
@@ -205,22 +188,28 @@ def velocity_manager(self):
 			self.velocity_buffer -= 1
 			case_to_move += 1
 	
-def eat_bob(self):
-		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
-		mass_bob_list = [x.get_mass() for x in copy_bobs]
-		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
+	def eat_bob(self):
+		"""
+		Permet à Bob de manger un autre Bob. Retourne True si Bob a mangé un autre Bob, False sinon.
+		"""
+		mass_bob_list = []
+		copy_bobs = self.world.get_bobs()[self.get_pos()].copy()
+		if len(copy_bobs) > 1:
+			copy_bobs.remove(self)
+			mass_bob_list = [x.get_mass() for x in copy_bobs]
+			bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
 
-		if (bob.get_mass()/self.get_mass())<(2/3):
-			if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
-				self.energy = self.max_energy
-			else:
-				self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
-			self.world.kill_bob(bob)
-			return True
+			if (bob.get_mass()/self.get_mass())<(2/3):
+				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
+					self.energy = self.max_energy
+				else:
+					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+				self.world.kill_bob(bob)
+				return True
 		return False
 	
 
-def bob_perception(self):
+	def bob_perception(self):
 		"""
 		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui.
 		"""
@@ -251,12 +240,12 @@ def bob_perception(self):
 
 		return perception_list
 
-def bob_perception_v2(self):
+	def bob_perception_v2(self):
 		"""
-		Permet à Bob de percevoir son environnement. Retourne une liste d'objets autour de lui trié par distance décroissante.
+		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
-		perception_list = []
-		
+		self.perception_list = []
+
 		def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
@@ -268,9 +257,9 @@ def bob_perception_v2(self):
 			while x <= self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
@@ -281,92 +270,114 @@ def bob_perception_v2(self):
 			while x > self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						perception_list.append(self.world.get_bobs()[(x,y-deplacement)])
+						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
 
 				x-=1
 				deplacement+=1
 
 		
-		distance = self.perception
-		while distance > 0:
-			self.bob_get_things_by_distance(distance)
-			distance-=1
+			distance = round(self.perception)
+			while distance > 0: #On ajoute les objets que voit bob par distance
 
-		return perception_list
+				self.bob_get_things_by_distance(distance)
+				distance-=1
+			self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+
+			tampon=[]
+			for k in self.perception_list: #Gestion des foods de même distance mais différentes values
+				for j in k:
+					if isinstance(j,food.Food):
+						tampon.append(j)
+						self.perception_list[k].remove(j)
+					tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
+					self.perception_list[k].append(tampon)
+					tampon=[]
+
+			return True
 
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
-def sexual_reproduction(self):
-		for partener in self.world.get_bobs[self.position]:
+	def sexual_reproduction(self ):
+		for partener in self.world.get_bobs()[self.position]:
 			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
-				
-				self.loose_energy("sexual_reproduction")
-
-				self.world.spawn_reproduce(partener, self) # Modifier fonction spawn_reproduce dans World
+				self.world.spawn_sexuelreproduction(self,partener)
+				self.energy -=100
+				partener.energy -=100
 				return True
-			
 		return False 
 
 
 
-def memory_store(self):
+
+	def memory_store(self):
 
 		"""
-		Fonction qui va stocké dans une file de 5 éléments les 5 dernières cases traversées par le bob
+		Fonction qui va stocker dans une file de 5 éléments les 5 dernières cases traversées par le bob
 		"""
+		def distance(self,food):
+			return abs(food.get_pos()[0]-self.get_pos()[0])+abs(food.get_pos()[1]-self.get_pos()[1])
 		
 		for k in self.perception_list:
 			for j in k:
-				if isinstance(j, food.Food):
-					self.memory_space[0].append(j)
-				elif isinstance(j, Bob) and (self.get_mass()/j.get_mass())<(2/3):
-					self.memory
+				if isinstance(j,food.Food):
+					if len(self.memory_space) > self.memory_points*2:
+						self.memory_space.pop(0)
+					self.memory_space.append(j)
+					
+		for e in self.memory_space:
+			if distance(self,e) < self.perception:
+				self.memory_space.remove(e)
+		
+		self.memory_space.sort(key=lambda food: food.value, reverse=True)
+		return True
+		
 
 
-
-def mutate_memory_points(self):
+	def mutate_memory_points(self):
 		
 		"""
 		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
 
 		"""
 
-		if (random.randint(0, 1) > self.word.mutation) :
-			
-			values = [-1, 0 , 1]
+		values = [-1, 0 , 1]
 
-			mutation = random.choice(values)
+		mutation = random.choice(values)
 
-			self.memory_points += mutation
+		self.memory_points += mutation
 
 		return self.memory_points
 
-def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
-		for i in self.memory_space:
-			for j in i:
-				for k in j:
-
-					if isinstance(k,Bob):
-						if (self.get_mass()/k.get_mass())<(2/3):
-							self.move_dest(self.case_ou_aller(k,"fuir"))
-							return True
-						
-						if (self.get_mass()/k.get_mass())>=(3/2):
-							self.move_dest(self.case_ou_aller(k,"aller"))
-							return True
-
-					elif isinstance(k,food.Food):
-						self.move(self.case_ou_aller(k,"aller"))
+	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
+		for j in self.perception_list:
+			for k in j:
+				if isinstance(k,Bob):
+					if (self.get_mass()/k.get_mass())<(2/3):
+						self.move_dest(self.case_ou_aller(k,"fuir"))
 						return True
+					
+					if (self.get_mass()/k.get_mass())>=(3/2):
+						self.move_dest(self.case_ou_aller(k,"aller"))
+						return True
+
+				elif isinstance(k,food.Food):
+					self.move(self.case_ou_aller(k,"aller"))
+					return True
+				
+		for i in self.memory_space:
+			if isinstance(i,food.Food):
+				self.move(self.case_ou_aller(i,"aller"))
+				return True
+			
 		self.move()
 		return True
 			
 	
 					
-def move_dest(self,dest):
+	def move_dest(self,dest):
 		"""
         Teleport Bob to a destination
 
@@ -378,10 +389,10 @@ def move_dest(self,dest):
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		#self.loose_energy("move")
 
 
-def case_ou_aller(self, bob , mode):
+	def case_ou_aller(self, bob , mode):
 		"""
 		Fonction qui renvoie la case où le bob doit fuir pour éviter de se faire manger par un autre bob.
 		"""
