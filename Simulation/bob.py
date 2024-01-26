@@ -83,9 +83,8 @@ class Bob:
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
-			self.energy -= 0.5
-			
-	cases_mémoire = Queue(5)	
+
+			self.energy -= 0.5	
 
 	def move(self):
 		"""
@@ -100,7 +99,8 @@ class Bob:
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		#self.loose_energy("move")
+		self.loose_energy("move")
+
 
 	
 
@@ -127,8 +127,8 @@ class Bob:
             bool: True if reproduction occurs, False otherwise.
         """
 		if self.energy >= self.max_energy:
-			self.energy -= 150
 			self.world.spawn_reproduce(self)
+			self.energy -= 150
 			return True
 		else:
 			return False
@@ -148,37 +148,33 @@ class Bob:
 		self.velocity_manager()
 
 		while self.case_to_move > 0:
+
+			if self.world.enable_function["reproduce"]:
+				if (self.reproduce()):
+					self.loose_energy("stand")
+			elif self.world.enable_function["sexual_reproduction"]:
+				if(self.sexual_reproduction()):
+					self.loose_energy("stand")
+
 			if self.world.enable_function["perception"]:
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
 				self.memory_store()
-			if self.world.enable_function["move_smart"] :
-				if self.move_smart():
-				#self.loose_energy("move")
-					self.case_to_move -= 1
 
-			if  self.move() :
-				if not self.world.enable_function["move_smart"]:
-					#self.loose_energy("move")
-					self.case_to_move -= 1
+			if self.world.enable_function["move_smart"]:
+				if (self.move_smart()):
+					self.loose_energy("move")
+				self.case_to_move -= 1
 
-			#if self.world.enable_function["reproduce"] and (self.reproduce()):
-				#self.loose_energy("stand")
-			#elif self.world.enable_function["sexual_reproduction"] and (self.sexual_reproduction()):
-				#self.loose_energy("stand")
+			else:
+				self.move()
+				self.loose_energy("move")
+				self.case_to_move -= 1
+				
+			self.world.enable_function["eat_bob"]: (self.eat_bob())
+			self.eat_food()
 
-
-			#if self.world.enable_function["eat_bob"] and (self.eat_bob()):
-				#self.loose_energy("stand")
-			#elif self.eat_food():
-				#self.loose_energy("stand")
-
-
-			
-			
-			
-
-			
+	
 	
 	def velocity_manager(self):
 
@@ -246,7 +242,26 @@ class Bob:
 		"""
 		self.perception_list = []
 
-		def bob_get_things_by_distance(self,distance):
+		distance = round(self.perception)
+		while distance > 0: #On ajoute les objets que voit bob par distance
+
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+
+		tampon=[]
+		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
+			for j in k:
+				if isinstance(j,food.Food):
+					tampon.append(j)
+					self.perception_list[k].remove(j)
+				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
+				self.perception_list[k].append(tampon)
+				tampon=[]
+
+		return True
+
+	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
 			"""
@@ -276,31 +291,33 @@ class Bob:
 
 				x-=1
 				deplacement+=1
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		self.perception_list = []
+		distance = round(self.perception)
+		while distance > 0: #On ajoute les objets que voit bob par distance
 
-		
-			distance = round(self.perception)
-			while distance > 0: #On ajoute les objets que voit bob par distance
+			self.bob_get_things_by_distance(distance)
+			distance-=1
+		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
 
-				self.bob_get_things_by_distance(distance)
-				distance-=1
-			self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+		tampon=[]
+		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
+			for j in k:
+				if isinstance(j,food.Food):
+					tampon.append(j)
+					self.perception_list[k].remove(j)
+				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
+				self.perception_list[k].append(tampon)
+				tampon=[]
 
-			tampon=[]
-			for k in self.perception_list: #Gestion des foods de même distance mais différentes values
-				for j in k:
-					if isinstance(j,food.Food):
-						tampon.append(j)
-						self.perception_list[k].remove(j)
-					tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
-					self.perception_list[k].append(tampon)
-					tampon=[]
-
-			return True
-
+		return True
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
-	def sexual_reproduction(self ):
+	def sexual_reproduction(self):
 		for partener in self.world.get_bobs()[self.position]:
 			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
 				self.world.spawn_sexuelreproduction(self,partener)
@@ -481,7 +498,3 @@ class Bob:
 				x1 -= d
 
 		return (x1,y1)
-
-
-
-		

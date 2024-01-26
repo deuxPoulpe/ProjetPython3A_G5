@@ -34,9 +34,7 @@ class Terrain:
 		
 		self.terrain = perlin_noise(size, z_min, z_max, 0.01, self.seed)
 
-		
 
-		
 		for _ in range(random.randint(size , size*2)):
 			x = random.randint(0,size-1)
 			y = random.randint(0,size-1)
@@ -61,7 +59,6 @@ class Terrain:
 					self.generation_point[f"river_{k}"] = (p0,p1,p2,p3)
 		
 					self.create_river(p0,p1,p2,p3)
-					
 					
 
 
@@ -109,6 +106,8 @@ class Terrain:
 		return self.decoration_to_add
 	def get_generation_point(self):
 		return self.generation_point
+	def get_height(self):
+		return self.height
 
 	def set_new_generation(self, bool):
 		self.new_generation = bool

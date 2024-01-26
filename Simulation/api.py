@@ -13,7 +13,7 @@ class Api:
 		self.quit = False
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
-
+		self.shared_data['world'] = None
 		self.shared_data['event'] = None
 		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
@@ -22,6 +22,8 @@ class Api:
 		self.option_shared_data.append(None)
 		self.option_shared_data.append(None)
 		self.option_shared_data.append(False)
+
+		self.get_world = mp.Manager().Value('i', False)
 		
 	def change_options(self, argDict, terrain_config_dict):
 		with self.data_lock:
@@ -31,7 +33,6 @@ class Api:
    
 	def is_changed_option(self):
 		return self.option_shared_data[2]
-		
 
 
 	def get_tick_interval(self):
@@ -72,6 +73,13 @@ class Api:
 			self.shared_data['nb_food'] = self.world_sim.get_nb_food()
 			self.shared_data['argDict'] = self.world_sim.get_argDict()
 			self.shared_data['water_level'] = self.world_sim.get_water_level()
+
+	def get_world_sim(self):
+		self.get_world.value = True
+		while self.get_world.value:
+			pass
+		return self.shared_data['world']
+	
   
   
 	def run(self):
@@ -79,6 +87,10 @@ class Api:
 		self.running.value = True
 		while self.running.value:
 			start = time.time()
+			if self.get_world.value:
+				self.shared_data['world'] = self.world_sim
+				self.get_world.value = False
+
 			if not self.paused.value:
 				
 				event = self.world_sim.update_tick()
