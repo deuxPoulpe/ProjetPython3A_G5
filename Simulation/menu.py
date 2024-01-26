@@ -227,12 +227,19 @@ class Ig_menu:
             "bob_mutation": 0,
             "bob_memory_point": 0,
             "custom_terrain" : False,
+            "event_days_rate" : 100,
         }
         self.option_changed = False
 
         
                 
     def set_up_options_menu(self):
+        
+        def toggle_terrain_button_visibility(*args):
+            if self.custom_terrain.get():
+                terrain_option_button.grid()
+            else:
+                terrain_option_button.grid_remove()
         
         self.world_size = tk.IntVar(value=self.option_values_sim["size"])
         self.food_number = tk.IntVar(value=self.option_values_sim["nbFood"])
@@ -246,9 +253,10 @@ class Ig_menu:
         self.mutation_rate = tk.DoubleVar(value=self.option_values_sim["bob_mutation"])
         self.bob_initial_memory_point = tk.IntVar(value=self.option_values_sim["bob_memory_point"])
         self.custom_terrain = tk.BooleanVar(value=self.option_values_sim["custom_terrain"])
+        self.event_days_rate = tk.IntVar(value=self.option_values_sim["event_days_rate"])
         
         labels = ["World size", "Food number", "Food energy", "Bob max energy", "Bob initial energy", "Bob initial velocity",
-                "Bob initial mass", "Bob initial perception", "Day tick", "Mutation rate", "Bob initial memory point", "Custom terrain"
+                "Bob initial mass", "Bob initial perception", "Day tick", "Mutation rate", "Bob initial memory point", "Event Days rate", "Custom terrain"
                 ]
 
         widget = [
@@ -263,7 +271,8 @@ class Ig_menu:
                 ttk.Entry(self.options_menu_frame, textvariable=self.day_tick),
                 ttk.Scale(self.options_menu_frame, from_=0, to=1, orient="horizontal", variable=self.mutation_rate),
                 ttk.Scale(self.options_menu_frame, from_=0, to=100, orient="horizontal", variable=self.bob_initial_memory_point),
-                ttk.Checkbutton(self.options_menu_frame, text="Custom\n terrain", variable=self.custom_terrain),
+                ttk.Entry(self.options_menu_frame, textvariable=self.event_days_rate),
+                ttk.Checkbutton(self.options_menu_frame, text="", variable=self.custom_terrain),
                 ]
 
         for i, label_text in enumerate(labels):
@@ -296,23 +305,22 @@ class Ig_menu:
         
         terrain_option_button = ttk.Button(self.options_menu_frame, text="Terrain Option", command=self.show_option_terrain)
         terrain_option_button.grid(row=len(labels) + 1, column=0, columnspan=3, pady=15, sticky="n")
-        terrain_option_button.grid_remove()
+        toggle_terrain_button_visibility()
+        
+        toggle_function_button = ttk.Button(self.options_menu_frame, text="Toggle Function", command=lambda: print("Toggle"))
+        toggle_function_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15)
         
         load_button = ttk.Button(self.options_menu_frame, text="Charger une sauvegarde de paramètre", command=self.validation_option)
-        load_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15, sticky="s")
+        load_button.grid(row=len(labels) + 3, column=0, columnspan=3, pady=15, sticky="s")
         
         validate_button = ttk.Button(self.options_menu_frame, text="Valider Option", command=self.validation_option)
-        validate_button.grid(row=len(labels) + 3, column=0, columnspan=3, pady=15, sticky="s")
+        validate_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
 
         
         return_button = ttk.Button(self.options_menu_frame, text="Retour", command=self.show_main_menu)
-        return_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
+        return_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
         
-        def toggle_terrain_button_visibility(*args):
-            if self.custom_terrain.get():
-                terrain_option_button.grid()
-            else:
-                terrain_option_button.grid_remove()
+        
         self.custom_terrain.trace_add('write', toggle_terrain_button_visibility)
                 
 
@@ -334,9 +342,9 @@ class Ig_menu:
         
         labels = [ "Génération de rivière", "Nombre de rivière", "Génération de lac", "Nombre de lac", "Taille des lac", "Hauteur max", "Niveau de l'eau", "seed"]
 
-        widget = [ ttk.Checkbutton(self.option_terrain_frame, text="generate_river", variable=self.generate_river),
+        widget = [ ttk.Checkbutton(self.option_terrain_frame, text="", variable=self.generate_river),
                 ttk.Scale(self.option_terrain_frame, from_=0, to=5, orient="horizontal", variable=self.number_of_river),
-                ttk.Checkbutton(self.option_terrain_frame, text="generate_lake", variable=self.generate_lake),
+                ttk.Checkbutton(self.option_terrain_frame, text="", variable=self.generate_lake),
                 ttk.Scale(self.option_terrain_frame, from_=0, to=5, orient="horizontal", variable=self.number_of_lake),
                 ttk.Scale(self.option_terrain_frame, from_=0, to=100, orient="horizontal", variable=self.size_of_lake),
                 ttk.Scale(self.option_terrain_frame, from_=0, to=15, orient="horizontal", variable=self.max_height),
@@ -347,11 +355,10 @@ class Ig_menu:
         for i, label_text in enumerate(labels):
             label = ttk.Label(self.option_terrain_frame, text=label_text, font=("Pixel", 12))
             pady_value = 20 if i == 0 else 2
-            label.grid(row=i + 1, column=0, pady=(pady_value, 0), padx=(10, 20), sticky="e")
-
+            label.grid(row=i + 1, column=0, pady=(pady_value, 5), padx=(10, 20), sticky="e")
+            
             scale_var = widget[i]
             scale_var.grid(row=i + 1, column=1, pady=(pady_value, 5), padx=(0, 0), sticky="w")
-
             
             if isinstance(scale_var, ttk.Scale):
                 label_var = ttk.Label(self.option_terrain_frame, text="")
@@ -364,13 +371,13 @@ class Ig_menu:
                     self.slider_changed(None, scale_var, label_var)
             elif isinstance(scale_var, ttk.Entry):
                 scale_var.config(width=13)
-                
-            
+
+
 
         self.option_terrain_frame.columnconfigure(0, weight=1)
         self.option_terrain_frame.columnconfigure(1, weight=1)
         self.option_terrain_frame.columnconfigure(2, weight=1)
-        self.option_terrain_frame.rowconfigure(len([]) + 1, weight=1)
+        self.option_terrain_frame.rowconfigure(len(labels) + 1, weight=1)
         
               
         return_button = ttk.Button(self.option_terrain_frame, text="Retour", command=self.show_options_menu)
@@ -428,11 +435,11 @@ class Ig_menu:
         style.configure("TLabel", font=("Pixel", font_size))
         style.configure("TCheckbutton", font=("Pixel", font_size))
         style.configure("TEntry", font=("Pixel", font_size))
-        self.root.resizable(True, True)
+        self.root.resizable(False, False)
         
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
+        screen_width = min(1920, self.root.winfo_screenwidth())
+        screen_height = min(1080, self.root.winfo_screenheight())
+        
         x_position = (screen_width - 300) // 2
         y_position = (screen_height - 300) // 4
         
@@ -503,6 +510,7 @@ class Ig_menu:
             "bob_mutation": self.mutation_rate.get(),
             "bob_memory_point": self.bob_initial_memory_point.get(),
             "custom_terrain" : self.custom_terrain.get(),
+            "event_days_rate" : self.event_days_rate.get(),
         }
         
         self.option_value_terrain_validate = {
@@ -527,14 +535,16 @@ class Ig_menu:
     def change_the_option(self):
         if self.validated:
             self.option_changed = True
-        self.root.destroy()
+            self.root.destroy()
+        else:
+            messagebox.showerror("Error", "You need to validate the option before changing it")
         
        
         
 if __name__ == "__main__":
-    menu = Menu()
-    menu.menu_principal()
-    # ig_menu = ig_menu()
-    # ig_menu.main_loop()
+    # menu = Menu()
+    # menu.menu_principal()
+    ig_menu = Ig_menu()
+    ig_menu.main_loop()
 
 
