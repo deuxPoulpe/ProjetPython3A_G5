@@ -83,9 +83,7 @@ class Bob:
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
-			self.energy -= 0.5
-			
-	cases_mémoire = Queue(5)	
+			self.energy -= 0.5	
 
 	def move(self):
 		"""
