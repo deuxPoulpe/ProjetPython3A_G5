@@ -391,8 +391,8 @@ class Display:
 
 		self.sprite_display.fill(BLACK)
   
-		self.draw_sprite("bob")
 		self.draw_sprite("food")
+		self.draw_sprite("bob")
   
 		self.zooming_render()
   
