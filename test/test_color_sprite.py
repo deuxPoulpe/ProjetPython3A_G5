@@ -10,7 +10,7 @@ screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 
 # Chargement et mise à l'échelle de l'image de Bob
-bob = pygame.image.load(os.path.join("assets", "Sprites/bob_blank.png")).convert_alpha()
+bob = pygame.image.load(os.path.join("assets", "Sprites/bob.png")).convert_alpha()
 bob = pygame.transform.scale(bob, (500, 500))
 
 

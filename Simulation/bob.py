@@ -354,6 +354,7 @@ class Bob:
 		
 
 
+
 	def mutate_memory_points(self):
 		
 		"""

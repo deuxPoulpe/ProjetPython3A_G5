@@ -1,22 +1,23 @@
+from menu import Menu, Ig_menu
 from world import World
-from display import Display
 from api import Api
 from menu import *
+from bob import Bob
+from display import Display
 
 
 if __name__ == "__main__":
 
-	# menu = Menu()
-	# menu.menu_principal()
 
 	terrain_config = {
-		"generate_river" : True,
+		"generate_river" : False,
 		"number_of_river" : 1,
 		"generate_lake" : False,
 		"number_of_lake" : 1,
 		"size_of_lake" : 20,
 		"max_height" : 10,
 		"seed" : 6432,
+		 "water_level" : 0,
 		}
 
 	world = World({
@@ -52,8 +53,8 @@ if __name__ == "__main__":
 	world.enable_function["sexual_reproduction"] = False
 	world.spawn_bob(1,velocity=1,mass=1)
 
-
 	api = Api(world, 500)
-	display = Display(api)
+	ig = Ig_menu()
+	display = Display(api, ig)
 	display.main_loop()
-	
+

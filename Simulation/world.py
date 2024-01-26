@@ -42,7 +42,7 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
-		self.water_level = 0
+		self.water_level = terrain_config_dict["water_level"]
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
@@ -70,7 +70,7 @@ class World:
 
 
 		self.event_type = ["flood","drought"]
-	
+
 
 	#getters
 	def get_water_level(self):
@@ -167,6 +167,8 @@ class World:
 			self.bobs[(x,y)].append(bob)
 
 		self.nb_bob += num_bobs
+  
+	
 
 	def spawn_food(self,num_food):
 		"""
@@ -237,8 +239,6 @@ class World:
 		"""
 		Updates the state of the world on each tick
 		"""
-				
-
 		event = None
 		
 		#update tick for all bobs
@@ -271,4 +271,19 @@ class World:
 				print(objet.get_energy())
 		return event
 
-		
+	def change_options(self, arg_dict, terrain_config_dict):
+		"""
+		Changes the configuration of the world.
+
+		Parameters:
+			arg_dict (dict): Dictionary of world configuration arguments.
+			terrain_config_dict (dict): Dictionary of terrain configuration.
+		"""
+		self.argDict = arg_dict
+		self.terrain_config = terrain_config_dict
+		if self.argDict["custom_terrain"]:
+			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
+		else:
+			self.terrain = None
+		self.water_level = terrain_config_dict["water_level"]
+
