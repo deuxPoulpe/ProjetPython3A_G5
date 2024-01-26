@@ -61,6 +61,7 @@ class Terrain:
 					self.create_river(p0,p1,p2,p3)
 					
 
+
 			if self.generate_lake:
 				for k in range(self.number_of_lake):
 
@@ -105,6 +106,8 @@ class Terrain:
 		return self.decoration_to_add
 	def get_generation_point(self):
 		return self.generation_point
+	def get_height(self):
+		return self.height
 
 	def set_new_generation(self, bool):
 		self.new_generation = bool

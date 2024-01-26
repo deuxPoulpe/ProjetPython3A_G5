@@ -19,6 +19,9 @@ class Tile(pygame.sprite.Sprite):
     def get_size(self):
         return self.image.get_size()
     
+    def get_image(self):
+        return self.image
+    
 
 class Sprite(pygame.sprite.Sprite):
     """

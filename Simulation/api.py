@@ -13,13 +13,26 @@ class Api:
 		self.quit = False
 		self.update_shared_data()
 		self.shared_data['real_tick_time'] = 0
-
+		self.shared_data['world'] = None
 		self.shared_data['event'] = None
 		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
 		self.paused = mp.Manager().Value('i', False)
-		
+		self.option_shared_data = mp.Manager().list()
+		self.option_shared_data.append(None)
+		self.option_shared_data.append(None)
+		self.option_shared_data.append(False)
 
+		self.get_world = mp.Manager().Value('i', False)
+		
+	def change_options(self, argDict, terrain_config_dict):
+		with self.data_lock:
+			self.option_shared_data[0] = argDict
+			self.option_shared_data[1] = terrain_config_dict
+			self.option_shared_data[2] = True
+   
+	def is_changed_option(self):
+		return self.option_shared_data[2]
 
 
 	def get_tick_interval(self):
@@ -60,6 +73,13 @@ class Api:
 			self.shared_data['nb_food'] = self.world_sim.get_nb_food()
 			self.shared_data['argDict'] = self.world_sim.get_argDict()
 			self.shared_data['water_level'] = self.world_sim.get_water_level()
+
+	def get_world_sim(self):
+		self.get_world.value = True
+		while self.get_world.value:
+			pass
+		return self.shared_data['world']
+	
   
   
 	def run(self):
@@ -67,6 +87,10 @@ class Api:
 		self.running.value = True
 		while self.running.value:
 			start = time.time()
+			if self.get_world.value:
+				self.shared_data['world'] = self.world_sim
+				self.get_world.value = False
+
 			if not self.paused.value:
 				
 				event = self.world_sim.update_tick()
@@ -75,7 +99,11 @@ class Api:
 						self.shared_data['event'] = event
 
 				self.update_shared_data()
-
+			elif self.option_shared_data[2]:
+				self.world_sim.change_options(self.option_shared_data[0], self.option_shared_data[1])
+				self.update_shared_data()
+				self.option_shared_data[2] = False
+				
 			time.sleep(self.tick_interval.value/1000)
 			with self.data_lock:
 				self.shared_data['real_tick_time'] = time.time() - start
@@ -89,5 +117,8 @@ class Api:
 			self.process.join()
    
    
-			
+
+   
+   
+	#faire un booléan . crée une variable qui va stocké l'objet et sera accesible des 2 côtés.	
    

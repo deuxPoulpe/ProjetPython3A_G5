@@ -1,11 +1,9 @@
 import pygame
 from sprite import Sprite, Sprite_UI, Tile
 import os
-import matplotlib.pyplot as plt
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
-
 
 
 from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
@@ -19,7 +17,8 @@ BLACK = (0,0,0)
 
 
 class Display:
-	def __init__(self, api):
+	def __init__(self, api, ig_menu):
+		self.in_game_menu = ig_menu
 		self.api = api
 
 		self.screen_width = 800
@@ -30,13 +29,14 @@ class Display:
 
 		self.data = self.api.get_shared_data()
 		self.world_size = self.data["world_size"]
-		self.floor_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
-		self.sprite_display = pygame.Surface((32 * self.world_size, 16 * self.world_size + 250))
+		self.max_height = self.api.get_shared_data()["terrain"].get_height() if self.data["argDict"]["custom_terrain"] else 0
+		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
 		self.floor_display_temp = pygame.Surface((0,0))
 		self.sprite_display_temp = pygame.Surface((0,0))
 		
-		self.zoom_factor = 100
-		self.zoom_speed = 50
+		self.zoom_factor = 1
+		self.zoom_speed = 0.1
 		self.previous_zoom_factor = self.zoom_factor 
 		self.needs_rescaling = True
 
@@ -46,6 +46,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
+		
 
 		self.assets = {
 			"grass": pygame.image.load(os.path.join("assets/tiles", "tile_028.png")),
@@ -58,7 +59,12 @@ class Display:
 			"plants": [],
 			"rocks" : [],
 			"full_bob" : pygame.image.load(os.path.join("assets/Sprites","bob.png")).convert(),
-			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert()
+			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert(),
+			"pause" : pygame.image.load(os.path.join("assets/UI", "pause.png")),
+			"play" : pygame.image.load(os.path.join("assets/UI", "play.png")),
+			"backforward" : pygame.image.load(os.path.join("assets/UI", "backforward.png")),
+			"fastforward" : pygame.image.load(os.path.join("assets/UI", "fastforward.png")),
+			"option" : pygame.image.load(os.path.join("assets/UI", "option.png")),
 		}
 
 		for k in range(0, 12):
@@ -82,11 +88,13 @@ class Display:
 	
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
-			self.zoom_factor += self.zoom_speed
-		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 or pygame.key.get_pressed()[pygame.K_PAGEDOWN]:
 			self.zoom_factor -= self.zoom_speed
-			if self.zoom_factor < 10:  
-				self.zoom_factor = 10
+			if self.zoom_factor < 0.3 and self.data["world_size"] > 40:  
+				self.zoom_factor = 0.3
+			elif self.zoom_factor < 0.1:
+				self.zoom_factor = 0.1
+		elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 5 or pygame.key.get_pressed()[pygame.K_PAGEDOWN]:
+			self.zoom_factor += self.zoom_speed
 
 		if self.previous_zoom_factor != self.zoom_factor:
 			self.needs_rescaling = True
@@ -113,7 +121,7 @@ class Display:
     
 		for k in range(height, grid[i][j]):
 			x = start_x + (i - j) * 32 / 2 - 16
-			y = start_y + (i + j) * 32 / 4 - 9 * k - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * k
 			if k < grid[i][j] - 1:
 				under_tile = Tile(x,y, self.assets["stone"])
 				self.floor.add(under_tile)
@@ -121,10 +129,10 @@ class Display:
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= 1:
-			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16 
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j]
 			tile = Tile(x,y, self.assets["sand"])
 		else:
-			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j] - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j]
 			tile = Tile(x,y, self.assets["clean_grass"])
 			dirt = Tile(x,y + 9, self.assets["dirt"])
 			self.floor.add(dirt)
@@ -135,18 +143,18 @@ class Display:
 	def draw_water_surface_world(self,start_x,start_y,i,j,grid):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= self.data["water_level"]:
-			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1) - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1)
 			tile = Tile(x,y, self.assets["water"])
 			self.floor.add(tile)
    
 	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
 		x = start_x + (i - j) * 32 / 2 - 16
 		if decoration_to_add[i][j] == 1 and grid[i][j] > 2:
-			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1) - 16
+			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1)
 			plant = Tile(x,y, self.assets["plants"][random.randint(0,11)])
 			self.floor.add(plant)
 		elif decoration_to_add[i][j] == 2 and self.data["water_level"] == 0:
-			y = start_y + (i + j) * 32 / 4 - 8 - 16
+			y = start_y + (i + j) * 32 / 4 - 8
 			rock = Tile(x,y, self.assets["rocks"][random.randint(0,10)])
 			self.floor.add(rock)
 
@@ -228,7 +236,7 @@ class Display:
 		else:
 			for i in range(size):
 				for j in range(size):
-					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4 - 16, self.assets["clean_grass"])
+					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4, self.assets["clean_grass"])
 					self.floor.add(tile)
 
 				world_loader(int((i)/(size)*100),"Génération de l'affichage du monde en cours ...") if load_bar else None
@@ -236,6 +244,7 @@ class Display:
 		world_loader(100,"Chargement de l'affichage du monde en cours ...") if load_bar else None
 
 		self.floor_display.fill(BLACK)
+		self.floor2 = self.floor.copy()
 		self.floor.draw(self.floor_display)
 		self.needs_rescaling = True
 
@@ -268,7 +277,7 @@ class Display:
 
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
-			y = start_y + (i + j) * 8 - 15 - 9 * base
+			y = start_y + (i + j) * 8 - 9 * base
 
 	
 			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
@@ -302,7 +311,7 @@ class Display:
 			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
-			y = start_y + (i + j) * 8 - 15 * size
+			y = start_y + (i + j) * 8 - 15 * (size - 1)
    
       
 			if sprite_type == "bob":
@@ -331,6 +340,11 @@ class Display:
 				sprite_dict = self.data["foods"]
 				sprite_image = self.assets["foods_banana"]
     
+		vel_list = [bob.get_velocity() for bobs in sprite_dict.values() for bob in bobs] if sprite_type == "bob" else []
+		vel_list.append(1)
+		velocity_max = max(vel_list) if sprite_type == "bob" else 1
+  
+    
 		with ThreadPoolExecutor(max_workers=10) as threading_pool:
 			pool = []
 
@@ -338,7 +352,7 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), bob.get_velocity(), sprite_image))
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 							pass
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group, key, 1, 1, sprite_image))
@@ -347,7 +361,7 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), bob.get_velocity(), sprite_image, sprite_type))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1, 1, sprite_image, sprite_type))
 
@@ -360,8 +374,11 @@ class Display:
 		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
-		scale_x = 6*self.zoom_factor
-		scale_y = 3*self.zoom_factor
+		scale_x = int(self.zoom_factor * (32/24))
+		scale_y = self.zoom_factor
+
+		scale_x = 32 * self.world_size // self.zoom_factor
+		scale_y = (24 * self.world_size + 9*self.max_height) // self.zoom_factor
 				
 		if self.needs_rescaling:
 			self.needs_rescaling = False
@@ -381,8 +398,8 @@ class Display:
 
 		self.sprite_display.fill(BLACK)
   
-		self.draw_sprite("bob")
 		self.draw_sprite("food")
+		self.draw_sprite("bob")
   
 		self.zooming_render()
   
@@ -390,7 +407,6 @@ class Display:
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
 		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
-		
 		self.screen.blit(self.floor_display_temp, ( grid_x , grid_y))
 		self.screen.blit(self.sprite_display_temp, ( grid_x , grid_y))
 		
@@ -412,6 +428,17 @@ class Display:
 	
 	def draw_gif(self, gif_generator, pos):
 		self.screen.blit(next(gif_generator), pos)
+  
+  		
+	def change_api_option(self,options):
+		self.api.change_options(options[0], options[1])
+		self.world_size = options[0]["size"]
+		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
+		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
+		while self.api.is_changed_option():
+			pass
+		self.data = self.api.get_shared_data()
+		self.draw_better_world(True)
 
 		
 	def main_loop(self):
@@ -427,12 +454,12 @@ class Display:
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, BLACK),(20,100))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, BLACK),(20,120))
 
-
 		def change_color_all_ui():
 			pause_button.change_color()
 			play_button.change_color()
 			fastforward.change_color()
 			backforward.change_color()
+			option_button.change_color()
    
 		def ui_tick_modification(pos):
 			"""
@@ -476,22 +503,30 @@ class Display:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 100)
 				else:
 					self.api.set_tick_interval(self.api.get_tick_interval() + 500)
-			
-					
-    
-    
+     
+			elif option_button.get_rect().collidepoint(x,y) and os.name == 'nt': # os.name == 'nt' is for windows only because the click on the option button is not working on linux
+				self.api.pause()
+				self.in_game_menu.main_loop()
+				if self.in_game_menu.is_option_changed():
+					self.change_api_option(self.in_game_menu.get_options())
+				self.api.resume()
+
+
 		pygame.init()
 		pygame.display.set_caption("Simulation of Bobs")
 		self.screen.fill(BLUE_SKY)
 		clock = pygame.time.Clock()
 
-		backforward = Sprite_UI(self.screen_width - 160, 10, pygame.image.load(os.path.join("assets/UI", "backforward.png")))
+		backforward = Sprite_UI(self.screen_width - 160, 10, self.assets["backforward"])
 		backforward.set_active(False)
-		fastforward = Sprite_UI(self.screen_width - 40, 10, pygame.image.load(os.path.join("assets/UI", "fastforward.png")))
+		fastforward = Sprite_UI(self.screen_width - 40, 10, self.assets["fastforward"])
 		fastforward.set_active(False)
-		pause_button = Sprite_UI(self.screen_width - 120, 10, pygame.image.load(os.path.join("assets/UI", "pause.png")))
+		pause_button = Sprite_UI(self.screen_width - 120, 10, self.assets["pause"])
 		pause_button.set_active(False)
-		play_button = Sprite_UI(self.screen_width - 80, 10, pygame.image.load(os.path.join("assets/UI", "play.png")))
+		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
+
+		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
+		option_button.set_active(False)
 		change_color_all_ui()
 
 		self.fastforward_active = GEN_NULL
@@ -508,24 +543,22 @@ class Display:
 		ui_element.add(play_button)
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
+		ui_element.add(option_button)
 
 		self.draw_better_world(True)
 		self.api.start()
 
 
 		rendering = True
-		running = True
+		self.running = True
 
-		while running:
+		while self.running:
 			self.data = self.api.get_shared_data()
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.api.stop()
-
-					# pygame.quit()
-					# quit()
-					running = False
+					self.running = False
 				elif event.type == pygame.VIDEORESIZE:
 					self.screen_height = event.size[1]
 					self.screen_width = event.size[0]
@@ -533,6 +566,7 @@ class Display:
 					play_button.update_position((self.screen_width - 80, 10))
 					fastforward.update_position((self.screen_width - 40, 10))
 					backforward.update_position((self.screen_width - 160, 10))
+					option_button.update_position((self.screen_width - 200, 10))
 
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
 					if rendering:
@@ -540,10 +574,16 @@ class Display:
 					else:
 						rendering = True
 
-
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+					self.api.pause()
+					self.in_game_menu.main_loop()
+					if self.in_game_menu.is_option_changed():
+						self.change_api_option(self.in_game_menu.get_options())
+					self.api.resume()
 
+  
 				self.zoom(event)
 				self.start_drag(event)
 
@@ -571,6 +611,7 @@ class Display:
 			if rendering:
 				self.render()
 
+		
 			# all fonction that need to be executed after or during a certain number of iteration
 			next(flood_gif_active,None)
 			next(drought_gif_active,None)
@@ -587,25 +628,7 @@ class Display:
 			pygame.display.flip()
 			clock.tick()
 
-
-
-	def graph(self):
-		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
-
-		# Premier graphique
-		ax1.plot(range(len(self.world.get_population_Bob())), self.world.get_population_Bob(), label="Population")
-		ax1.legend()
-		ax1.set_ylabel('Population')
-		ax1.set_title('Bob Population Over Time')
-		ax1.grid(True)
-
-		# Deuxième graphique
-		ax2.plot(range(len(self.world.get_population_Food())), self.world.get_population_Food(), label="Food", color='orange')
-		ax2.legend()
-		ax2.set_xlabel('Ticks')
-		ax2.set_ylabel('Food')
-		ax2.set_title('Bob Food Over Time')
-		ax2.grid(True)
-
-		plt.tight_layout()
-		plt.show()
+	def close_display(self):
+		self.running = False
+		self.api.stop()
+		pygame.quit()

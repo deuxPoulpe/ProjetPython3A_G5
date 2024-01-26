@@ -16,3 +16,6 @@ we finna get it done
 
 - ./install_lib.bat for windows users
 - ./install_lib.sh for linux users (may not work)
+
+sudo apt-get install python3-tk
+
