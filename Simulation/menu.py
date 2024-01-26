@@ -14,7 +14,6 @@ class Menu:
         
         self.in_game_menu = Ig_menu()
         
-        
         # Dimensions de la fenêtre
         self.LARGEUR, self.HAUTEUR = 800, 600
 
@@ -171,6 +170,7 @@ class Menu:
 
 
 class Ig_menu: 
+
     def __init__(self):
 
         self.world = None
@@ -212,8 +212,6 @@ class Ig_menu:
         }
         self.option_changed = False
         self.is_running = False
-
-
         
                 
     def set_up_options_menu(self):
@@ -261,6 +259,7 @@ class Ig_menu:
         for i, label_text in enumerate(labels):
             label = ttk.Label(self.options_menu_frame, text=label_text, font=("Pixel", 12))
             pady_value = 20 if i == 0 else 2
+
             label.grid(row=i + 1, column=0, pady=(pady_value, 5), padx=(10, 20), sticky="e")
 
             scale_var = widget[i]
@@ -517,9 +516,6 @@ class Ig_menu:
         close_button = ttk.Button(self.main_menu_frame, text="Return", command=self.root.destroy, width=15)
         close_button.pack(pady=15, side=tk.BOTTOM)
 
-        
-        
-
         self.set_up_options_menu()
         self.set_up_options_terrain_menu()
         self.set_up_toggle_fonction_menu()
@@ -761,16 +757,10 @@ class Ig_menu:
         exit()
 
 
-        
-            
-
-        
-        
-       
+          
         
 if __name__ == "__main__":
     # menu = Menu()
     # menu.menu_principal()
     ig_menu = Ig_menu()
     ig_menu.main_loop()
-

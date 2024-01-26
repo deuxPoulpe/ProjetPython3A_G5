@@ -8,6 +8,8 @@ from display import Display
 
 if __name__ == "__main__":
 
+	# menu = Menu()
+	# menu.menu_principal()
 
 	terrain_config = {
 		"generate_river" : False,
@@ -45,9 +47,11 @@ if __name__ == "__main__":
 	world.enable_function["sexual_reproduction"] = True
 	world.spawn_bob(1,velocity=1,mass=1)
 	world.spawn_bob(1,velocity=1,mass=1)
+
 	"""
 
 	#Test reproduction
+
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False

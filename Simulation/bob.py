@@ -83,6 +83,7 @@ class Bob:
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
+
 			self.energy -= 0.5	
 
 	def move(self):
@@ -99,6 +100,7 @@ class Bob:
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
 		self.loose_energy("move")
+
 
 	
 
@@ -125,7 +127,6 @@ class Bob:
             bool: True if reproduction occurs, False otherwise.
         """
 		if self.energy >= self.max_energy:
-			print("try reproduce2")
 			self.world.spawn_reproduce(self)
 			self.energy -= 150
 			return True
@@ -147,6 +148,7 @@ class Bob:
 		self.velocity_manager()
 
 		while self.case_to_move > 0:
+
 			if self.world.enable_function["reproduce"]:
 				if (self.reproduce()):
 					self.loose_energy("stand")
@@ -158,6 +160,7 @@ class Bob:
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
 				self.memory_store()
+
 			if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
 					self.loose_energy("move")
@@ -171,12 +174,7 @@ class Bob:
 			self.world.enable_function["eat_bob"]: (self.eat_bob())
 			self.eat_food()
 
-
-			
-			
-			
-
-			
+	
 	
 	def velocity_manager(self):
 
@@ -243,6 +241,7 @@ class Bob:
 		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
 		self.perception_list = []
+
 		distance = round(self.perception)
 		while distance > 0: #On ajoute les objets que voit bob par distance
 
@@ -354,7 +353,6 @@ class Bob:
 		
 
 
-
 	def mutate_memory_points(self):
 		
 		"""
@@ -408,7 +406,7 @@ class Bob:
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		#self.loose_energy("move")
 
 
 	def case_ou_aller(self, bob , mode):
@@ -500,4 +498,3 @@ class Bob:
 				x1 -= d
 
 		return (x1,y1)
-	

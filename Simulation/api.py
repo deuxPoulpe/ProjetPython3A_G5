@@ -22,6 +22,7 @@ class Api:
 		self.option_shared_data.append(None)
 		self.option_shared_data.append(None)
 		self.option_shared_data.append(False)
+
 		self.get_world = mp.Manager().Value('i', False)
 		
 	def change_options(self, argDict, terrain_config_dict):
@@ -32,6 +33,7 @@ class Api:
    
 	def is_changed_option(self):
 		return self.option_shared_data[2]
+
 
 	def get_tick_interval(self):
 		return self.tick_interval.value
@@ -115,5 +117,8 @@ class Api:
 			self.process.join()
    
    
-			
+
+   
+   
+	#faire un booléan . crée une variable qui va stocké l'objet et sera accesible des 2 côtés.	
    
