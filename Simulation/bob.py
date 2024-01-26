@@ -127,7 +127,7 @@ class Bob:
             bool: True if reproduction occurs, False otherwise.
         """
 		if self.energy >= self.max_energy:
-			self.energy = 3 * self.energy // 4
+			self.energy -= 150
 			self.world.spawn_reproduce(self)
 			return True
 		else:

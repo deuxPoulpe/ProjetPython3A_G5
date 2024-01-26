@@ -38,13 +38,23 @@ if __name__ == "__main__":
 	
 
 	"""
-
-	#Test reproduction
+	"""
+	#Test reproduction_sexual
 	world.enable_function["reproduce"] = False
 	world.enable_function["sexual_reproduction"] = True
 	world.spawn_bob(1,velocity=1,mass=1)
 	world.spawn_bob(1,velocity=1,mass=1)
-				 
+	"""	
+	#Test reproduction
+	print("Test reproduction")
+	world.enable_function["reproduce"] = True
+	world.enable_function["sexual_reproduction"] = False
+	world.spawn_bob(1,velocity=1,mass=1)
+	for position, liste_objets in world.get_bobs().items():
+		for objet in liste_objets:
+			print(objet.get_energy())
+
+
 	api = Api(world, 500)
 	display = Display(api)
 	display.main_loop()
