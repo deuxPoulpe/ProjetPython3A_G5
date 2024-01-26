@@ -188,18 +188,20 @@ class Bob:
 		"""
 		Permet à Bob de manger un autre Bob. Retourne True si Bob a mangé un autre Bob, False sinon.
 		"""
-		
-		copy_bobs = self.world.get_bobs()[self.get_pos()].remove(self).copy()
-		mass_bob_list = [x.get_mass() for x in copy_bobs]
-		bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
+		mass_bob_list = []
+		copy_bobs = self.world.get_bobs()[self.get_pos()].copy()
+		if len(copy_bobs) > 1:
+			copy_bobs.remove(self)
+			mass_bob_list = [x.get_mass() for x in copy_bobs]
+			bob=copy_bobs[mass_bob_list.index(min(mass_bob_list))]
 
-		if (bob.get_mass()/self.get_mass())<(2/3):
-			if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
-				self.energy = self.max_energy
-			else:
-				self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
-			self.world.kill_bob(bob)
-			return True
+			if (bob.get_mass()/self.get_mass())<(2/3):
+				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
+					self.energy = self.max_energy
+				else:
+					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+				self.world.kill_bob(bob)
+				return True
 		return False
 	
 
