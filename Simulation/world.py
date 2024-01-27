@@ -208,8 +208,14 @@ class World:
 			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
 		
 		child_velocity = 1
+		
+		mutation = random.choice([-1, 0, 1])
+		child_perception = mother_bob.get_perception() + mutation
+		child_perception = max(0, child_perception)
 
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity )
+
+
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity, perception= child_perception)
 		
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:

@@ -174,6 +174,9 @@ class Bob:
 			self.world.enable_function["eat_bob"]: (self.eat_bob())
 			self.eat_food()
 
+			if self.die():
+				return None
+
 	
 	
 	def velocity_manager(self):
