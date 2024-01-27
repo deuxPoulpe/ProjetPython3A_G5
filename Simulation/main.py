@@ -43,23 +43,24 @@ if __name__ == "__main__":
 	
 
 	"""
-	"""
+	
 	#Test reproduction_sexual
 	world.enable_function["reproduce"] = False
 	world.enable_function["sexual_reproduction"] = True
+	world.enable_function["move_smart"] = True
 	world.spawn_bob(1,velocity=1,mass=1)
 	world.spawn_bob(1,velocity=1,mass=1)
 
-	"""
+	
 
 	#Test reproduction
-	
+	"""
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
 	world.enable_function["move_smart"] = True
 	world.spawn_bob(1,velocity=1,mass=1)
-	
+	"""
 
 
 
