@@ -711,24 +711,24 @@ class Display:
 		rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
 
 		rect_color = (0, 0, 0, 128)
-		pygame.draw.rect(rect_surface, rect_color, rect_surface.get_rect(), border_radius=20)
+		pygame.draw.rect(rect_surface, rect_color, rect_surface.get_rect(), border_radius=18)
 
-		self.screen.blit(rect_surface, (mouse_x - 100, mouse_y))
+		self.screen.blit(rect_surface, (mouse_x - 150, mouse_y))
 
 		for obj in self.object_stats:
 			if isinstance(obj, Bob):
-				self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {bob.get_name()} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef_bob + 10 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 30 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 45 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {obj.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 60 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {obj.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 75 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {obj.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 90 + nb_food * height_coef_food))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {obj.get_memory_points()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 105 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {obj.get_name()} :", True, WHITE), (mouse_x - 140, mouse_y + nb_bob * height_coef_bob + 10 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 30 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_energy()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 45 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {obj.get_mass()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 60 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {obj.get_velocity()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 75 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {obj.get_perception()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 90 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {obj.get_memory_points()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 105 + nb_food * height_coef_food))
 				nb_bob += 1
 			elif isinstance(obj, Food):
-				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 140, 130 + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_food * height_coef_food + 30 + nb_bob * height_coef_bob))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_value()}", True, WHITE), (mouse_x - 80, mouse_y + nb_food * height_coef_food + 45 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_value()}", True, WHITE), (mouse_x - 130, mouse_y + nb_food * height_coef_food + 45 + nb_bob * height_coef_bob))
 				nb_food += 1
 
 		self.object_stats = []
