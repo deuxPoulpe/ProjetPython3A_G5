@@ -57,6 +57,31 @@ if __name__ == "__main__":
 	world.enable_function["sexual_reproduction"] = False
 	world.spawn_bob(1,velocity=1,mass=1)
 
+		#Test perception 
+	"""
+	print("Test perception")
+	world.enable_function["perception"] = True
+	world.enable_function["move_smart"] = True
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=2,mass=3)
+	"""
+
+	#Test die
+	"""
+	print("Test die")
+	world.enable_function["move_smart"] = True
+	world.spawn_bob(1,velocity=1,mass=1)
+	"""
+
+	#Test memory
+	"""
+	print("Test memory")
+	world.enable_function["memory"] = True
+	world.enable_function["move_smart"] = True
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=1,mass=3)
+	"""
+
 	api = Api(world, 500)
 	ig = Ig_menu()
 	display = Display(api, ig)
