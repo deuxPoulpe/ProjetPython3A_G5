@@ -56,10 +56,10 @@ if __name__ == "__main__":
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
-	world.spawn_bob(2,velocity=1,mass=4)
-	world.spawn_bob(2,velocity=2,mass=1)
-	world.spawn_bob(2,velocity=3,mass=2)
-	world.spawn_bob(2,velocity=2,mass=5)
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=2,mass=1)
+	world.spawn_bob(1,velocity=3,mass=1)
+
 
 	api = Api(world, 500)
 	ig = Ig_menu()

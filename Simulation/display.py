@@ -4,7 +4,8 @@ import os
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
-
+from bob import Bob
+from food import Food
 
 from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
 from Utility.time_function_utility import execute_function_during_it, execute_function_after_it
@@ -47,7 +48,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
-		self.bobs_stats = []
+		self.object_stats = []
 		
 
 		self.assets = {
@@ -323,8 +324,8 @@ class Display:
      
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
-				self.bobs_stats.append(sprite_obj)
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
+				self.object_stats.append(sprite_obj)
 
 
 		def add_sprite_to_group(sprite_obj, sprite_mass, velocity, sprite_image):
@@ -359,8 +360,8 @@ class Display:
 
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
-				self.bobs_stats.append(sprite_obj)
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
+				self.object_stats.append(sprite_obj)
 			
    
 			
@@ -687,11 +688,21 @@ class Display:
 
 	def show_bob_stats(self):
 		nb_bob = 0
+		nb_food = 0
 		mouse_x, mouse_y = pygame.mouse.get_pos()
 
 		rect_width = 150
-		height_coef = 140
-		rect_height = len(self.bobs_stats) * height_coef
+		height_coef_bob = 140
+		height_coef_food = 70
+  
+		rect_height = 0
+    
+		for _ in self.object_stats:
+			if isinstance(_, Bob):
+				rect_height += height_coef_bob
+			elif isinstance(_, Food):
+				rect_height += height_coef_food
+    
 		rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
 
 		rect_color = (0, 0, 0, 128)
@@ -699,14 +710,20 @@ class Display:
 
 		self.screen.blit(rect_surface, (mouse_x - 100, mouse_y))
 
-		for bob in self.bobs_stats:
-			self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef + 10))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {bob.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 30))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {bob.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 45))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {bob.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 75))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {bob.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 90))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {bob.get_memory_points()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 105))
-			nb_bob += 1
+		for obj in self.object_stats:
+			if isinstance(obj, Bob):
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef_bob + 10 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 30 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 45 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {obj.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 60 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {obj.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 75 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {obj.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 90 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {obj.get_memory_points()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 105 + nb_food * height_coef_food))
+				nb_bob += 1
+			elif isinstance(obj, Food):
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_food * height_coef_food + 30 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_value()}", True, WHITE), (mouse_x - 80, mouse_y + nb_food * height_coef_food + 45 + nb_bob * height_coef_bob))
+				nb_food += 1
 
-		self.bobs_stats = []
+		self.object_stats = []
