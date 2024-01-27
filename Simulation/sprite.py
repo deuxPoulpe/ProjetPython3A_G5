@@ -44,6 +44,8 @@ class Sprite(pygame.sprite.Sprite):
         return self.size
     def get_image(self):
         return self.image
+    def get_rect(self):
+        self.rect
     
     def set_image(self, image):
         self.image = image
@@ -63,7 +65,7 @@ class Sprite_UI(pygame.sprite.Sprite):
         self.image = image
         self.base_image = image.copy()
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x,y)
+        self.rect.topleft = (self.x, self.y)
         self.active = True
         
         

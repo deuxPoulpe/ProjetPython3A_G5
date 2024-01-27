@@ -10,6 +10,7 @@ if __name__ == "__main__":
 
 	# menu = Menu()
 	# menu.menu_principal()
+	# exit()
 
 	terrain_config = {
 		"generate_river" : False,
@@ -55,9 +56,13 @@ if __name__ == "__main__":
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
-	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(9,velocity=1,mass=1)
 
 	api = Api(world, 500)
 	ig = Ig_menu()
 	display = Display(api, ig)
+	ig.is_running = True
+	ig.display = display
+	ig.api = api
+	ig.world = world
 	display.main_loop()

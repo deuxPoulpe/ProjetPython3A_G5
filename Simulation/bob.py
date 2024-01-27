@@ -182,7 +182,7 @@ class Bob:
 		self.velocity_buffer += self.velocity-abs(self.velocity)
 		if self.velocity_buffer > 0:
 			self.velocity_buffer -= 1
-			case_to_move += 1
+			self.case_to_move += 1
 	
 	def eat_bob(self):
 		"""

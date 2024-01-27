@@ -206,6 +206,8 @@ class World:
 
 			
 			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
+		
+		child_velocity = 1
 
 		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity )
 		
@@ -215,6 +217,7 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+		
 	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
 		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
 		new_born_pos = new_born.get_pos()

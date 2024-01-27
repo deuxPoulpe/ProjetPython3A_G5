@@ -517,7 +517,7 @@ class Ig_menu:
         save_button = ttk.Button(self.main_menu_frame, text="Save", command=self.save_world, width=15)
         save_button.pack(pady=15)
         
-        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_workd, width=15)
+        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_world, width=15)
         load_save_button.pack(pady=15)
         
         exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=self.exit, width=15)
@@ -619,7 +619,7 @@ class Ig_menu:
         else:
             return None
         
-    def load_save_workd(self):
+    def load_save_world(self):
         file_path = self.open_file_dialog()
         if file_path is None:
             return -1

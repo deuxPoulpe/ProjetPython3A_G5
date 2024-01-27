@@ -14,17 +14,18 @@ from Utility.time_function_utility import execute_function_during_it, execute_fu
 GEN_NULL = iter(())
 BLUE_SKY = (135,206,250)
 BLACK = (0,0,0)
+WHITE = (255,255,255)
 
 
 class Display:
 	def __init__(self, api, ig_menu):
 		self.in_game_menu = ig_menu
 		self.api = api
+		self.game_paused = True
 
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-	
 
 
 		self.data = self.api.get_shared_data()
@@ -46,6 +47,7 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
+		self.bobs_stats = []
 		
 
 		self.assets = {
@@ -85,6 +87,27 @@ class Display:
 
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
+
+	def convert_sprite_coords_to_screen(self, sprite_x, sprite_y):
+		#get the offset of the sprite display
+		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
+		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
+
+		#calculate the screen position of the sprite
+		screen_x = int(sprite_x / self.zoom_factor) + grid_x
+		screen_y = int(sprite_y / self.zoom_factor) + grid_y
+
+		return screen_x, screen_y
+	
+	def is_mouse_on_sprite(self, sprite_pos):
+		# get the mouse position
+		mouse_x, mouse_y = pygame.mouse.get_pos()
+		# get the sprite position
+		sprite_x, sprite_y = sprite_pos
+		# convert the sprite position to screen position
+		screen_x, screen_y = self.convert_sprite_coords_to_screen(sprite_x, sprite_y)
+		# check if the mouse is on the sprite
+		return screen_x <= mouse_x <= screen_x + int(16/self.zoom_factor) and screen_y <= mouse_y <= screen_y + int(16/self.zoom_factor)
 	
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
@@ -268,11 +291,11 @@ class Display:
 		bob_color_modified.blit(sub_color_surface, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
 
 		return bob_color_modified.convert_alpha()
-
+	
 	def draw_sprite(self, sprite_type):
 
-		def add_sprite_to_group_occlusion(key, sprite_mass, velocity, sprite_image, sprite_type):
-			i,j = key
+		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
+			i,j = sprite_obj.get_pos()
 			base = grid_of_height[i][j]
 
 			size = sprite_mass ** (1/3)
@@ -303,12 +326,14 @@ class Display:
 					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base)
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
 
-		
 			sprite_group.add(sprite)
 
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft) and sprite_type == "bob":
+				self.bobs_stats.append(sprite_obj)
 
-		def add_sprite_to_group(key, sprite_mass, velocity, sprite_image):
-			i,j = key
+
+		def add_sprite_to_group(sprite_obj, sprite_mass, velocity, sprite_image):
+			i,j = sprite_obj.get_pos()
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * (size - 1)
@@ -320,9 +345,14 @@ class Display:
 				else:
 					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
 					self.sprite_color_cache[velocity] = sprite_image
+			sprite = Sprite(x,y, sprite_image, size)
 
-     
-			sprite_group.add(Sprite(x,y, sprite_image, size))
+			sprite_group.add(sprite)
+
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft) and sprite_type == "bob":
+				self.bobs_stats.append(sprite_obj)
+
+
 
 		sprite_group = pygame.sprite.Group()
 
@@ -352,18 +382,17 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
-							pass
+							pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group, key, 1, 1, sprite_image))
+						pool.append(threading_pool.submit(add_sprite_to_group, sprites, 1, 1, sprite_image))
 			else:
 				grid_of_height = terrain.get_terrain()
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1, 1, sprite_image, sprite_type))
+						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image, sprite_type))
 
 			for _ in as_completed(pool):
 				pass
@@ -374,9 +403,6 @@ class Display:
 		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
-		scale_x = int(self.zoom_factor * (32/24))
-		scale_y = self.zoom_factor
-
 		scale_x = 32 * self.world_size // self.zoom_factor
 		scale_y = (24 * self.world_size + 9*self.max_height) // self.zoom_factor
 				
@@ -468,12 +494,14 @@ class Display:
 			x,y = pos
 			if pause_button.get_rect().collidepoint(x,y):
 				self.api.pause()
+				self.game_paused = True
 				pause_button.set_active(True)
 				play_button.set_active(False)
 				change_color_all_ui()
 
 			elif play_button.get_rect().collidepoint(x,y):
 				self.api.resume()
+				self.game_paused = False
 				pause_button.set_active(False)
 				play_button.set_active(True)
 				change_color_all_ui()
@@ -522,8 +550,9 @@ class Display:
 		fastforward = Sprite_UI(self.screen_width - 40, 10, self.assets["fastforward"])
 		fastforward.set_active(False)
 		pause_button = Sprite_UI(self.screen_width - 120, 10, self.assets["pause"])
-		pause_button.set_active(False)
+		pause_button.set_active(True)
 		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
+		play_button.set_active(False)
 
 		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
 		option_button.set_active(False)
@@ -557,6 +586,7 @@ class Display:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.api.resume()
 					self.api.stop()
 					self.running = False
 				elif event.type == pygame.VIDEORESIZE:
@@ -618,9 +648,11 @@ class Display:
 			next(self.fastforward_active,None)
 			next(self.backforward_active,None)
 
+
 			# UI and text
 			blit_text_info()
 			ui_element.draw(self.screen)
+			self.show_bob_stats()
 
 			
 			# Updating the display
@@ -632,3 +664,27 @@ class Display:
 		self.running = False
 		self.api.stop()
 		pygame.quit()
+
+	def show_bob_stats(self):
+		nb_bob = 0
+		mouse_x, mouse_y = pygame.mouse.get_pos()
+
+		rect_width = 120
+		rect_height = len(self.bobs_stats) * 100
+		rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
+
+		rect_color = (0, 0, 0, 128)
+		pygame.draw.rect(rect_surface, rect_color, rect_surface.get_rect(), border_radius=10)
+
+		self.screen.blit(rect_surface, (mouse_x - 100, mouse_y))
+
+		for bob in self.bobs_stats:
+			self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 95, mouse_y + nb_bob * 100 + 5))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Energy {bob.get_energy()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 25))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Mass {bob.get_mass()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 40))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 55))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception {bob.get_perception()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 70))
+			nb_bob += 1
+
+
+		self.bobs_stats = []
