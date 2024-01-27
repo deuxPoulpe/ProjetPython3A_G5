@@ -1,8 +1,9 @@
+import copy
 import random
 import food
 
 from queue import *
-
+from food import *
 class Bob:
 	"""
 	Classe représentant un personnage 'Bob' dans un monde simulé.
@@ -498,3 +499,55 @@ class Bob:
 				x1 -= d
 
 		return (x1,y1)
+	
+def memoriserLesNourritures(self, world, destination, anciennes_nourritures_visibles):
+        # Récupérer les nourritures qui ne sont plus visibles
+        nourritures_plus_visibles = self.nourritures_plus_visibles(world, destination, anciennes_nourritures_visibles)
+        # Trier les nourritures en fonction de leur énergie de manière décroissante
+        nourriture_A_memorise = sorted(nourritures_plus_visibles, key=lambda food: food.get_value(), reverse=True)
+        # Mémoriser les nourritures tant que la capacité de mémorisation n'est pas atteinte
+        if nourriture_A_memorise:
+            for nourriture in nourriture_A_memorise:
+                if self.nb_Nouriture_Memorisable > 0:
+                    self.memoriserNourriture(nourriture)
+                else:
+                    break
+
+def memoriserNourriture(self, nourriture):
+        # Effectuer une copie profonde de la nourriture pour éviter des références partagées
+        copie_food = copy.deepcopy(nourriture)
+        # Ajouter la copie à la liste des nourritures mémorisées
+        self.listFoodMemorise.append(copie_food)
+        # Mettre à jour le nombre de nourritures et de cases mémorisables
+        self.nb_Nouriture_Memorisable -= 1
+        self.nb_Cases_Memorisable -= 2
+        # Supprimer les cases les plus anciennes si nécessaire
+        if self.casesMemorisees:
+            self.casesMemorisees.pop(0)
+        if self.casesMemorisees:
+            self.casesMemorisees.pop(0)
+
+def memoriserCaseVisite(self, ancienX, ancienY):
+        # Vérifier si la case n'a pas déjà été mémorisée
+        if (ancienX, ancienY) not in self.casesMemorisees:
+            # Vérifier si on peut encore stocker des cases visitées
+            if self.nb_Cases_Memorisable > 0:
+                # Ajouter la case aux cases mémorisées
+                self.casesMemorisees.append((ancienX, ancienY))
+                # Décrémenter le nombre de cases mémorisables
+                self.nb_Cases_Memorisable -= 1
+            else:
+                # Si la liste des cases mémorisées n'est pas vide, supprimer la plus ancienne
+                if self.casesMemorisees:
+                    self.casesMemorisees.pop(0)
+                # Ajouter la nouvelle case mémorisée
+                self.casesMemorisees.append((ancienX, ancienY))
+
+def nourritures_plus_visibles(self, world, destination, anciennes_nourritures_visibles):
+        # Obtenir les nouvelles nourritures visibles et les nouvelles positions
+        nouvelles_nourritures_visibles, _ = self.objets_visibles(world)
+        # Exclure la destination de la liste des anciennes nourritures visibles
+        if destination in anciennes_nourritures_visibles:
+            anciennes_nourritures_visibles.remove(destination)
+        # Retourner les nourritures qui ne sont plus visibles
+        return [nourriture for nourriture in anciennes_nourritures_visibles if nourriture not in nouvelles_nourritures_visibles]

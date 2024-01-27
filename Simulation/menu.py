@@ -18,6 +18,13 @@ class Menu:
         # Dimensions de la fenêtre
         self.LARGEUR, self.HAUTEUR = 800, 600
 
+        # Initialisation de la bibliothèque Pygame pour le son
+        pygame.mixer.init()
+        # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
+        self.chanson = pygame.mixer.Sound("music.mp3")
+         # Jouer la chanson en boucle (-1 indique une lecture en boucle)
+        pygame.mixer.Sound.play(self.chanson, loops=-1)
+
         # Création de la fenêtre Pygame
         self.fenetre = pygame.display.set_mode((self.LARGEUR, self.HAUTEUR))
         pygame.display.set_caption("PROJET_PYTHON_2024_G5")
@@ -31,7 +38,7 @@ class Menu:
         self.arial = os.path.join("assets", "arial.ttf")
 
         self.police = pygame.font.Font(self.policeChoisie, 36)
-        self.policeme = pygame.font.Font(None, 24)        
+        self.policeme = pygame.font.Font(None, 24)  
 
         # Champs de texte
         self.champs_texte = [pygame.Rect(350, 50 + i * 50, 300, 30) for i in range(10)]
@@ -48,6 +55,9 @@ class Menu:
         self.valeurs_variables = {}
 
         
+    def jouer_chanson(self):
+        # Jouer la chanson en boucle (-1 indique une lecture en boucle)
+        self.music = pygame.mixer.Sound.play(self.chanson, loops=-1)      
 
     def dessiner_rectangle(self, couleur, x, y, largeur, hauteur, texte, taille_texte=36):
         pygame.draw.rect(self.fenetre, couleur, (x, y, largeur, hauteur))
@@ -59,6 +69,9 @@ class Menu:
         file_path = filedialog.askopenfilename()
         #selcted_file = select_file()
         #print (select_file)
+        return file_path
+    
+    
 
 
 
@@ -82,7 +95,7 @@ class Menu:
     def afficher_formulaire(self, variables):
         self.afficher_image_de_fond("fond2.jpg")
        
-        for i, (variable, champ) in enumerate(zip(variables, self.champs_texte)):
+        #for i, (variable, champ) in enumerate(zip(variables, self.champs_texte)):
             
             # # Affichage de la variable
             #surface_variable = self.police.render(variable, True, self.NOIR)
@@ -96,7 +109,7 @@ class Menu:
             # self.fenetre.blit(surface_texte, (champ.x + 5, champ.y + 5))
 
             # Bouton de retour
-            self.dessiner_bouton(self.ROSE, 600, 505, 140, 50, "Retour")
+        self.dessiner_bouton(self.ROSE, 600, 505, 140, 50, "Retour")
 
         pygame.display.flip()
 
@@ -113,8 +126,8 @@ class Menu:
                     #         self.couleur = self.couleur_active
                     #     else:
                     #         self.couleur = self.couleur_inactive
-                    if 600 <= event.pos[0] <= 700 and 500 <= event.pos[1] <= 530:
-                        return True
+                    # if 600 <= event.pos[0] <= 700 and 500 <= event.pos[1] <= 530:
+                    return True
                         # Attribuer les valeurs saisies aux variables
                         # for i, variable in enumerate(variables):
                         #     self.valeurs_variables[variable] = int(self.textes_champs[i])
@@ -137,12 +150,22 @@ class Menu:
         elif bouton_resume.collidepoint(x, y):
             variables = ['number_of_river', 'number_of_lake', 'size_of_lake', 'max_height', 'nbFood', 'dayTick', 'Food_energy', 'generate_river', 'generate_lake', 'custo_terrain']
             self.afficher_formulaire(variables)
+        
         elif bouton_quitter.collidepoint(x, y):
             pygame.quit()
+        
+        elif boutton_Retour.collidepoint(x,y):
+            return True
+        
+        elif bouton_load_save.collidepoint(x, y):
+            self.select_file()
 
+
+            
 
     def menu_principal(self):
         while True:
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -771,8 +794,8 @@ class Ig_menu:
         
 if __name__ == "__main__":
 
-    # menu = Menu()
-    # menu.menu_principal()
-    ig_menu = Ig_menu()
-    ig_menu.main_loop()
+    menu = Menu()
+    menu.menu_principal()
+    # ig_menu = Ig_menu()
+    # ig_menu.main_loop()
 
