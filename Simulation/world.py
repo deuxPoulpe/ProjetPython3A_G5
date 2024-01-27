@@ -166,7 +166,7 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception)
+			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception )
 
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]

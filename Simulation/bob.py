@@ -20,7 +20,7 @@ class Bob:
 	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200 ,):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -50,7 +50,8 @@ class Bob:
 		self.world = world
 		self.case_to_move = 0
 		self.velocity_buffer = 0
-
+		self.name = self.random_name()
+		
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
@@ -64,10 +65,13 @@ class Bob:
 		return self.velocity
 	def get_perception(self):
 		return self.perception
+	def get_name (self) : 
+		return self.name
 	def get_old_pos(self):
 		return self.old_position
 	def get_memory_points(self):
 		return self.memory_points
+
 
 	
 	def eat_food(self):
@@ -90,6 +94,27 @@ class Bob:
 		elif mode == "stand":
 
 			self.energy -= 0.5	
+	
+	def random_name(self):
+		
+		
+		vowels = 'aeiou'
+		consones = 'bcdfghjklmnpqrstvwxyz'
+		taille_name = random.randint(3, 8)
+		name= ''
+		
+		for i in range (taille_name):
+			if i%2 == 0 : 
+				name += random.choice(consones)
+			else : 
+				name += random.choice(vowels)
+			name = name.capitalize()
+		return name
+			
+		
+    
+
+    
 
 	def move(self):
 		"""

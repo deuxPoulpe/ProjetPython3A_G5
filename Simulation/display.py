@@ -685,6 +685,11 @@ class Display:
 		self.running = False
 		self.api.stop()
 		pygame.quit()
+	
+	
+
+
+
 
 	def show_bob_stats(self):
 		nb_bob = 0
@@ -712,7 +717,7 @@ class Display:
 
 		for obj in self.object_stats:
 			if isinstance(obj, Bob):
-				self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef_bob + 10 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {bob.get_name()} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef_bob + 10 + nb_food * height_coef_food))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 30 + nb_food * height_coef_food))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 45 + nb_food * height_coef_food))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {obj.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef_bob + 60 + nb_food * height_coef_food))
