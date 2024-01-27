@@ -71,7 +71,7 @@ class Menu:
         #print (select_file)
         return file_path
     
-    
+
 
 
 
@@ -179,7 +179,7 @@ class Menu:
 
             self.afficher_texte("Game Of Life", self.LARGEUR // 2, 100, 56)
             self.dessiner_bouton(self.ROSE, 300, 200, 200, 50, "Start")
-            self.dessiner_bouton(self.ROSE, 300, 300, 200, 50, "Histoire")
+            self.dessiner_bouton(self.ROSE, 300, 300, 200, 50, "History")
             self.dessiner_bouton(self.ROSE, 300, 400, 200, 50, "Load_Save")
             self.dessiner_bouton(self.ROSE , 300, 500, 200, 50, "Quitter")
             
