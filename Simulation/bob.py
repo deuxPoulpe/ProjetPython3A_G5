@@ -499,3 +499,4 @@ class Bob:
 				x1 -= d
 
 		return (x1,y1)
+	

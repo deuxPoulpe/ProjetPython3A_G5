@@ -1,3 +1,4 @@
+import pickle
 import pygame
 from display import Display
 from api import Api
@@ -21,7 +22,7 @@ class Menu:
         # Initialisation de la bibliothèque Pygame pour le son
         pygame.mixer.init()
         # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
-        self.chanson = pygame.mixer.Sound("music.mp3")
+        self.chanson = pygame.mixer.Sound("music2.mp3")
          # Jouer la chanson en boucle (-1 indique une lecture en boucle)
         pygame.mixer.Sound.play(self.chanson, loops=-1)
 
@@ -62,15 +63,59 @@ class Menu:
     def dessiner_rectangle(self, couleur, x, y, largeur, hauteur, texte, taille_texte=36):
         pygame.draw.rect(self.fenetre, couleur, (x, y, largeur, hauteur))
         self.afficher_texte(texte, x + largeur // 2, y + hauteur // 2, taille_texte)
+    def save_game(fic_name,jeu):
+        with open(fic_name,'rb') as fichier:
+            dictionnaire = pickle.load(fichier)
+        dictionnaire[fic_name] = jeu
 
-    def select_file(self):
+        with open(fic_name,'wb') as fichier:
+            pickle.dump(dictionnaire,fichier)
+    def save_load_menu(self):
+        # Afficher le formulaire pour le nom de fichier
+        file_name = self.ask_for_file_name()
+        
+        # Sauvegarder les données actuelles dans le fichier
+        if file_name:
+            save(file_name, World)
+            print(f"Le jeu a été sauvegardé dans le fichier {file_name}")
+
+        else:
+            # Mettez à jour les variables du jeu avec les données chargées
+            load(file_name)
+            print(f"Le jeu a été chargé depuis le fichier {file_name}")
+
+    def ask_for_file_name(self):
+        # Utilisez la boîte de dialogue pour demander le nom de fichier
         root = tk.Tk()
         root.withdraw()
-        file_path = filedialog.askopenfilename()
-        #selcted_file = select_file()
-        #print (select_file)
-        return file_path
+        file_name = filedialog.askopenfilename()
+
+        if not file_name:
+            create_new_file = tk.messagebox.askyesno("Fichier non trouve","le fichier n'existe pas.Voulez-vous creer un nouveau fichier ?")
+            if create_new_file:
+                file_name = self.create_new_file_dialog()
+
+        return file_name
     
+    def create_new_file_dialog(self):
+        root=tk.Tk()
+        root.withdraw()
+        file_name =  filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    
+        return file_name
+
+    def load_game(self, file_name):
+        # Charger les données depuis le fichier
+        loaded_data = {}
+        try:
+            with open(file_name, 'rb') as file:
+                loaded_data = pickle.load(file)
+        except FileNotFoundError:
+            print(f"Le fichier {file_name} n'existe pas.")
+        except Exception as e:
+            print(f"Une erreur s'est produite lors du chargement du jeu : {e}")
+
+        return loaded_data
 
 
 
@@ -158,7 +203,8 @@ class Menu:
             return True
         
         elif bouton_load_save.collidepoint(x, y):
-            self.select_file()
+              self.save_load_menu()
+    
 
 
             

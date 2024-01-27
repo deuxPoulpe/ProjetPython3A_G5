@@ -10,6 +10,7 @@ from Utility.time_function_utility import execute_function_after_it
 
 
 class World:
+	
 	"""
     Class representing the world in which 'Bob' and 'Food' objects interact.
 
@@ -61,8 +62,7 @@ class World:
 		self.enabled_event = 0
 		self.event_timer_day_tick = 25
 
-
-
+		
 
 
 		assert all([type(argDict["size"]) == int ,
@@ -104,10 +104,11 @@ class World:
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
 
-  
+	
 
 
 	#methods
+	
 	def move_bob(self,bob,old_x,old_y):
 		"""
         Moves a 'Bob' in the world.
@@ -301,6 +302,16 @@ class World:
 			for objet in liste_objets:
 				print(objet.get_energy())
 		return event
+	
+	def load(self, file_name):
+		try:
+				with open(file_name, 'rb') as file:
+					loaded_world = pickle.load(file)
+				return loaded_world
+		except FileNotFoundError:
+				print(f"Le fichier {file_name} n'existe pas.")
+				return None
+				
 
 	def change_options(self, arg_dict, terrain_config_dict):
 		"""
@@ -317,3 +328,12 @@ class World:
 		else:
 			self.terrain = None
 		self.water_level = terrain_config_dict["water_level"]
+
+	def save(self, file_name):
+    	
+		with open(file_name, 'wb') as file:
+        	 pickle.dump(self, file)
+
+    
+
+	
