@@ -52,7 +52,7 @@ if __name__ == "__main__":
 	"""
 
 	#Test reproduction
-
+	"""
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
@@ -69,3 +69,22 @@ if __name__ == "__main__":
 	ig.api = api
 	ig.world = world
 	display.main_loop()
+	"""
+
+	#Test velocity
+	world.enable_function["velocity"] = True
+	world.enable_function["velocity_manager"] = False
+	world.spawn_bob(1,velocity=1,mass=8)
+	world.spawn_bob(1,velocity=2,mass=8)
+	world.spawn_bob(1,velocity=3,mass=8)
+	
+
+	api = Api(world, 500)
+	ig = Ig_menu()
+	display = Display(api, ig)
+	ig.is_running = True
+	ig.display = display
+	ig.api = api
+	ig.world = world
+	display.main_loop()
+
