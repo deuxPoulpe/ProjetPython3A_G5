@@ -1,7 +1,6 @@
 import pickle
 
 
-
 def save(filename,*args):
     with open(filename, 'wb') as output:
         for i in args:

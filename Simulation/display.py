@@ -291,12 +291,12 @@ class Display:
 
 		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
 			i,j = sprite_obj.get_pos()
+   
 			base = grid_of_height[i][j]
 
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
 			y = start_y + (i + j) * 8 - 9 * base
-
 	
 			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
 			left_tile_cord = min(self.world_size - 1, max(0 , j + 1))
@@ -320,7 +320,7 @@ class Display:
 				else:
 					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base)
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
-
+     
 			sprite_group.add(sprite)
 
 			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
@@ -329,24 +329,41 @@ class Display:
 
 		def add_sprite_to_group(sprite_obj, sprite_mass, velocity, sprite_image):
 			i,j = sprite_obj.get_pos()
+			old_i, old_j = sprite_obj.get_old_pos() if sprite_type == "bob" else (0,0)
+
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * (size - 1)
+			old_x = start_x + (old_i - old_j) * 16 - 8 * size
+			old_y = start_y + (old_i + old_j) * 8 - 15 * (size - 1)
    
-      
+   
+	
 			if sprite_type == "bob":
 				if velocity in self.sprite_color_cache.keys():
 					sprite_image = self.sprite_color_cache[velocity]
 				else:
 					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
 					self.sprite_color_cache[velocity] = sprite_image
+	
+			if sprite_type == "bob":
+				for t in range(1, 10):
+					interpolated_x = old_x + (x - old_x) * t / 10
+					interpolated_y = old_y + (y - old_y) * t / 10
+
+					sprite = Sprite(interpolated_x, interpolated_y, sprite_image, size)
+					sprite.image.set_alpha(255 * (10 - t) / 20)
+					sprite_group.add(sprite)
+     
 			sprite = Sprite(x,y, sprite_image, size)
 
 			sprite_group.add(sprite)
 
 			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
 				self.bobs_stats.append(sprite_obj)
-
+			
+   
+			
 
 
 		sprite_group = pygame.sprite.Group()
@@ -601,12 +618,27 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-					self.api.pause()
-					self.in_game_menu.main_loop()
-					if self.in_game_menu.is_option_changed():
-						self.change_api_option(self.in_game_menu.get_options())
-					self.api.resume()
+				elif event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						self.api.pause()
+						self.in_game_menu.main_loop()
+						if self.in_game_menu.is_option_changed():
+							self.change_api_option(self.in_game_menu.get_options())
+						self.api.resume()
+					elif event.key == pygame.K_SPACE:
+						if self.game_paused:
+							self.api.resume()
+							self.game_paused = False
+							pause_button.set_active(False)
+							play_button.set_active(True)
+							change_color_all_ui()
+						else:
+							self.api.pause()
+							self.game_paused = True
+							pause_button.set_active(True)
+							play_button.set_active(False)
+							change_color_all_ui()
+     
 
   
 				self.zoom(event)
@@ -624,18 +656,13 @@ class Display:
 				regeneration_thread.start()
 				drought_gif_active = execute_function_during_it(self.draw_gif, solar_gif, (0,0), nb_iter = 140)
 				self.api.set_event(None)
-
-
-
 			
 			self.camera()
 			self.screen.fill(BLUE_SKY)
 
-
 			# Drawing the world and the sprites
 			if rendering:
 				self.render()
-
 		
 			# all fonction that need to be executed after or during a certain number of iteration
 			next(flood_gif_active,None)
@@ -643,13 +670,11 @@ class Display:
 			next(self.fastforward_active,None)
 			next(self.backforward_active,None)
 
-
 			# UI and text
 			blit_text_info()
 			ui_element.draw(self.screen)
 			self.show_bob_stats()
-
-			
+	
 			# Updating the display
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 			pygame.display.flip()
@@ -664,8 +689,8 @@ class Display:
 		nb_bob = 0
 		mouse_x, mouse_y = pygame.mouse.get_pos()
 
-		rect_width = 120
-		height_coef = 120
+		rect_width = 150
+		height_coef = 140
 		rect_height = len(self.bobs_stats) * height_coef
 		rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
 
@@ -676,12 +701,12 @@ class Display:
 
 		for bob in self.bobs_stats:
 			self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef + 10))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Position {bob.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 30))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Energy {bob.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 45))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Mass {bob.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 60))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 75))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception {bob.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 90))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {bob.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 30))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {bob.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 45))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Mass {bob.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 75))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {bob.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 90))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {bob.get_memory_points()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 105))
 			nb_bob += 1
-
 
 		self.bobs_stats = []

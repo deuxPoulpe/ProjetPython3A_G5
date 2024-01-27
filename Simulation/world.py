@@ -99,6 +99,8 @@ class World:
 		return self.nb_bob
 	def get_nb_food(self):
 		return self.nb_food
+	def get_mutation(self):
+		return self.mutation
 
 	#setter
 	def setArgDict(self,newArgDict):

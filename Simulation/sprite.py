@@ -54,6 +54,11 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (self.x,self.y)
     
+    def set_position(self, x, y):
+        self.x = x
+        self.y = y
+        self.rect.topleft = (self.x,self.y)
+    
 class Sprite_UI(pygame.sprite.Sprite):
     """
     Class representing a Sprite UI object in the game world.
