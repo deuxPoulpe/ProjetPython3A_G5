@@ -664,6 +664,11 @@ class Display:
 		self.running = False
 		self.api.stop()
 		pygame.quit()
+	
+	
+
+
+
 
 	def show_bob_stats(self):
 		nb_bob = 0
@@ -684,6 +689,7 @@ class Display:
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Mass {bob.get_mass()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 40))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 55))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception {bob.get_perception()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 70))
+			self.screen.blit(pygame.font.Font(None , 20).render(f"Prenom {bob.get_name()}" , True , WHITE) , (mouse_x - 85, mouse_y + nb_bob * 100 + 85))
 			nb_bob += 1
 
 
