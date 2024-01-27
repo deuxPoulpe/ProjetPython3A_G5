@@ -84,6 +84,7 @@ class Bob:
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
 			self.energy -= 0.5	
+		
 
 	def move(self):
 		"""
@@ -262,6 +263,7 @@ class Bob:
 
 		return True
 
+
 	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
@@ -361,7 +363,7 @@ class Bob:
 		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
 
 		"""
-
+		
 		values = [-1, 0 , 1]
 
 		mutation = random.choice(values)
