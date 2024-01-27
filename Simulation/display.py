@@ -88,26 +88,21 @@ class Display:
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
 
-	def convert_sprite_coords_to_screen(self, sprite_x, sprite_y):
-		#get the offset of the sprite display
+	def convert_sub_surface_coords_to_screen(self, x, y):
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
 		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
-		#calculate the screen position of the sprite
-		screen_x = int(sprite_x / self.zoom_factor) + grid_x
-		screen_y = int(sprite_y / self.zoom_factor) + grid_y
+		screen_x = int(x / self.zoom_factor) + grid_x
+		screen_y = int(y / self.zoom_factor) + grid_y
 
 		return screen_x, screen_y
 	
-	def is_mouse_on_sprite(self, sprite_pos):
-		# get the mouse position
+	def is_mouse_on_sprite(self, sprite_pos, sprite_size):
 		mouse_x, mouse_y = pygame.mouse.get_pos()
-		# get the sprite position
 		sprite_x, sprite_y = sprite_pos
-		# convert the sprite position to screen position
-		screen_x, screen_y = self.convert_sprite_coords_to_screen(sprite_x, sprite_y)
-		# check if the mouse is on the sprite
-		return screen_x <= mouse_x <= screen_x + int(16/self.zoom_factor) and screen_y <= mouse_y <= screen_y + int(16/self.zoom_factor)
+		screen_x, screen_y = self.convert_sub_surface_coords_to_screen(sprite_x, sprite_y)
+
+		return screen_x <= mouse_x <= screen_x + int((16*sprite_size)/self.zoom_factor) and screen_y <= mouse_y <= screen_y + int((16*sprite_size)/self.zoom_factor)
 	
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
@@ -328,7 +323,7 @@ class Display:
 
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft) and sprite_type == "bob":
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
 				self.bobs_stats.append(sprite_obj)
 
 
@@ -349,7 +344,7 @@ class Display:
 
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft) and sprite_type == "bob":
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size) and sprite_type == "bob":
 				self.bobs_stats.append(sprite_obj)
 
 
@@ -670,20 +665,22 @@ class Display:
 		mouse_x, mouse_y = pygame.mouse.get_pos()
 
 		rect_width = 120
-		rect_height = len(self.bobs_stats) * 100
+		height_coef = 120
+		rect_height = len(self.bobs_stats) * height_coef
 		rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
 
 		rect_color = (0, 0, 0, 128)
-		pygame.draw.rect(rect_surface, rect_color, rect_surface.get_rect(), border_radius=10)
+		pygame.draw.rect(rect_surface, rect_color, rect_surface.get_rect(), border_radius=20)
 
 		self.screen.blit(rect_surface, (mouse_x - 100, mouse_y))
 
 		for bob in self.bobs_stats:
-			self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 95, mouse_y + nb_bob * 100 + 5))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Energy {bob.get_energy()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 25))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Mass {bob.get_mass()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 40))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 55))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception {bob.get_perception()}", True, WHITE), (mouse_x - 85, mouse_y + nb_bob * 100 + 70))
+			self.screen.blit(pygame.font.Font(None, 25).render(f"Bob {nb_bob + 1} :", True, WHITE), (mouse_x - 90, mouse_y + nb_bob * height_coef + 10))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Position {bob.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 30))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Energy {bob.get_energy()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 45))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Mass {bob.get_mass()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 60))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Velocity {bob.get_velocity()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 75))
+			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception {bob.get_perception()}", True, WHITE), (mouse_x - 80, mouse_y + nb_bob * height_coef + 90))
 			nb_bob += 1
 
 
