@@ -24,7 +24,7 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 3,
+		"size" : 20,
 		"nbFood" : 10,
 		"dayTick" : 100,
 		"Food_energy" : 100,
@@ -56,7 +56,10 @@ if __name__ == "__main__":
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
-	world.spawn_bob(9,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=2,mass=1)
+	world.spawn_bob(1,velocity=3,mass=1)
+
 
 	api = Api(world, 500)
 	ig = Ig_menu()

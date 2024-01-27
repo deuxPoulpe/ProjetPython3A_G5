@@ -45,6 +45,7 @@ class Bob:
 		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
+		self.old_position = (x, y)
 		self.en_fuite = False
 		self.world = world
 		self.case_to_move = 0
@@ -66,6 +67,11 @@ class Bob:
 		return self.perception
 	def get_name (self) : 
 		return self.name
+	def get_old_pos(self):
+		return self.old_position
+	def get_memory_points(self):
+		return self.memory_points
+
 
 	
 	def eat_food(self):
@@ -170,7 +176,8 @@ class Bob:
 		
 		self.mutate_memory_points()
 		self.velocity_manager()
-
+		self.old_position = self.position
+  
 		while self.case_to_move > 0:
 
 			if self.world.enable_function["reproduce"]:
@@ -405,12 +412,12 @@ class Bob:
 						return True
 
 				elif isinstance(k,food.Food):
-					self.move(self.case_ou_aller(k,"aller"))
+					self.move_dest(self.case_ou_aller(k,"aller"))
 					return True
 				
 		for i in self.memory_space:
 			if isinstance(i,food.Food):
-				self.move(self.case_ou_aller(i,"aller"))
+				self.move_dest(self.case_ou_aller(i,"aller"))
 				return True
 			
 		self.move()
