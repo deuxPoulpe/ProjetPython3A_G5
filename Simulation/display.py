@@ -16,6 +16,7 @@ from Utility.time_function_utility import execute_function_during_it, execute_fu
 GEN_NULL = iter(())
 BLUE_SKY = (135,206,250)
 BLACK = (0,0,0)
+WHITE = (255,255,255)
 
 
 class Display:
