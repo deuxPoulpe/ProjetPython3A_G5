@@ -20,7 +20,7 @@ class Bob:
 	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200 ,):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -45,12 +45,15 @@ class Bob:
 		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
+		self.old_position = (x, y)
 		self.en_fuite = False
 		self.world = world
 		self.case_to_move = 0
 		self.velocity_buffer = 0
 		self.tiles_visited = []
 
+		self.name = self.random_name()
+		
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
@@ -64,6 +67,13 @@ class Bob:
 		return self.velocity
 	def get_perception(self):
 		return self.perception
+	def get_name (self) : 
+		return self.name
+	def get_old_pos(self):
+		return self.old_position
+	def get_memory_points(self):
+		return self.memory_points
+
 
 	
 	def eat_food(self):
@@ -84,11 +94,29 @@ class Bob:
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
-
 			self.energy -= 0.5
-
 		elif mode == "self_reproduce":
 			self.energy -= 3*self.max_energy/4
+			self.energy -= 0.5	
+	
+	def random_name(self):
+		
+		
+		vowels = 'aeiou'
+		consones = 'bcdfghjklmnpqrstvwxyz'
+		taille_name = random.randint(3, 8)
+		name= ''
+		
+		for i in range (taille_name):
+			if i%2 == 0 : 
+				name += random.choice(consones)
+			else : 
+				name += random.choice(vowels)
+			name = name.capitalize()
+		return name
+			
+		
+
 
 	def move(self):
 		"""
@@ -150,7 +178,8 @@ class Bob:
 		print("1")
 		#self.mutate_memory_points()
 		self.velocity_manager()
-
+		self.old_position = self.position
+  
 		while self.case_to_move > 0:
 
 			if self.world.enable_function["reproduce"]:
@@ -402,7 +431,7 @@ class Bob:
 						return True
 
 				elif isinstance(k,food.Food):
-					self.move(self.case_ou_aller(k,"aller"))
+					self.move_dest(self.case_ou_aller(k,"aller"))
 					return True
 				
 		for i in self.memory_space:

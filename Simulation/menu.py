@@ -493,7 +493,7 @@ class Ig_menu:
         
         self.root.geometry(f'280x300+{x_position}+{y_position}')
         self.root.title('Game Of Life')
-        self.root.iconbitmap(os.path.join("assets/UI", "bob.ico"))
+        self.root.iconbitmap(os.path.join("assets/UI", "bob.ico")) if os.name == 'nt' else None
 
         self.root.bind("<Escape>", lambda event: self.root.destroy())
 

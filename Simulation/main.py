@@ -25,7 +25,7 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 10,
+		"size" : 20,
 		"nbFood" : 10,
 		"dayTick" : 100,
 		"Food_energy" : 100,
@@ -62,6 +62,19 @@ if __name__ == "__main__":
 	world.spawn_bob(1,velocity=1,mass=1)
 	"""
 
+	#Test velocity
+	"""
+	print("Test velocity")
+	world.enable_function["reproduce"] = False
+	world.enable_function["sexual_reproduction"] = False
+	world.enable_function["move_smart"] = True
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=2,mass=1)
+	world.spawn_bob(1,velocity=3,mass=1)
+	world.spawn_bob(1,velocity=4,mass=1)
+
+	"""
+
 	#Test memory
 	
 	print("Test memory")
@@ -78,11 +91,7 @@ if __name__ == "__main__":
 	world.bobs[(3,3)]=[bob1]
 
 	#save("test_memory",world)
-	
 
-	
-
-	
 
 
 	api = Api(world, 500)
