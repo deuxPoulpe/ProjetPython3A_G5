@@ -6,6 +6,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from bob import Bob
 from food import Food
+from tkinter import simpledialog
+import tkinter as tk
 
 from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
 from Utility.time_function_utility import execute_function_during_it, execute_function_after_it
@@ -881,6 +883,10 @@ class Display:
 							pause_button.set_active(True)
 							play_button.set_active(False)
 							change_color_all_ui()
+					
+					elif event.key == pygame.K_g:
+						self.ask_spawn_bob()
+						
 
   
 				self.zoom(event)
@@ -930,6 +936,21 @@ class Display:
 		self.running = False
 		self.api.stop()
 		pygame.quit()
+
+	def ask_spawn_bob(self):
+		self.api.pause()
+		self.game_paused = True
+		root = tk.Tk()
+		root.withdraw()
+		ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=root, minvalue=1, maxvalue=500)
+		if ask_number_of_bob is None:
+			self.api.resume()
+			return	
+		self.api.spawn_bob(ask_number_of_bob)
+		root.destroy()
+		self.game_paused = False
+		self.api.resume()
+		
 	
 
 

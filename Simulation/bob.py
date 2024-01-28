@@ -135,18 +135,27 @@ class Bob:
             bool: True after Bob's movement.
         """
 		old_x, old_y = self.position
-		dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-		new_x, new_y = old_x + dx, old_y + dy
-		new_x = max(0, min(new_x, self.world.get_size() - 1))
-		new_y = max(0, min(new_y, self.world.get_size() - 1))
+		def choose_random_position(old_x, old_y):
+			dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
+			x, y = old_x + dx, old_y + dy
+			x = max(0, min(x, self.world.get_size() - 1))
+			y = max(0, min(y, self.world.get_size() - 1))
+
+			return x, y
 		
 		if self.world.get_terrain() is not None:
 			terrain = self.world.get_terrain().get_terrain()
+			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+			while terrain[new_x][new_y] <= self.world.get_water_level():
+				new_x, new_y = choose_random_position(old_x, old_y)
+				height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+
 		else:
+			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = 0
 
-		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:
+		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass or (new_x, new_y) == (old_x, old_y):
 			self.loose_energy("stand")
 		else:
 			self.position = (new_x, new_y)
@@ -167,6 +176,12 @@ class Bob:
 			self.make_it_dead = 3
 			self.dead = True
 			return True
+		elif self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			if terrain[self.position[0]][self.position[1]] <= self.world.get_water_level():
+				self.make_it_dead = 3
+				self.dead = True
+				return True
 		else:
 			return False
 
@@ -428,13 +443,24 @@ class Bob:
             bool: True after Bob's movement.
         """
 		old_x, old_y = self.position
-		new_x, new_y = dest
-		new_x = max(0, min(new_x, self.world.get_size() - 1))
-		new_y = max(0, min(new_y, self.world.get_size() - 1))
+		def choose_random_position(old_x, old_y):
+			dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
+			x, y = old_x + dx, old_y + dy
+			x = max(0, min(x, self.world.get_size() - 1))
+			y = max(0, min(y, self.world.get_size() - 1))
+
+			return x, y
+		
 		if self.world.get_terrain() is not None:
 			terrain = self.world.get_terrain().get_terrain()
+			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+			while terrain[new_x][new_y] <= self.world.get_water_level():
+				new_x, new_y = choose_random_position(old_x, old_y)
+				height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+
 		else:
+			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = 0
 
 		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:

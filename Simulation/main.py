@@ -114,7 +114,7 @@ if __name__ == "__main__":
 	# save("Test height lost energy",world)
 
 	world.spawn_bob(1,velocity=1,mass=1)
-	save("Test height lost energy.pkl",world)
+	# save("Test height lost energy.pkl",world)
 
 	api = Api(world, 500)
 	ig = Ig_menu()
