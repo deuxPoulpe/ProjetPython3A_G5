@@ -7,6 +7,8 @@ import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
 from Utility.save_utility import save, load
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Menu:
     def __init__(self):
@@ -297,13 +299,16 @@ class Ig_menu:
         
         load_button = ttk.Button(self.options_menu_frame, text="Load Option", command=self.load_options, width=15)
         load_button.grid(row=len(labels) + 4, column=0, columnspan=3, pady=15, sticky="s")
+
+        graph_button = ttk.Button(self.options_menu_frame, text="Graph", command=self.plot_data, width=15)
+        graph_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
         
         validate_button = ttk.Button(self.options_menu_frame, text="Validate Options", command=self.validation_option, width=15)
-        validate_button.grid(row=len(labels) + 5, column=0, columnspan=3, pady=15, sticky="s")
+        validate_button.grid(row=len(labels) + 6, column=0, columnspan=3, pady=15, sticky="s")
 
         
         return_button = ttk.Button(self.options_menu_frame, text="Return", command=self.show_main_menu, width=15)
-        return_button.grid(row=len(labels) + 6, column=0, columnspan=3, pady=15, sticky="s")
+        return_button.grid(row=len(labels) + 7, column=0, columnspan=3, pady=15, sticky="s")
         
         
         self.custom_terrain.trace_add('write', toggle_terrain_button_visibility)
@@ -509,6 +514,9 @@ class Ig_menu:
         
         load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_workd, width=15)
         load_save_button.pack(pady=15)
+
+        graph_button = ttk.Button(self.main_menu_frame, text="Graph", command=self.plot_data, width=15)
+        graph_button.pack(pady=15)
         
         exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=self.exit, width=15)
         exit_button.pack(pady=15, side=tk.BOTTOM)
@@ -678,7 +686,28 @@ class Ig_menu:
         else:
             messagebox.showerror("Error", "You need to validate the option before saving it")
             return -1
+
+    # def graph(self):
+    #     if not self.is_running:
+    #         messagebox.showerror("Error", "You need to start a new simulation before see the graph")
+    #         return -1
         
+    def plot_data(self):
+        shared_tick = self.api.shared_data['tick']
+        shared_bob = self.api.shared_data['bobs']
+        fig = plt.Figure()
+        ax = fig.add_subplot(111)
+        ax.plot(shared_tick, shared_bob)
+        ax.set_xlabel('Tick')
+        ax.set_ylabel('Number of bobs')
+        ax.set_title('Number of bobs over time')
+
+        canvas = FigureCanvasTkAgg(fig, master=self.root)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    
+      
     def load_options(self):
         file_path = self.open_file_dialog()
         if file_path is None:
