@@ -785,6 +785,40 @@ class Ig_menu:
             self.stop_simulation()
         exit()
 
+    def plot_data(self):
+        if self.is_running:
+            shared_data = self.api.get_shared_data()
+
+            shared_tick = shared_data['tick']
+            shared_bob = shared_data['bob_population']
+            shared_food = shared_data['food_population']
+
+            ticks = [i for i in range(shared_tick)]
+            fig = plt.Figure()
+            ax = fig.add_subplot(111)
+            
+            fig, (ax, ax2) = plt.subplots(2, 1)
+
+            ax.plot(ticks, shared_bob)
+            ax.set_xlabel('Tick')
+            ax.set_ylabel('Number of bobs')
+            #ax.set_ylabel('Number of food')
+            ax.set_title('Number of bobs over time')
+
+            ax2.plot(ticks, shared_food)
+            ax2.set_xlabel('Tick')
+            ax2.set_ylabel('Number of food')
+            ax2.set_title('Number of food over time')
+
+
+            new_window = tk.Toplevel(self.root)
+            canvas = FigureCanvasTkAgg(fig, master=new_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack()
+        else:
+            messagebox.showerror("Error", "You need to start a new simulation before getting the graph")
+            return -1
+
 
           
         
