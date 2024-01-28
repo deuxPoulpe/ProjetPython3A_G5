@@ -95,10 +95,6 @@ if __name__ == "__main__":
 
 
 	api = Api(world, 500)
-	ig = Ig_menu()
+	ig = Menu()
 	display = Display(api, ig)
-	ig.is_running = True
-	ig.display = display
-	ig.api = api
-	ig.world = world
 	display.main_loop()
