@@ -99,6 +99,8 @@ class World:
 		return self.nb_bob
 	def get_nb_food(self):
 		return self.nb_food
+	def get_mutation(self):
+		return self.mutation
 
 	#setter
 	def setArgDict(self,newArgDict):
@@ -164,7 +166,7 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception)
+			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception )
 
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
@@ -206,8 +208,19 @@ class World:
 
 			
 			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
+		
+		child_velocity = 1
+		
+		mutation = random.choice([-1, 0, 1])
+		child_perception = mother_bob.get_perception() + mutation
+		child_perception = max(0, child_perception)
 
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity )
+		memory_points = random.choice([-1, 0, 1])
+		child_memory = mother_bob.get_memory_points() + memory_points
+		child_memory = max(0, child_memory)
+
+
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity, perception= child_perception, memory_points=child_memory)
 		
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
@@ -215,6 +228,7 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+		
 	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
 		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
 		new_born_pos = new_born.get_pos()
