@@ -149,7 +149,7 @@ class World:
 		velocity = self.argDict["bob_velocity"] if velocity == -1 else velocity
 		mass = self.argDict["bob_mass"] if mass == -1 else mass
 		perception = self.argDict["bob_perception"] if perception == -1 else perception
-		memory_points = self.argDict["bob_memory_points"] if memory_points == -1 else memory_points
+		memory_points = self.argDict["bob_memory_point"] if memory_points == -1 else memory_points
 		max_energy = self.argDict["bob_max_energy"] if max_energy == -1 else max_energy
 
 

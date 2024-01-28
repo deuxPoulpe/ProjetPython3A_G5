@@ -9,9 +9,9 @@ from Utility.save_utility import save
 
 if __name__ == "__main__":
 
-	# menu = Menu()
-	# menu.menu_principal()
-	# exit()
+	menu = Menu()
+	menu.menu_principal()
+	exit()
 
 	terrain_config = {
 		"generate_river" : False,
