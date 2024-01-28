@@ -347,6 +347,7 @@ class Bob:
 		for e in self.memory_space:
 			if distance(self,e) < self.perception:
 				self.memory_space.remove(e)
+				self.memory_points -= 1
 		
 		self.memory_space.sort(key=lambda food: food.value, reverse=True)
 		return True
