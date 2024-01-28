@@ -18,6 +18,7 @@ BLACK = (0,0,0)
 
 class Display:
 	def __init__(self, api, ig_menu):
+		
 		self.in_game_menu = ig_menu
 		self.api = api
 
@@ -65,6 +66,7 @@ class Display:
 			"backforward" : pygame.image.load(os.path.join("assets/UI", "backforward.png")),
 			"fastforward" : pygame.image.load(os.path.join("assets/UI", "fastforward.png")),
 			"option" : pygame.image.load(os.path.join("assets/UI", "option.png")),
+			"playmusic" : pygame.image.load(os.path.join("assets/UI", "music.png")),
 		}
 
 		for k in range(0, 12):
@@ -85,7 +87,23 @@ class Display:
 
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
+		
+		pygame.mixer.init()	
+        
+		self.chanson = pygame.mixer.Sound("music2.mp3")
 	
+	def jouer_chanson(self):
+        
+		pygame.mixer.Sound.play(self.chanson, loops=-1)
+	
+	def pause_chanson(self):
+        
+		pygame.mixer.pause()
+	
+	def reprendre_chanson(self):
+        
+		pygame.mixer.unpause()
+
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor -= self.zoom_speed
@@ -461,6 +479,7 @@ class Display:
 			fastforward.change_color()
 			backforward.change_color()
 			option_button.change_color()
+			play_buttonmusic.change_color()
    
 		def ui_tick_modification(pos):
 			"""
@@ -472,6 +491,11 @@ class Display:
 				pause_button.set_active(True)
 				play_button.set_active(False)
 				change_color_all_ui()
+			
+			
+				
+
+				
 
 			elif play_button.get_rect().collidepoint(x,y):
 				self.api.resume()
@@ -525,6 +549,10 @@ class Display:
 		pause_button = Sprite_UI(self.screen_width - 120, 10, self.assets["pause"])
 		pause_button.set_active(False)
 		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
+		play_buttonmusic = Sprite_UI(self.screen_width - 240, 10, self.assets["play"])
+		play_buttonmusic.set_active(False)
+		music_playing = False
+		
 
 		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
 		option_button.set_active(False)
@@ -545,6 +573,7 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 		ui_element.add(option_button)
+		ui_element.add(play_buttonmusic)
 
 		self.draw_better_world(True)
 		self.api.start()
@@ -565,6 +594,7 @@ class Display:
 					self.screen_width = event.size[0]
 					pause_button.update_position((self.screen_width - 120, 10))
 					play_button.update_position((self.screen_width - 80, 10))
+					play_buttonmusic.update_position((self.screen_width - 240, 10))
 					fastforward.update_position((self.screen_width - 40, 10))
 					backforward.update_position((self.screen_width - 160, 10))
 					option_button.update_position((self.screen_width - 200, 10))
@@ -577,6 +607,23 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
+					if play_buttonmusic.get_rect().collidepoint(event.pos):
+           				 # Inverser l'état de la musique
+						music_playing = not music_playing
+
+            			# En fonction de l'état, démarrer ou arrêter la musique
+						if music_playing:
+							play_buttonmusic.set_active(False)
+							play_buttonmusic.change_color()
+							pygame.mixer.unpause()
+							print("unpause")
+						else:
+							pygame.mixer.pause()
+							play_buttonmusic.set_active(True)
+							play_buttonmusic.change_color()
+							print("pause")
+
+
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 					self.api.pause()
 					self.in_game_menu.main_loop()

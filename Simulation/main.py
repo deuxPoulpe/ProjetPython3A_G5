@@ -58,6 +58,6 @@ if __name__ == "__main__":
 	world.spawn_bob(1,velocity=1,mass=1)
 
 	api = Api(world, 500)
-	ig = Ig_menu()
+	ig = Menu()
 	display = Display(api, ig)
 	display.main_loop()
