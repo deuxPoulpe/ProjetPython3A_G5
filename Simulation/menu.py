@@ -19,7 +19,7 @@ class Menu:
         
         self.toggle_fonction = {
             "move_smart" : False,
-            "self_reproduce" : False,
+            "sexual_reproduction" : False,
             "custom_event" : False,
         }
              
@@ -445,7 +445,7 @@ class Menu:
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
-        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["sexual_reproduction"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
 
         labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
@@ -558,9 +558,11 @@ class Menu:
         
         self.toggle_fonction_validate = {
             "move_smart" : self.toggle_move_smart.get(),
-            "self_reproduce" : self.toggle_sexual_reproduce.get(),
+            "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
+
+        
         
         self.option_values_sim_validate = {
             "size": self.world_size.get(),
@@ -778,9 +780,10 @@ class Ig_menu:
         
         self.toggle_fonction = {
             "move_smart" : False,
-            "self_reproduce" : False,
+            "sexual_reproduction" : False,
             "custom_event" : False,
         }
+
              
         self.option_value_terrain = {
             "generate_river" : True,
@@ -969,7 +972,7 @@ class Ig_menu:
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
-        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["sexual_reproduction"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
 
         labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
@@ -1148,7 +1151,7 @@ class Ig_menu:
         
         self.toggle_fonction_validate = {
             "move_smart" : self.toggle_move_smart.get(),
-            "self_reproduce" : self.toggle_sexual_reproduce.get(),
+            "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
         
