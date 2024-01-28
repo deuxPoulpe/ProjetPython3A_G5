@@ -24,6 +24,8 @@ class Food:
 		self.pos = (x, y)
 		self.world = world
 		self.type = type
+	
+   
 
 	def get_value(self):
 		return self.value
@@ -51,3 +53,4 @@ class Food:
 		else:
 			self.value -= value
 			return value
+		
