@@ -4,7 +4,6 @@ from terrain import Terrain
 from bob import *
 from food import Food
 import random
-import time
 
 from Utility.time_function_utility import execute_function_after_it
 
@@ -299,6 +298,7 @@ class World:
 				for bob in bobs:
 					bob.set_max_energy(arg_dict["bob_max_energy"])
 
+		self.enable_function = arg_dict["toggle_fonction"]
 		self.argDict = arg_dict
 		self.terrain_config = terrain_config_dict
 		if self.argDict["custom_terrain"]:

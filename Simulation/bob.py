@@ -225,7 +225,8 @@ class Bob:
 				self.move()
 				self.case_to_move -= 1
 				
-			self.world.enable_function["eat_bob"]: (self.eat_bob())
+			if self.world.enable_function["eat_bob"]:
+				self.eat_bob()
 			self.eat_food()
 
 			if self.die():
@@ -256,7 +257,7 @@ class Bob:
 				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
 					self.energy = self.max_energy
 				else:
-					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+					self.energy += int(bob.get_energy()/2*(1-bob.get_mass()/self.get_mass()))
 				self.world.kill_bob(bob)
 				return True
 		return False

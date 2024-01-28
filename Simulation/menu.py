@@ -1,4 +1,3 @@
-import pickle
 import pygame
 from display import Display
 from api import Api
@@ -793,26 +792,30 @@ class Ig_menu:
         exit()
 
     def plot_data(self):
-        shared_data = self.api.get_shared_data()
+        if self.is_running:
+            shared_data = self.api.get_shared_data()
 
-        shared_tick = shared_data['tick']
-        shared_bob = shared_data['bob_population']
-        shared_food = shared_data['food_population']
+            shared_tick = shared_data['tick']
+            shared_bob = shared_data['bob_population']
+            shared_food = shared_data['food_population']
 
-        ticks = [i for i in range(shared_tick)]
-        fig = plt.Figure()
-        ax = fig.add_subplot(111)
-        ax.plot(ticks, shared_bob)
-        ax.set_xlabel('Tick')
-        ax.set_ylabel('Number of bobs')
-        #ax.set_ylabel('Number of food')
-        ax.set_title('Number of bobs over time')
+            ticks = [i for i in range(shared_tick)]
+            fig = plt.Figure()
+            ax = fig.add_subplot(111)
+            ax.plot(ticks, shared_bob)
+            ax.set_xlabel('Tick')
+            ax.set_ylabel('Number of bobs')
+            #ax.set_ylabel('Number of food')
+            ax.set_title('Number of bobs over time')
 
 
-        new_window = tk.Toplevel(self.root)
-        canvas = FigureCanvasTkAgg(fig, master=new_window)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
+            new_window = tk.Toplevel(self.root)
+            canvas = FigureCanvasTkAgg(fig, master=new_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack()
+        else:
+            messagebox.showerror("Error", "You need to start a new simulation before getting the graph")
+            return -1
 
 
 

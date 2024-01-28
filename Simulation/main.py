@@ -35,11 +35,11 @@ if __name__ == "__main__":
         }
 
 	world = World({
-			"size": 5,
-            "nbFood": 3,
+			"size": 10,
+            "nbFood": 4,
             "Food_energy": 100,
             "bob_max_energy": 200,
-            "bob_energy": 100,
+            "bob_energy": 200,
             "bob_velocity": 1,
             "bob_mass": 1,
             "bob_perception": 0,
@@ -54,46 +54,41 @@ if __name__ == "__main__":
 	
 #------------------------BATTERIE DE TESTS------------------------#
 	#Test prédation
-	""""
-	world.enable_function["eat_bob"] = True
-	world.enable_function["move_smart"] = True
+	
+	# world.enable_function["eat_bob"] = True
+	# world.enable_function["move_smart"] = True
 
-	world.spawn_bob(1,velocity=5,mass=3)
-	world.spawn_bob(1,velocity=1,mass=1)
+	# world.spawn_bob(1,velocity=1,mass=3)
+	# world.spawn_bob(1,velocity=1,mass=1)
 	
 
-	"""
-	"""
-	#Test reproduction_sexual
-	world.enable_function["reproduce"] = False
-	world.enable_function["sexual_reproduction"] = True
-	world.enable_function["move_smart"] = True
-	world.spawn_bob(1,velocity=1,mass=1)
-	world.spawn_bob(1,velocity=1,mass=1)
-	"""
+	
+	# #Test reproduction_sexual
+	# world.enable_function["reproduce"] = False
+	# world.enable_function["sexual_reproduction"] = True
+	# world.enable_function["move_smart"] = True
+	# world.spawn_bob(1,velocity=1,mass=1)
+	# world.spawn_bob(1,velocity=1,mass=1)
 	
 
-	#Test reproduction
-	"""
-	print("Test reproduction")
-	world.enable_function["reproduce"] = True
-	world.enable_function["sexual_reproduction"] = False
-	world.enable_function["move_smart"] = True
-	world.spawn_bob(1,velocity=1,mass=1)
-	"""
+	# #Test reproduction
+	# print("Test reproduction")
+	# world.enable_function["reproduce"] = True
+	# world.enable_function["sexual_reproduction"] = False
+	# world.enable_function["move_smart"] = True
+	# world.spawn_bob(1,velocity=1,mass=1)
+	
 
-	#Test velocity
-	"""
-	print("Test velocity")
-	world.enable_function["reproduce"] = False
-	world.enable_function["sexual_reproduction"] = False
-	world.enable_function["move_smart"] = True
-	world.spawn_bob(1,velocity=1,mass=1)
-	world.spawn_bob(1,velocity=2,mass=1)
-	world.spawn_bob(1,velocity=3,mass=1)
-	world.spawn_bob(1,velocity=4,mass=1)
+	# #Test velocity
+	# print("Test velocity")
+	# world.enable_function["reproduce"] = False
+	# world.enable_function["sexual_reproduction"] = False
+	# world.enable_function["move_smart"] = True
+	# world.spawn_bob(1,velocity=1,mass=1)
+	# world.spawn_bob(1,velocity=2,mass=1)
+	# world.spawn_bob(1,velocity=3,mass=1)
+	# world.spawn_bob(1,velocity=4,mass=1)
 
-	"""
 
 	#Test memory
 	
@@ -112,15 +107,15 @@ if __name__ == "__main__":
 
 	# save("test_memory",world)
 
-	world.spawn_bob(1,velocity=1,mass=1)
-	world.spawn_bob(1,velocity=5,mass=1)
-	world.spawn_bob(1,velocity=10,mass=1)
+	# world.spawn_bob(1,velocity=1,mass=1)
+	# world.spawn_bob(1,velocity=5,mass=1)
+	# world.spawn_bob(1,velocity=10,mass=1)
 
-
+	save("Test velocity",world)
 
 
 	api = Api(world, 500)
-	ig = Menu()
+	ig = Ig_menu()
 	display = Display(api, ig)
 	ig.api = api
 	ig.world = world
