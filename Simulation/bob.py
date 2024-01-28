@@ -328,15 +328,6 @@ class Bob:
 
 				x-=1
 				deplacement+=1
-	def bob_perception_v2(self):
-		"""
-		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
-		"""
-		self.perception_list = []
-		distance = round(self.perception)
-		while distance > 0: #On ajoute les objets que voit bob par distance
-
-
 
 	def bob_perception_v2(self):
 		"""
