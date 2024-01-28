@@ -1,8 +1,9 @@
+import copy
 import random
 import food
 
 from queue import *
-
+from food import *
 class Bob:
 	"""
 	Classe représentant un personnage 'Bob' dans un monde simulé.
@@ -552,3 +553,4 @@ class Bob:
 				x1 -= d
 
 		return (x1,y1)
+	
