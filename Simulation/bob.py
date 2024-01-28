@@ -299,7 +299,7 @@ class Bob:
 			deplacement=0
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
-			# self.perception_list.append([])
+			self.perception_list.append([])
 
 			while x <= self.get_pos()[0]:
 

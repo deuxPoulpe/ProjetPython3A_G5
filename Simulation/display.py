@@ -138,7 +138,7 @@ class Display:
 		
 		pygame.mixer.init()	
         
-		self.chanson = pygame.mixer.Sound("music2.mp3")
+		self.chanson = pygame.mixer.Sound(os.path.join("assets", f"music.mp3"))
 		pygame.mixer.pause()
 		
 
@@ -560,8 +560,10 @@ class Display:
 					if sprite_type == "bob":
 						for bob in sprites:
 							if bob.is_dead():
-								sprite_image = self.assets["dead_bob"]
-							pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
+								new_sprite_image = self.assets["dead_bob"]
+								pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, new_sprite_image))
+							else:
+								pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group, sprites, 1, 1, sprite_image))
 		
@@ -571,8 +573,10 @@ class Display:
 					if sprite_type == "bob":
 						for bob in sprites:
 							if bob.is_dead():
-								sprite_image = self.assets["dead_bob"]
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
+								new_sprite_image = self.assets["dead_bob"]
+								pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, new_sprite_image))
+							else:
+								pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image))
 
