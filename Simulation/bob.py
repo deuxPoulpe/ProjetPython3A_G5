@@ -93,14 +93,16 @@ class Bob:
 		else:
 			return False
 
-	def loose_energy(self, mode):
+	def loose_energy(self, mode,*arg):
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
 			self.energy -= 0.5
 		elif mode == "self_reproduce":
 			self.energy -= 3*self.max_energy/4
-			self.energy -= 0.5	
+			self.energy -= 0.5
+		elif mode == "move_height":
+			self.energy -= self.mass * self.velocity**2 + arg[0] * self.mass
 	
 	def random_name(self):
 		
@@ -131,10 +133,20 @@ class Bob:
 		old_x, old_y = self.position
 		dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
 		new_x, new_y = old_x + dx, old_y + dy
-		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
-						max(0, min(new_y, self.world.get_size() - 1)))
-		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		if self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+		else:
+			height_diff = 0
+
+		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:
+			self.loose_energy("stand")
+		else:
+			self.position = (max(0, min(new_x, self.world.get_size() - 1)),
+							max(0, min(new_y, self.world.get_size() - 1)))
+			self.world.move_bob(self, old_x, old_y)
+
+			self.loose_energy("move_height", height_diff)
 
 
 	
@@ -198,12 +210,10 @@ class Bob:
 
 			if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
-					self.loose_energy("move")
 					self.case_to_move -= 1
 
 			else:
 				self.move()
-				self.loose_energy("move")
 				self.case_to_move -= 1
 				
 			self.world.enable_function["eat_bob"]: (self.eat_bob())
@@ -346,8 +356,6 @@ class Bob:
 		return False 
 
 
-
-
 	def memory_store(self):
 
 		"""
@@ -411,10 +419,21 @@ class Bob:
         """
 		old_x, old_y = self.position
 		new_x, new_y = dest
-		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
-						max(0, min(new_y, self.world.get_size() - 1)))
-		self.world.move_bob(self, old_x, old_y)
-		#self.loose_energy("move")
+		if self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+		else:
+			height_diff = 0
+
+		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:
+			self.loose_energy("stand")
+
+		else:
+			self.position = (max(0, min(new_x, self.world.get_size() - 1)),
+							max(0, min(new_y, self.world.get_size() - 1)))
+			self.world.move_bob(self, old_x, old_y)
+			self.loose_energy("move_height", height_diff)
+			return True
 
 
 	def case_ou_aller(self, bob , mode):
