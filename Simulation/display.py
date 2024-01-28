@@ -7,6 +7,7 @@ import threading
 from bob import Bob
 from food import Food
 
+
 from Utility.occlusion_utility import hide_behind_terrain_image, tile_to_array
 from Utility.time_function_utility import execute_function_during_it, execute_function_after_it
 
@@ -20,13 +21,14 @@ WHITE = (255,255,255)
 
 class Display:
 	def __init__(self, api, ig_menu):
+		
 		self.in_game_menu = ig_menu
 		self.api = api
-		self.game_paused = True
 
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
+	
 
 
 		self.data = self.api.get_shared_data()
@@ -48,7 +50,6 @@ class Display:
 		self.drag_pos = None
 
 		self.floor = pygame.sprite.Group()
-		self.object_stats = []
 		
 
 		self.assets = {
@@ -68,6 +69,7 @@ class Display:
 			"backforward" : pygame.image.load(os.path.join("assets/UI", "backforward.png")),
 			"fastforward" : pygame.image.load(os.path.join("assets/UI", "fastforward.png")),
 			"option" : pygame.image.load(os.path.join("assets/UI", "option.png")),
+			"playmusic" : pygame.image.load(os.path.join("assets/UI", "play.png")),
 		}
 
 		for k in range(0, 12):
@@ -88,23 +90,23 @@ class Display:
 
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
-
-	def convert_sub_surface_coords_to_screen(self, x, y):
-		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
-		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
-
-		screen_x = int(x / self.zoom_factor) + grid_x
-		screen_y = int(y / self.zoom_factor) + grid_y
-
-		return screen_x, screen_y
+		
+		pygame.mixer.init()	
+        
+		self.chanson = pygame.mixer.Sound("music2.mp3")
 	
-	def is_mouse_on_sprite(self, sprite_pos, sprite_size):
-		mouse_x, mouse_y = pygame.mouse.get_pos()
-		sprite_x, sprite_y = sprite_pos
-		screen_x, screen_y = self.convert_sub_surface_coords_to_screen(sprite_x, sprite_y)
-
-		return screen_x <= mouse_x <= screen_x + int((16*sprite_size)/self.zoom_factor) and screen_y <= mouse_y <= screen_y + int((16*sprite_size)/self.zoom_factor)
+	def jouer_chanson(self):
+        
+		pygame.mixer.Sound.play(self.chanson, loops=-1)
 	
+	def pause_chanson(self):
+        
+		pygame.mixer.pause()
+	
+	def reprendre_chanson(self):
+        
+		pygame.mixer.unpause()
+
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor -= self.zoom_speed
@@ -287,17 +289,17 @@ class Display:
 		bob_color_modified.blit(sub_color_surface, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
 
 		return bob_color_modified.convert_alpha()
-	
+
 	def draw_sprite(self, sprite_type):
 
-		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
-			i,j = sprite_obj.get_pos()
-   
+		def add_sprite_to_group_occlusion(key, sprite_mass, velocity, sprite_image, sprite_type):
+			i,j = key
 			base = grid_of_height[i][j]
 
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 
 			y = start_y + (i + j) * 8 - 9 * base
+
 	
 			right_tile_cord = min(self.world_size - 1, max(0 , i + 1))
 			left_tile_cord = min(self.world_size - 1, max(0 , j + 1))
@@ -321,51 +323,27 @@ class Display:
 				else:
 					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base)
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
-     
+
+		
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
-				self.object_stats.append(sprite_obj)
 
-
-		def add_sprite_to_group(sprite_obj, sprite_mass, velocity, sprite_image):
-			i,j = sprite_obj.get_pos()
-			old_i, old_j = sprite_obj.get_old_pos() if sprite_type == "bob" else (0,0)
-
+		def add_sprite_to_group(key, sprite_mass, velocity, sprite_image):
+			i,j = key
 			size = sprite_mass ** (1/3)
 			x = start_x + (i - j) * 16 - 8 * size
 			y = start_y + (i + j) * 8 - 15 * (size - 1)
-			old_x = start_x + (old_i - old_j) * 16 - 8 * size
-			old_y = start_y + (old_i + old_j) * 8 - 15 * (size - 1)
    
-   
-	
+      
 			if sprite_type == "bob":
 				if velocity in self.sprite_color_cache.keys():
 					sprite_image = self.sprite_color_cache[velocity]
 				else:
 					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
 					self.sprite_color_cache[velocity] = sprite_image
-	
-			if sprite_type == "bob":
-				for t in range(1, 10):
-					interpolated_x = old_x + (x - old_x) * t / 10
-					interpolated_y = old_y + (y - old_y) * t / 10
 
-					sprite = Sprite(interpolated_x, interpolated_y, sprite_image, size)
-					sprite.image.set_alpha(255 * (10 - t) / 20)
-					sprite_group.add(sprite)
      
-			sprite = Sprite(x,y, sprite_image, size)
-
-			sprite_group.add(sprite)
-
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
-				self.object_stats.append(sprite_obj)
-			
-   
-			
-
+			sprite_group.add(Sprite(x,y, sprite_image, size))
 
 		sprite_group = pygame.sprite.Group()
 
@@ -395,17 +373,18 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
+							pool.append(threading_pool.submit(add_sprite_to_group, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
+							pass
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group, sprites, 1, 1, sprite_image))
+						pool.append(threading_pool.submit(add_sprite_to_group, key, 1, 1, sprite_image))
 			else:
 				grid_of_height = terrain.get_terrain()
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image, sprite_type))
+						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, key, 1, 1, sprite_image, sprite_type))
 
 			for _ in as_completed(pool):
 				pass
@@ -416,6 +395,9 @@ class Display:
 		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
+		scale_x = int(self.zoom_factor * (32/24))
+		scale_y = self.zoom_factor
+
 		scale_x = 32 * self.world_size // self.zoom_factor
 		scale_y = (24 * self.world_size + 9*self.max_height) // self.zoom_factor
 				
@@ -500,6 +482,7 @@ class Display:
 			fastforward.change_color()
 			backforward.change_color()
 			option_button.change_color()
+			play_buttonmusic.change_color()
    
 		def ui_tick_modification(pos):
 			"""
@@ -508,14 +491,17 @@ class Display:
 			x,y = pos
 			if pause_button.get_rect().collidepoint(x,y):
 				self.api.pause()
-				self.game_paused = True
 				pause_button.set_active(True)
 				play_button.set_active(False)
 				change_color_all_ui()
+			
+			
+				
+
+				
 
 			elif play_button.get_rect().collidepoint(x,y):
 				self.api.resume()
-				self.game_paused = False
 				pause_button.set_active(False)
 				play_button.set_active(True)
 				change_color_all_ui()
@@ -564,9 +550,12 @@ class Display:
 		fastforward = Sprite_UI(self.screen_width - 40, 10, self.assets["fastforward"])
 		fastforward.set_active(False)
 		pause_button = Sprite_UI(self.screen_width - 120, 10, self.assets["pause"])
-		pause_button.set_active(True)
+		pause_button.set_active(False)
 		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
-		play_button.set_active(False)
+		play_buttonmusic = Sprite_UI(self.screen_width - 240, 10, self.assets["play"])
+		play_buttonmusic.set_active(False)
+		music_playing = False
+		
 
 		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
 		option_button.set_active(False)
@@ -587,6 +576,7 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 		ui_element.add(option_button)
+		ui_element.add(play_buttonmusic)
 
 		self.draw_better_world(True)
 		self.api.start()
@@ -600,7 +590,6 @@ class Display:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					self.api.resume()
 					self.api.stop()
 					self.running = False
 				elif event.type == pygame.VIDEORESIZE:
@@ -608,6 +597,7 @@ class Display:
 					self.screen_width = event.size[0]
 					pause_button.update_position((self.screen_width - 120, 10))
 					play_button.update_position((self.screen_width - 80, 10))
+					play_buttonmusic.update_position((self.screen_width - 240, 10))
 					fastforward.update_position((self.screen_width - 40, 10))
 					backforward.update_position((self.screen_width - 160, 10))
 					option_button.update_position((self.screen_width - 200, 10))
@@ -620,27 +610,29 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
-				elif event.type == pygame.KEYDOWN:
-					if event.key == pygame.K_ESCAPE:
-						self.api.pause()
-						self.in_game_menu.main_loop()
-						if self.in_game_menu.is_option_changed():
-							self.change_api_option(self.in_game_menu.get_options())
-						self.api.resume()
-					elif event.key == pygame.K_SPACE:
-						if self.game_paused:
-							self.api.resume()
-							self.game_paused = False
-							pause_button.set_active(False)
-							play_button.set_active(True)
-							change_color_all_ui()
+					if play_buttonmusic.get_rect().collidepoint(event.pos):
+           				 # Inverser l'état de la musique
+						music_playing = not music_playing
+
+            			# En fonction de l'état, démarrer ou arrêter la musique
+						if music_playing:
+							play_buttonmusic.set_active(False)
+							play_buttonmusic.change_color()
+							pygame.mixer.unpause()
+							print("unpause")
 						else:
-							self.api.pause()
-							self.game_paused = True
-							pause_button.set_active(True)
-							play_button.set_active(False)
-							change_color_all_ui()
-     
+							pygame.mixer.pause()
+							play_buttonmusic.set_active(True)
+							play_buttonmusic.change_color()
+							print("pause")
+
+
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+					self.api.pause()
+					self.in_game_menu.main_loop()
+					if self.in_game_menu.is_option_changed():
+						self.change_api_option(self.in_game_menu.get_options())
+					self.api.resume()
 
   
 				self.zoom(event)
@@ -658,13 +650,18 @@ class Display:
 				regeneration_thread.start()
 				drought_gif_active = execute_function_during_it(self.draw_gif, solar_gif, (0,0), nb_iter = 140)
 				self.api.set_event(None)
+
+
+
 			
 			self.camera()
 			self.screen.fill(BLUE_SKY)
 
+
 			# Drawing the world and the sprites
 			if rendering:
 				self.render()
+
 		
 			# all fonction that need to be executed after or during a certain number of iteration
 			next(flood_gif_active,None)
@@ -675,8 +672,8 @@ class Display:
 			# UI and text
 			blit_text_info()
 			ui_element.draw(self.screen)
-			self.show_bob_stats()
-	
+
+			
 			# Updating the display
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 			pygame.display.flip()
