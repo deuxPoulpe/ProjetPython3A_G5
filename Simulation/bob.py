@@ -443,24 +443,12 @@ class Bob:
             bool: True after Bob's movement.
         """
 		old_x, old_y = self.position
-		def choose_random_position(old_x, old_y):
-			dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
-			x, y = old_x + dx, old_y + dy
-			x = max(0, min(x, self.world.get_size() - 1))
-			y = max(0, min(y, self.world.get_size() - 1))
+		new_x, new_y = dest
 
-			return x, y
-		
 		if self.world.get_terrain() is not None:
 			terrain = self.world.get_terrain().get_terrain()
-			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
-			while terrain[new_x][new_y] <= self.world.get_water_level():
-				new_x, new_y = choose_random_position(old_x, old_y)
-				height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
-
 		else:
-			new_x, new_y = choose_random_position(old_x, old_y)
 			height_diff = 0
 
 		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:
