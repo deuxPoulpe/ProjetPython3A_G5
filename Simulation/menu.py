@@ -19,7 +19,7 @@ class Menu:
         
         self.toggle_fonction = {
             "move_smart" : False,
-            "self_reproduce" : False,
+            "sexual_reproduction" : False,
             "custom_event" : False,
         }
              
@@ -445,7 +445,7 @@ class Menu:
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
-        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["sexual_reproduction"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
 
         labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
@@ -558,9 +558,11 @@ class Menu:
         
         self.toggle_fonction_validate = {
             "move_smart" : self.toggle_move_smart.get(),
-            "self_reproduce" : self.toggle_sexual_reproduce.get(),
+            "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
+
+        
         
         self.option_values_sim_validate = {
             "size": self.world_size.get(),
@@ -778,9 +780,10 @@ class Ig_menu:
         
         self.toggle_fonction = {
             "move_smart" : False,
-            "self_reproduce" : False,
+            "sexual_reproduction" : False,
             "custom_event" : False,
         }
+
              
         self.option_value_terrain = {
             "generate_river" : True,
@@ -969,7 +972,7 @@ class Ig_menu:
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
-        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["self_reproduce"])
+        self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["sexual_reproduction"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
 
         labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
@@ -1082,7 +1085,7 @@ class Ig_menu:
         
         self.root.geometry(f'280x300+{x_position}+{y_position}')
         self.root.title('Game Of Life')
-        self.root.iconbitmap(os.path.join("assets/UI", "bob.ico"))
+        self.root.iconbitmap(os.path.join("assets/UI", "bob.ico")) if os.name == 'nt' else None
 
         self.root.bind("<Escape>", lambda event: self.root.destroy())
 
@@ -1106,7 +1109,7 @@ class Ig_menu:
         save_button = ttk.Button(self.main_menu_frame, text="Save", command=self.save_world, width=15)
         save_button.pack(pady=15)
         
-        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_workd, width=15)
+        load_save_button = ttk.Button(self.main_menu_frame, text="Load Save", command=self.load_save_world, width=15)
         load_save_button.pack(pady=15)
         
         exit_button = ttk.Button(self.main_menu_frame, text="Exit", command=self.exit, width=15)
@@ -1148,7 +1151,7 @@ class Ig_menu:
         
         self.toggle_fonction_validate = {
             "move_smart" : self.toggle_move_smart.get(),
-            "self_reproduce" : self.toggle_sexual_reproduce.get(),
+            "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
         
@@ -1208,7 +1211,7 @@ class Ig_menu:
         else:
             return None
         
-    def load_save_workd(self):
+    def load_save_world(self):
         file_path = self.open_file_dialog()
         if file_path is None:
             return -1

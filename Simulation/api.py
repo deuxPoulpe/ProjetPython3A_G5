@@ -17,7 +17,7 @@ class Api:
 		self.shared_data['event'] = None
 		self.shared_data['real_tick_time_data'] = []
 		self.running = mp.Manager().Value('i', False)
-		self.paused = mp.Manager().Value('i', False)
+		self.paused = mp.Manager().Value('i', True)
 		self.option_shared_data = mp.Manager().list()
 		self.option_shared_data.append(None)
 		self.option_shared_data.append(None)
@@ -97,6 +97,7 @@ class Api:
 				with self.data_lock:
 					if 	event is not None:
 						self.shared_data['event'] = event
+
 
 				self.update_shared_data()
 			elif self.option_shared_data[2]:
