@@ -25,7 +25,7 @@ class Menu:
         # Initialisation de la bibliothèque Pygame pour le son
         pygame.mixer.init()
         # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
-        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
+        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music.mp3"))
          # Jouer la chanson en boucle (-1 indique une lecture en boucle)
         pygame.mixer.Sound.play(self.chanson, loops=-1)
 

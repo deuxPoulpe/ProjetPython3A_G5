@@ -5,8 +5,19 @@ from Utility.geometry_utility import *
 
 
 class Terrain:
-
+	"""
+		Represents the terrain of the simulation.
+		This class is responsible for generating and managing the terrain of the game world,
+		including features like rivers and lakes.
+    """
 	def __init__(self,size,config_dict):
+		'''
+        Initializes the terrain with a given size and configuration.
+
+        Parameters:
+            size (int): The size of the terrain.
+            config_dict (dict): A dictionary containing terrain configuration like rivers, lakes, seed, etc.
+        '''
 		self.size = size
 		self.generate_river	= config_dict["generate_river"]
 		self.number_of_river = config_dict["number_of_river"]
@@ -28,6 +39,14 @@ class Terrain:
 		
 
 	def generate_terrain(self ,size, z_max, z_min=0):
+		'''
+        Generates the terrain using Perlin noise and additional features like rivers and lakes.
+
+        Parameters:
+            size (int): Size of the terrain to generate.
+            z_max (float): The maximum elevation of the terrain.
+            z_min (float): The minimum elevation of the terrain, default is 0.
+        '''
 
 		if self.seed is None:
 			self.seed = random.randint(0, 1024)
@@ -76,6 +95,12 @@ class Terrain:
 						
   
 	def create_river(self, p0, p1, p2, p3):
+		'''
+        Creates a river in the terrain.
+
+        Parameters:
+            p0, p1, p2, p3 (tuple): Control points to define the path of the river.
+        '''
 		courbe = trace_courbe_cubic_bezier(p0, p1, p2, p3)
 		courbe = ondulation(courbe)		
 		courbe = add_points(add_points(add_points(courbe)))
@@ -88,6 +113,13 @@ class Terrain:
 		self.terrain = smooth_around_line(self.terrain.copy(), courbe, radius=4)
   
 	def create_lake(self, lake, size_terrain):
+		'''
+        Creates a lake in the terrain.
+
+        Parameters:
+            lake (tuple): Tuple containing the center and extent of the lake.
+            size_terrain (int): Size of the terrain to ensure the lake fits within bounds.
+        '''
 		for x, y in lake:
 			self.terrain[int(x)][int(y)] = 0
 

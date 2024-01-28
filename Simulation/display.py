@@ -19,7 +19,51 @@ WHITE = (255,255,255)
 
 
 class Display:
+	'''
+		Class representing the display of the game.
+
+		Attributes:
+			in_game_menu (InGameMenu): InGameMenu object.
+			api (API): API object.
+	'''
 	def __init__(self, api, ig_menu):
+		'''
+			Initializes a new instance of the display.
+
+			Parameters:
+				api (API): API object.
+				ig_menu (InGameMenu): InGameMenu object.
+			
+			
+			game_paused (bool): Boolean representing the state of the game.
+			screen_width (int): Width of the screen.
+			screen_height (int): Height of the screen.
+			screen (pygame.Surface): Surface of the screen.
+			data (dict): Dictionary of shared data.
+			world_size (int): Size of the world.
+			max_height (int): Maximum height of the terrain.
+			floor_display (pygame.Surface): Surface of the floor display.
+			sprite_display (pygame.Surface): Surface of the sprite display.
+			floor_display_temp (pygame.Surface): Temporary surface of the floor display.
+			sprite_display_temp (pygame.Surface): Temporary surface of the sprite display.
+			zoom_factor (float): Zoom factor of the display.
+			zoom_speed (float): Zoom speed of the display.
+			previous_zoom_factor (float): Previous zoom factor of the display.
+			needs_rescaling (bool): Boolean representing if the display needs to be rescaled.
+			camera_x (int): X coordinate of the camera.
+			camera_y (int): Y coordinate of the camera.
+			dragging (bool): Boolean representing if the user is dragging the camera.
+			drag_pos (tuple): Tuple representing the position of the mouse when the user started dragging the camera.
+			floor (pygame.sprite.Group): Group of floor objects.
+			object_stats (list): List of objects stats.
+			assets (dict): Dictionary of assets.
+			tile_array (numpy.ndarray): Array of tiles.
+			bob_array_base (numpy.ndarray): Array of bob base.
+			sprite_occlusion_cache (dict): Dictionary of sprite occlusion cache.
+			sprite_color_cache (dict): Dictionary of sprite color cache.
+			sprite_group (pygame.sprite.Group): Group of sprites.
+
+		'''
 		self.in_game_menu = ig_menu
 		self.api = api
 		self.game_paused = True
@@ -99,6 +143,17 @@ class Display:
 		
 
 	def convert_sub_surface_coords_to_screen(self, x, y):
+		'''
+			Converts the coordinates of a sub surface to the coordinates of the screen.
+			
+			Parameters:
+				x (int): X coordinate of the sub surface.
+				y (int): Y coordinate of the sub surface.
+				
+			Returns:
+				screen_x (int): X coordinate of the screen.
+				screen_y (int): Y coordinate of the screen.
+		'''
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
 		grid_y = -self.camera_y + (self.screen_height - self.floor_display_temp.get_size()[1]) // 2
 
@@ -108,6 +163,16 @@ class Display:
 		return screen_x, screen_y
 	
 	def is_mouse_on_sprite(self, sprite_pos, sprite_size):
+		'''
+			Checks if the mouse is on a sprite.
+			
+			Parameters:
+				sprite_pos (tuple): Tuple representing the position of the sprite.
+				sprite_size (int): Size of the sprite.
+				
+			Returns:
+				(bool): Boolean representing if the mouse is on the sprite.
+		'''
 		mouse_x, mouse_y = pygame.mouse.get_pos()
 		sprite_x, sprite_y = sprite_pos
 		screen_x, screen_y = self.convert_sub_surface_coords_to_screen(sprite_x, sprite_y)
@@ -116,6 +181,12 @@ class Display:
 	
 
 	def zoom(self,event):
+		'''
+			Manages the zoom of the display.
+			
+			Parameters:
+				event (pygame.event): Event of the display.
+		'''
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor -= self.zoom_speed
 			if self.zoom_factor < 0.3 and self.data["world_size"] > 40:  
@@ -130,6 +201,12 @@ class Display:
 			self.previous_zoom_factor = self.zoom_factor
 
 	def start_drag(self,event):
+		'''
+			Manages the start of the drag of the display.
+			
+			Parameters:
+				event (pygame.event): Event of the display.
+		'''
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 			self.dragging = True
 			self.drag_pos = pygame.mouse.get_pos()
@@ -138,6 +215,9 @@ class Display:
 			self.drag_pos = None
 
 	def camera(self):
+		'''
+			Manages the camera of the display by moving the camera according to the mouse position.
+		'''
 		if self.dragging and pygame.mouse.get_pressed()[0]:  # Clic gauche de la souris enfoncé
 			current_mouse_pos = pygame.mouse.get_pos()
 			if self.drag_pos:
@@ -147,6 +227,17 @@ class Display:
     
 
 	def draw_empty_world(self,start_x,start_y,i,j,grid,height):
+		'''
+			Draws an empty world by adding stone tiles to the floor group.	
+			
+			Parameters:
+				start_x (int): X coordinate of the start of the world.
+				start_y (int): Y coordinate of the start of the world.
+				i (int): X coordinate of the tile.
+				j (int): Y coordinate of the tile.
+				grid (list): List representing the grid of the world.
+				height (int): Height of the tile.		
+		'''
     
 		for k in range(height, grid[i][j]):
 			x = start_x + (i - j) * 32 / 2 - 16
@@ -156,6 +247,17 @@ class Display:
 				self.floor.add(under_tile)
 
 	def draw_surface_world(self,start_x,start_y,i,j,grid):
+		'''
+			Draws the surface of the world by adding grass tiles to the floor group.
+
+			Parameters:
+				start_x (int): X coordinate of the start of the world.
+				start_y (int): Y coordinate of the start of the world.
+				i (int): X coordinate of the tile.
+				j (int): Y coordinate of the tile.
+				grid (list): List representing the grid of the world.
+		'''
+
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= 1:
 			y = start_y + (i + j) * 32 / 4 - 9 * grid[i][j]
@@ -170,6 +272,16 @@ class Display:
 		
    
 	def draw_water_surface_world(self,start_x,start_y,i,j,grid):
+		'''
+			Draws the water surface of the world by adding water tiles to the floor group.
+
+			Parameters:
+				start_x (int): X coordinate of the start of the world.
+				start_y (int): Y coordinate of the start of the world.
+				i (int): X coordinate of the tile.
+				j (int): Y coordinate of the tile.
+				grid (list): List representing the grid of the world.
+		'''
 		x = start_x + (i - j) * 32 / 2 - 16
 		if grid[i][j] <= self.data["water_level"]:
 			y = start_y + (i + j) * 32 / 4 - 9 * (self.data["water_level"] + 1)
@@ -177,6 +289,9 @@ class Display:
 			self.floor.add(tile)
    
 	def draw_decoration_world(self,start_x,start_y,i,j,grid,decoration_to_add):
+		'''
+			Draws the decoration of the world by adding plants and rocks tiles to the floor group.
+		'''
 		x = start_x + (i - j) * 32 / 2 - 16
 		if decoration_to_add[i][j] == 1 and grid[i][j] > 2:
 			y = start_y + (i + j) * 32 / 4 - 9 * (grid[i][j]+1)
@@ -191,6 +306,12 @@ class Display:
 
 
 	def draw_better_world(self, load_bar):
+		'''
+			Draws the world by adding tiles to the floor group.
+
+			Parameters:
+				load_bar (bool): Boolean representing if the load bar is displayed.
+		'''
 
 		
 		def world_loader(load_percentage, message):
@@ -251,7 +372,7 @@ class Display:
 						terrain_height = grid[i][j]
 						rc = min(size - 1, max(0, i + 1))
 						lc = min(size - 1, max(0, j + 1))
-						if terrain_height > grid[rc][j] or terrain_height > grid[i][lc] or terrain_height > grid[rc][lc]:
+						if terrain_height > grid[rc][j] or terrain_height > grid[i][lc] or terrain_height > grid[rc][lc]: # if the tile is a border tile or a tile that is higher than its neighbours
 							self.draw_empty_world(start_x,start_y,i,j,grid,min(grid[rc][j], grid[i][lc], grid[rc][lc]))
      
 					self.draw_surface_world(start_x,start_y,i,j,grid)
@@ -263,6 +384,7 @@ class Display:
 
 
 		else:
+			# If there is no terrain, we draw a flat world
 			for i in range(size):
 				for j in range(size):
 					tile = Tile(start_x + (i - j) * 32 / 2 - 16, start_y + (i + j) * 32 / 4, self.assets["clean_grass"])
@@ -279,6 +401,16 @@ class Display:
 
 
 	def update_bob_color(self, velocity, bob_image):
+		'''
+			Updates the color of a bob according to its velocity.
+
+			Parameters:
+				velocity (int): Velocity of the bob.
+				bob_image (pygame.Surface): Surface of the bob.
+				
+			Returns:
+				bob_color_modified (pygame.Surface): Modified surface of the bob.
+		'''
 		x = max(0, min(velocity, 100))
 
 		red_amount = int((x - 40) * 2.55) if x > 40 else 10
@@ -300,7 +432,25 @@ class Display:
 
 	def draw_sprite(self, sprite_type):
 
+		'''
+			Draws the sprites of the world by adding sprites to the sprite group.
+			
+			Parameters:
+				sprite_type (str): Type of the sprite.
+		'''
+
 		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
+			'''
+				Adds a sprite to the sprite group with occlusion.
+				occlusion is the fact that a sprite can be hidden behind a tile.
+				
+				Parameters:
+					sprite_obj (Bob or Food): Sprite object.
+					sprite_mass (int): Mass of the sprite.
+					velocity (int): Velocity of the sprite.
+					sprite_image (pygame.Surface): Surface of the sprite.
+					sprite_type (str): Type of the sprite.
+			'''
 			i,j = sprite_obj.get_pos()
    
 			base = grid_of_height[i][j]
@@ -316,29 +466,37 @@ class Display:
 			lc = max(grid_of_height[i][left_tile_cord] - base, 0)
 			bc = max(grid_of_height[right_tile_cord][left_tile_cord] - base, 0)
 
-			if sprite_type == "bob":
+			if sprite_type == "bob": # if the sprite is a bob, we update its color according to its velocity
 				if velocity in self.sprite_color_cache.keys():
-					sprite_image = self.sprite_color_cache[velocity]
+					sprite_image = self.sprite_color_cache[velocity, sprite_obj.is_dead()] # if the sprite is already in the cache, we use the cached image
 				else:
-					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
-					self.sprite_color_cache[velocity] = sprite_image
+					sprite_image = self.update_bob_color(velocity, sprite_image) # if the sprite is not in the cache, we update its color and add it to the cache
+					self.sprite_color_cache[velocity, sprite_obj.is_dead()] = sprite_image
 				
 
 			sprite = Sprite(x, y, sprite_image, size)
 			if any([rc, lc, bc]):
 				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
-					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
+					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)]) # if the sprite is already in the cache, we use the cached image
 				else:
-					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base)
+					self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)] = hide_behind_terrain_image(sprite, self.tile_array, [rc, lc, bc], self.bob_array_base) # if the sprite is not in the cache, we hide it behind the terrain and add it to the cache
 					sprite.set_image(self.sprite_occlusion_cache[(rc, lc, bc, sprite_type)])
      
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size): # if the game is paused and the mouse is on the sprite, we add it to the object stats
 				self.object_stats.append(sprite_obj)
 
-
 		def add_sprite_to_group(sprite_obj, sprite_mass, velocity, sprite_image):
+			'''
+				Adds a sprite to the sprite group.
+				
+				Parameters:
+					sprite_obj (Bob or Food): Sprite object.
+					sprite_mass (int): Mass of the sprite.
+					velocity (int): Velocity of the sprite.
+					sprite_image (pygame.Surface): Surface of the sprite.
+			'''
 			i,j = sprite_obj.get_pos()
 			old_i, old_j = sprite_obj.get_old_pos() if sprite_type == "bob" else (0,0)
 
@@ -350,14 +508,14 @@ class Display:
    
    
 	
-			if sprite_type == "bob":
+			if sprite_type == "bob": # if the sprite is a bob, we update its color according to its velocity
 				if velocity in self.sprite_color_cache.keys():
-					sprite_image = self.sprite_color_cache[velocity]
+					sprite_image = self.sprite_color_cache[velocity, sprite_obj.is_dead()] # if the sprite is already in the cache, we use the cached image
 				else:
-					sprite_image = self.update_bob_color(velocity, sprite_image)
-					self.sprite_color_cache[velocity, sprite_obj.is_dead()] = sprite_image
+					sprite_image = self.update_bob_color(velocity, sprite_image) # if the sprite is not in the cache, we update its color and add it to the cache
+					self.sprite_color_cache[velocity, sprite_obj.is_dead()] = sprite_image 
 	
-			if sprite_type == "bob" and not sprite_obj.is_dead():
+			if sprite_type == "bob" and not sprite_obj.is_dead(): # if the bob is not dead, we interpolate its position show is path
 				for t in range(1, 10):
 					interpolated_x = old_x + (x - old_x) * t / 10
 					interpolated_y = old_y + (y - old_y) * t / 10
@@ -370,7 +528,7 @@ class Display:
 
 			sprite_group.add(sprite)
 
-			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
+			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size): # if the game is paused and the mouse is on the sprite, we add it to the object stats
 				self.object_stats.append(sprite_obj)
 			
 
@@ -394,10 +552,10 @@ class Display:
 		velocity_max = max(vel_list) if sprite_type == "bob" else 1
   
     
-		with ThreadPoolExecutor(max_workers=10) as threading_pool:
+		with ThreadPoolExecutor(max_workers=10) as threading_pool: # we use a thread pool to add the sprites to the sprite group in parallel to improve performance 
 			pool = []
 
-			if not terrain:
+			if not terrain: # if there is no terrain, we don't use occlusion
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
@@ -406,7 +564,8 @@ class Display:
 							pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group, sprites, 1, 1, sprite_image))
-			else:
+		
+			else: # if there is a terrain, we use occlusion
 				grid_of_height = terrain.get_terrain()
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
@@ -417,12 +576,16 @@ class Display:
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image))
 
-			for _ in as_completed(pool):
+			for _ in as_completed(pool): # we wait for the threads to finish before continuing
 				pass			
 
 		sprite_group.draw(self.sprite_display)
 
 	def zooming_render(self):
+		'''
+			Manages the zooming of the display.
+			by rescaling the display if needed.
+		'''
 		scale_x = 32 * self.world_size // self.zoom_factor
 		scale_y = (24 * self.world_size + 9*self.max_height) // self.zoom_factor
 				
@@ -440,6 +603,10 @@ class Display:
 
 	
 	def render(self):
+		'''
+			Renders the display, draws the sprites and the floor and blits them on the screen according to the camera position.
+
+		'''
 		self.sprite_display.fill(BLACK)
   
 		self.draw_sprite("food")
@@ -457,6 +624,16 @@ class Display:
 	
 	
 	def gif_generator(self, gif_name, nb_total_image, nb_imame_start, extention, kroma_key):
+		'''
+			Generates a gif by loading images from the assets/gif folder.
+				
+			Parameters:
+				gif_name (str): Name of the gif.
+				nb_total_image (int): Total number of images.
+				nb_imame_start (int): Number of the first image.
+				extention (str): Extention of the images.
+				kroma_key (tuple): Tuple representing the kroma key.
+		'''
 		nb_image = nb_imame_start
 
 		while True:
@@ -465,21 +642,34 @@ class Display:
 			image.set_colorkey(kroma_key)
 			image = pygame.transform.scale(image, (self.screen_width, self.screen_height))
 
-			yield image
+			yield image # we use a generator to improve performance and avoid loading all the images at once
 			nb_image += 1
 			if nb_image == nb_total_image:
 				nb_image = nb_imame_start
 	
 	def draw_gif(self, gif_generator, pos):
-		self.screen.blit(next(gif_generator), pos)
+		'''
+			Draws a gif.
+				
+			Parameters:
+				gif_generator (generator): Generator of the gif.
+				pos (tuple): Tuple representing the position of the gif.
+		'''
+		self.screen.blit(next(gif_generator), pos) # we draw the gif by blitting the next image of the generator
   
   		
 	def change_api_option(self,options):
+		'''
+			Changes the options of the api.
+			
+			Parameters:
+				options (list): List of options.
+		'''
 		self.api.change_options(options[0], options[1])
 		self.world_size = options[0]["size"]
-		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
-		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height))
-		while self.api.is_changed_option():
+		self.floor_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height)) # we resize the floor display according to the new world size
+		self.sprite_display = pygame.Surface((32 * self.world_size, 24 * self.world_size + 9*self.max_height)) # we resize the sprite display according to the new world size
+		while self.api.is_changed_option(): # we wait for the api to change the options
 			pass
 		self.data = self.api.get_shared_data()
 		self.draw_better_world(True)
@@ -487,10 +677,15 @@ class Display:
 		
 	def main_loop(self):
 		"""
-		Main loop of the game
+			Main loop of the game.
+    		This function is responsible for running the game loop, handling events, updating the game state, and rendering the game world and UI.
 		"""
 
 		def blit_text_info():
+			'''
+				Renders the text information on the screen.
+        		This includes game statistics like days, ticks, game tick interval, and various toggles for game functions.
+			'''
 
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, BLACK),(20,20))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, BLACK),(20,40))
@@ -510,6 +705,11 @@ class Display:
 			self.screen.blit(pygame.font.Font(None, 20).render(f"_________________", True, BLACK),(20,310))		
 
 		def change_color_all_ui():
+			'''
+			Changes the color of all UI elements.
+        	This function is used to update the UI elements' color based on their current state.
+			'''
+			
 			pause_button.change_color()
 			play_button.change_color()
 			fastforward.change_color()
@@ -519,7 +719,8 @@ class Display:
    
 		def ui_tick_modification(pos):
 			"""
-			Handle the click on the UI elements
+			Handles the interaction with UI elements.
+			This function is triggered by mouse clicks and manages the behavior of various buttons like play, pause, fastforward, etc.
 			"""
 			x,y = pos
 			if pause_button.get_rect().collidepoint(x,y):
@@ -719,6 +920,10 @@ class Display:
 			clock.tick()
 
 	def close_display(self):
+		'''
+		Closes the game display and stops the game.
+		This function is called to properly exit the game, ensuring all resources are released.
+		'''
 		self.running = False
 		self.api.stop()
 		pygame.quit()
@@ -726,6 +931,10 @@ class Display:
 
 
 	def show_bob_stats(self):
+		"""
+		Displays statistics of Bobs and Food.
+		This function shows detailed information like position, energy, mass, etc., when hovering over game objects.
+		"""
 		nb_bob = 0
 		nb_food = 0
 		mouse_x, mouse_y = pygame.mouse.get_pos()
