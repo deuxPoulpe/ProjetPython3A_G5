@@ -774,6 +774,7 @@ class Ig_menu:
 
     def __init__(self):
 
+       
         self.world = None
         self.api = None
         self.display = None
@@ -1062,6 +1063,12 @@ class Ig_menu:
             
     def main_loop(self):
         
+        pygame.mixer.init()
+        # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
+        self.chanson = pygame.mixer.Sound("music2.mp3")
+         # Jouer la chanson en boucle (-1 indique une lecture en boucle)
+        pygame.mixer.Sound.play(self.chanson, loops=-1)
+
         self.option_value_terrain = self.option_value_terrain_validate if self.option_changed else self.option_value_terrain
         self.option_values_sim = self.option_values_sim_validate if self.option_changed else self.option_values_sim
         self.toggle_custom_event = self.toggle_fonction_validate if self.option_changed else self.toggle_fonction
