@@ -4,7 +4,6 @@ from terrain import Terrain
 from bob import *
 from food import Food
 import random
-import time
 
 from Utility.time_function_utility import execute_function_after_it
 
@@ -195,8 +194,7 @@ class World:
             mother_bob (Bob): The 'Bob' that is reproducing.
         """
 		if random.random() < self.mutation :
-
-			
+	
 			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
 		
 		child_velocity = 1
@@ -219,33 +217,6 @@ class World:
 
 		self.nb_bob += 1
 		
-	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
-		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
-		new_born_pos = new_born.get_pos()
-		if not new_born_pos in self.bobs:
-			self.bobs[new_born_pos] = []
-		self.bobs[new_born_pos].append(new_born)
-
-	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
-		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
-
-		new_born_pos = new_born.get_pos()
-
-		if not new_born_pos in self.bobs:
-			self.bobs[new_born_pos] = []
-		self.bobs[new_born_pos].append(new_born)
-
-		self.nb_bob += 1
-		
-
-	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
-		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
-		new_born_pos = new_born.get_pos()
-		if not new_born_pos in self.bobs:
-			self.bobs[new_born_pos] = []
-		self.bobs[new_born_pos].append(new_born)
-
-		self.nb_bob += 1
 		
 	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
 		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
@@ -295,7 +266,7 @@ class World:
 			self.foods = {}
 			self.spawn_food(self.argDict["nbFood"])
 			self.nb_food = self.argDict["nbFood"]	
-			if random.randint(0,10) == 3 and self.terrain and self.enable_function["custom_event"] and self.enabled_event == 0:
+			if random.randint(0,10) == 1 and self.terrain and self.enable_function["custom_event"] and self.enabled_event == 0:
 				event = self.event_update()
 				self.enabled_event = self.event_timer_day_tick * self.argDict["dayTick"]
 				
@@ -309,9 +280,7 @@ class World:
 
 
 		self.tick += 1
-		for position, liste_objets in self.get_bobs().items():
-			for objet in liste_objets:
-				print(objet.get_energy())
+
 		return event
 					
 
@@ -329,6 +298,7 @@ class World:
 				for bob in bobs:
 					bob.set_max_energy(arg_dict["bob_max_energy"])
 
+		self.enable_function = arg_dict["toggle_fonction"]
 		self.argDict = arg_dict
 		self.terrain_config = terrain_config_dict
 		if self.argDict["custom_terrain"]:
@@ -337,6 +307,10 @@ class World:
 			self.terrain = None
 		self.water_level = terrain_config_dict["water_level"]
 
+		for key, bobs in self.get_bobs().items():
+			for bob in bobs:
+				if bob.get_pos()[0] >= self.argDict["size"] or bob.get_pos()[1] >= self.argDict["size"]:
+					self.kill_bob(bob)
 
 
 

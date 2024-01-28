@@ -24,6 +24,8 @@ class Api:
 		self.option_shared_data.append(False)
 
 		self.get_world = mp.Manager().Value('i', False)
+		self.need_spawn_bob = mp.Manager().Value('i', False)
+		self.ask_number_of_bob = mp.Manager().Value('i', 0)
 		
 	def change_options(self, argDict, terrain_config_dict):
 		with self.data_lock:
@@ -47,7 +49,14 @@ class Api:
 			self.shared_data['event'] = event
 	def get_data_lock(self):
 		return self.data_lock
-     
+	
+	def spawn_bob(self, ask_number_of_bob):
+		self.need_spawn_bob.value = True
+		self.ask_number_of_bob.value = ask_number_of_bob
+		while self.need_spawn_bob.value:
+			pass
+
+		
 
 	def pause(self):
 		if self.process is not None:
@@ -73,6 +82,8 @@ class Api:
 			self.shared_data['nb_food'] = self.world_sim.get_nb_food()
 			self.shared_data['argDict'] = self.world_sim.get_argDict()
 			self.shared_data['water_level'] = self.world_sim.get_water_level()
+			self.shared_data['bob_population'] = self.world_sim.get_population_Bob()
+			self.shared_data['food_population'] = self.world_sim.get_population_Food()
 
 	def get_world_sim(self):
 		self.get_world.value = True
@@ -90,6 +101,9 @@ class Api:
 			if self.get_world.value:
 				self.shared_data['world'] = self.world_sim
 				self.get_world.value = False
+			if self.need_spawn_bob.value:
+				self.world_sim.spawn_bob(self.ask_number_of_bob.value)
+				self.need_spawn_bob.value = False
 
 			if not self.paused.value:
 				

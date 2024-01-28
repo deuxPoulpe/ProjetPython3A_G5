@@ -1,4 +1,3 @@
-import pickle
 import pygame
 from display import Display
 from api import Api
@@ -7,6 +6,9 @@ import os
 import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib import pyplot as plt
+
 from Utility.save_utility import save, load
 
 
@@ -23,7 +25,7 @@ class Menu:
         # Initialisation de la bibliothèque Pygame pour le son
         pygame.mixer.init()
         # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
-        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
+        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music.mp3"))
          # Jouer la chanson en boucle (-1 indique une lecture en boucle)
         pygame.mixer.Sound.play(self.chanson, loops=-1)
 
@@ -479,12 +481,12 @@ class Ig_menu:
             
     def main_loop(self):
         
-        pygame.mixer.init()
-        # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
-        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
-         # Jouer la chanson en boucle (-1 indique une lecture en boucle)
-        pygame.mixer.Sound.play(self.chanson, loops=-1)
-        pygame.mixer.music.pause()
+        # pygame.mixer.init()
+        # # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
+        # self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
+        #  # Jouer la chanson en boucle (-1 indique une lecture en boucle)
+        # pygame.mixer.Sound.play(self.chanson, loops=-1)
+        # pygame.mixer.music.pause()
 
         self.option_value_terrain = self.option_value_terrain_validate if self.option_changed else self.option_value_terrain
         self.option_values_sim = self.option_values_sim_validate if self.option_changed else self.option_values_sim
@@ -526,6 +528,9 @@ class Ig_menu:
         
         change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
         change_sim_button.pack(pady=15)
+
+        graph_button = ttk.Button(self.main_menu_frame, text="Get Graph", command=self.plot_data, width=15)
+        graph_button.pack(pady=15)
         
         options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu, width=15)
         options_button.pack(pady=15)
@@ -786,13 +791,49 @@ class Ig_menu:
             self.stop_simulation()
         exit()
 
+    def plot_data(self):
+        if self.is_running:
+            shared_data = self.api.get_shared_data()
+
+            shared_tick = shared_data['tick']
+            shared_bob = shared_data['bob_population']
+            shared_food = shared_data['food_population']
+
+            ticks = [i for i in range(shared_tick)]
+            fig = plt.Figure()
+            ax = fig.add_subplot(111)
+
+            fig, (ax, ax2) = plt.subplots(2, 1)
+
+            ax.plot(ticks, shared_bob)
+            ax.set_xlabel('Tick')
+            ax.set_ylabel('Number of bobs')
+            #ax.set_ylabel('Number of food')
+            ax.set_title('Number of bobs over time')
+
+            ax2.plot(ticks, shared_food)
+            ax2.set_xlabel('Tick')
+            ax2.set_ylabel('Number of food')
+            ax2.set_title('Number of food over time')
+
+
+            new_window = tk.Toplevel(self.root)
+            canvas = FigureCanvasTkAgg(fig, master=new_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack()
+        else:
+            messagebox.showerror("Error", "You need to start a new simulation before getting the graph")
+            return -1
+
+
+
 
           
         
 if __name__ == "__main__":
 
-    menu = Menu()
-    menu.menu_principal()
-    # ig_menu = Ig_menu()
-    # ig_menu.main_loop()
+    # menu = Menu()
+    # menu.menu_principal()
+    ig_menu = Ig_menu()
+    ig_menu.main_loop()
 
