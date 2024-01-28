@@ -95,18 +95,8 @@ class Display:
 		pygame.mixer.init()	
         
 		self.chanson = pygame.mixer.Sound("music2.mp3")
-	
-	def jouer_chanson(self):
-        
-		pygame.mixer.Sound.play(self.chanson, loops=-1)
-	
-	def pause_chanson(self):
-        
 		pygame.mixer.pause()
-	
-	def reprendre_chanson(self):
-        
-		pygame.mixer.unpause()
+		
 
 	def convert_sub_surface_coords_to_screen(self, x, y):
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
@@ -594,8 +584,8 @@ class Display:
 		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
 		play_button.set_active(False)
 		play_buttonmusic = Sprite_UI(self.screen_width - 240, 10, self.assets["playmusic"])
-		play_buttonmusic.set_active(False)
-		music_playing = True
+		play_buttonmusic.set_active(True)
+		music_playing = False
 		
 
 		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
@@ -673,6 +663,7 @@ class Display:
 						if self.in_game_menu.is_option_changed():
 							self.change_api_option(self.in_game_menu.get_options())
 						self.api.resume()
+
 					elif event.key == pygame.K_SPACE:
 						if self.game_paused:
 							self.api.resume()
