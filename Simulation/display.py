@@ -439,7 +439,7 @@ class Display:
 				sprite_type (str): Type of the sprite.
 		'''
 
-		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
+		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image):
 			'''
 				Adds a sprite to the sprite group with occlusion.
 				occlusion is the fact that a sprite can be hidden behind a tile.
@@ -473,7 +473,6 @@ class Display:
 					sprite_image = self.update_bob_color(velocity, sprite_image) # if the sprite is not in the cache, we update its color and add it to the cache
 					self.sprite_color_cache[velocity, sprite_obj.is_dead()] = sprite_image
 				
-
 			sprite = Sprite(x, y, sprite_image, size)
 			if any([rc, lc, bc]):
 				if (rc, lc, bc, sprite_type) in self.sprite_occlusion_cache.keys():
@@ -974,8 +973,8 @@ class Display:
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Height {obj.get_world().get_terrain().get_terrain()[obj.get_pos()[0]][obj.get_pos()[1]]}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 120 + nb_food * height_coef_food)) if self.data["terrain"] else None
 				nb_bob += 1
 			elif isinstance(obj, Food):
-				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 140, 130 + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
-				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 80, mouse_y + nb_food * height_coef_food + 30 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 140, mouse_y + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Position {obj.get_pos()}", True, WHITE), (mouse_x - 130, mouse_y + nb_food * height_coef_food + 30 + nb_bob * height_coef_bob))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Energy {obj.get_value()}", True, WHITE), (mouse_x - 130, mouse_y + nb_food * height_coef_food + 45 + nb_bob * height_coef_bob))
 				nb_food += 1
 

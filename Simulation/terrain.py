@@ -36,6 +36,7 @@ class Terrain:
 		self.terrain = np.zeros((size, size))
 
 		self.generate_terrain(size, self.height)	
+		random.seed()
 		
 
 	def generate_terrain(self ,size, z_max, z_min=0):
