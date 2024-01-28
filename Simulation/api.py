@@ -47,7 +47,6 @@ class Api:
 			self.shared_data['event'] = event
 	def get_data_lock(self):
 		return self.data_lock
-     
 
 	def pause(self):
 		if self.process is not None:

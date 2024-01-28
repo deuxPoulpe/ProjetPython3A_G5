@@ -1,8 +1,7 @@
-import copy
 import random
-import food
-from queue import *
-from food import *
+from food import Food
+from Utility.time_function_utility import execute_function_after_it
+
 class Bob:
 	"""
 	Classe représentant un personnage 'Bob' dans un monde simulé.
@@ -51,6 +50,7 @@ class Bob:
 		self.case_to_move = 0
 		self.velocity_buffer = 0
 		self.tiles_visited = []
+		self.dead = False
 
 		self.name = self.random_name()
 		
@@ -73,6 +73,10 @@ class Bob:
 		return self.old_position
 	def get_memory_points(self):
 		return self.memory_points
+	def get_world(self):
+		return self.world
+	def is_dead(self):
+		return self.dead
 	
 	def set_max_energy(self, max_energy):
 		self.max_energy = max_energy
@@ -133,6 +137,7 @@ class Bob:
 		old_x, old_y = self.position
 		dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
 		new_x, new_y = old_x + dx, old_y + dy
+
 		if self.world.get_terrain() is not None:
 			terrain = self.world.get_terrain().get_terrain()
 			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
@@ -148,9 +153,6 @@ class Bob:
 
 			self.loose_energy("move_height", height_diff)
 
-
-	
-
 		return True
 
 	def die(self):
@@ -161,7 +163,8 @@ class Bob:
             bool: True if Bob dies, False otherwise.
         """
 		if self.energy <= 0:
-			self.world.kill_bob(self)
+			self.make_it_dead = 3
+			self.dead = True
 			return True
 		else:
 			return False
@@ -187,6 +190,11 @@ class Bob:
         Returns:
             None
         """
+		if self.dead:
+			self.make_it_dead -= 1
+			if self.make_it_dead <= 0:
+				self.world.kill_bob(self)
+			return None
 
 		if self.die():
 			return None
@@ -291,7 +299,7 @@ class Bob:
 			deplacement=0
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
-			self.perception_list.append([])
+			# self.perception_list.append([])
 
 			while x <= self.get_pos()[0]:
 
@@ -331,14 +339,14 @@ class Bob:
 		tampon=[]
 		for k in range(0, len(self.perception_list)): #Gestion des foods de même distance mais différentes values
 			for j in self.perception_list[k].copy():
-				if isinstance(j,food.Food):
+				if isinstance(j, Food):
 					tampon.append(j)
 					self.perception_list[k].remove(j)
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
 				self.perception_list[k].append(tampon)
 				tampon=[]
 
-		self.perception_list.sort(key=lambda x: isinstance(x,food.Food), reverse=True)
+		self.perception_list.sort(key=lambda x: isinstance(x, Food), reverse=True)
 
 		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
 
@@ -366,7 +374,7 @@ class Bob:
 		
 		for k in self.perception_list:
 			for j in k:
-				if isinstance(j,food.Food):
+				if isinstance(j, Food):
 					if len(self.memory_space) > self.memory_points*2:
 						self.memory_space.pop(0)
 					self.memory_space.append(j)
@@ -392,13 +400,13 @@ class Bob:
 						self.move_dest(self.case_ou_aller(k,"aller"))
 						return True
 
-				elif isinstance(k,food.Food):
+				elif isinstance(k,Food):
 					self.move_dest(self.case_ou_aller(k,"aller"))
 					return True
 				
 		for i in self.memory_space:
-			if isinstance(i,food.Food):
-				self.move(self.case_ou_aller(i,"aller"))
+			if isinstance(i,Food):
+				self.move_dest(self.case_ou_aller(i,"aller"))
 				self.memory_points -= 1
 				return True
 		

@@ -9,9 +9,9 @@ from Utility.save_utility import save
 
 if __name__ == "__main__":
 
-	menu = Menu()
-	menu.menu_principal()
-	exit()
+	# menu = Menu()
+	# menu.menu_principal()
+	# exit()
 
 	terrain_config = {
 		"generate_river" : False,
@@ -19,17 +19,37 @@ if __name__ == "__main__":
 		"generate_lake" : False,
 		"number_of_lake" : 1,
 		"size_of_lake" : 20,
-		"max_height" : 10,
+		"max_height" : 3,
 		"seed" : 6432,
 		 "water_level" : 0,
 		}
+	
+	toggle_fonction = {
+            "move_smart" : False,
+            "sexual_reproduction" : False,
+            "custom_event" : False,
+            "reproduce" : True,
+            "perception" : False,
+            "memory" : False,
+            "eat_bob" : False,
+        }
 
 	world = World({
-		"size" : 10,
-		"nbFood" : 10,
-		"dayTick" : 100,
-		"Food_energy" : 100,
-		"custom_terrain" : False,
+			"size": 10,
+            "nbFood": 1,
+            "Food_energy": 100,
+            "bob_max_energy": 200,
+            "bob_energy": 10,
+            "bob_velocity": 1,
+            "bob_mass": 1,
+            "bob_perception": 0,
+            "dayTick": 100,
+            "bob_mutation": 0,
+            "bob_memory_point": 0,
+            "custom_terrain" : False,
+            "event_days_rate" : 100,
+            "toggle_fonction" : toggle_fonction,
+
 		}, terrain_config)
 	
 #------------------------BATTERIE DE TESTS------------------------#
@@ -75,26 +95,32 @@ if __name__ == "__main__":
 
 	"""
 
-	#Test memory
+	# #Test memory
 	
-	print("Test memory")
-	world.enable_function["memory"] = True
-	world.enable_function["move_smart"] = True
-	world.enable_function["eat_bob"] = False
-	world.enable_function["perception"] = True
-	# world.spawn_bob(1,velocity=1,mass=1, perception = 1)
-	# world.spawn_bob(1,velocity=2,mass=2, perception = 0)
-	bob = Bob(2,3,world,velocity=1,mass=1, perception = 1)
-	bob1 = Bob(3,3,world,velocity=1,mass=1, perception = 1)
+	# print("Test memory")
+	# world.enable_function["memory"] = True
+	# world.enable_function["move_smart"] = True
+	# world.enable_function["eat_bob"] = False
+	# world.enable_function["perception"] = True
+	# # world.spawn_bob(1,velocity=1,mass=1, perception = 1)
+	# # world.spawn_bob(1,velocity=2,mass=2, perception = 0)
+	# bob = Bob(2,3,world,velocity=1,mass=1, perception = 1)
+	# bob1 = Bob(3,3,world,velocity=1,mass=1, perception = 1)
 
-	world.bobs[(2,3)]=[bob]
-	world.bobs[(3,3)]=[bob1]
+	# world.bobs[(2,3)]=[bob]
+	# world.bobs[(3,3)]=[bob1]
 
 	#save("test_memory",world)
+
+	world.spawn_bob(1,velocity=1,mass=1)
+
 
 
 
 	api = Api(world, 500)
 	ig = Menu()
 	display = Display(api, ig)
+	ig.api = api
+	ig.world = world
+	ig.display = display
 	display.main_loop()

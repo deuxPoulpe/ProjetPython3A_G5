@@ -7,6 +7,8 @@ import os
 import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
+from matplotlib import pyplot as plt
+
 from Utility.save_utility import save, load
 
 
@@ -479,12 +481,12 @@ class Ig_menu:
             
     def main_loop(self):
         
-        pygame.mixer.init()
-        # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
-        self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
-         # Jouer la chanson en boucle (-1 indique une lecture en boucle)
-        pygame.mixer.Sound.play(self.chanson, loops=-1)
-        pygame.mixer.music.pause()
+        # pygame.mixer.init()
+        # # Charger la chanson (remplacez "votre_chanson.mp3" par le chemin de votre fichier audio)
+        # self.chanson = pygame.mixer.Sound(os.path.join("assets", "music2.mp3"))
+        #  # Jouer la chanson en boucle (-1 indique une lecture en boucle)
+        # pygame.mixer.Sound.play(self.chanson, loops=-1)
+        # pygame.mixer.music.pause()
 
         self.option_value_terrain = self.option_value_terrain_validate if self.option_changed else self.option_value_terrain
         self.option_values_sim = self.option_values_sim_validate if self.option_changed else self.option_values_sim
@@ -526,6 +528,9 @@ class Ig_menu:
         
         change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
         change_sim_button.pack(pady=15)
+
+        graph_button = ttk.Button(self.main_menu_frame, text="Get Graph", command=lambda : print("oui"), width=15)
+        graph_button.pack(pady=15)
         
         options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu, width=15)
         options_button.pack(pady=15)
@@ -787,12 +792,13 @@ class Ig_menu:
         exit()
 
 
+
           
         
 if __name__ == "__main__":
 
-    menu = Menu()
-    menu.menu_principal()
-    # ig_menu = Ig_menu()
-    # ig_menu.main_loop()
+    # menu = Menu()
+    # menu.menu_principal()
+    ig_menu = Ig_menu()
+    ig_menu.main_loop()
 

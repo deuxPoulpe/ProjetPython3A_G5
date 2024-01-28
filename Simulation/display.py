@@ -63,6 +63,7 @@ class Display:
 			"plants": [],
 			"rocks" : [],
 			"full_bob" : pygame.image.load(os.path.join("assets/Sprites","bob.png")).convert(),
+			"dead_bob" : pygame.image.load(os.path.join("assets/Sprites","dead_bob.png")).convert(),
 			"foods_banana" : pygame.image.load(os.path.join("assets/Sprites","food.png")).convert(),
 			"pause" : pygame.image.load(os.path.join("assets/UI", "pause.png")),
 			"play" : pygame.image.load(os.path.join("assets/UI", "play.png")),
@@ -363,10 +364,10 @@ class Display:
 				if velocity in self.sprite_color_cache.keys():
 					sprite_image = self.sprite_color_cache[velocity]
 				else:
-					sprite_image = self.update_bob_color(velocity,self.assets["full_bob"])
-					self.sprite_color_cache[velocity] = sprite_image
+					sprite_image = self.update_bob_color(velocity, sprite_image)
+					self.sprite_color_cache[velocity, sprite_obj.is_dead()] = sprite_image
 	
-			if sprite_type == "bob":
+			if sprite_type == "bob" and not sprite_obj.is_dead():
 				for t in range(1, 10):
 					interpolated_x = old_x + (x - old_x) * t / 10
 					interpolated_y = old_y + (y - old_y) * t / 10
@@ -390,14 +391,13 @@ class Display:
 
 		terrain = self.data["terrain"]
 
-		match sprite_type:
-			case "bob":
-				sprite_dict = self.data["bobs"]
-				sprite_image = self.assets["full_bob"]
+		if sprite_type == "bob":
+			sprite_dict = self.data["bobs"]
+			sprite_image = self.assets["full_bob"]
 
-			case "food":
-				sprite_dict = self.data["foods"]
-				sprite_image = self.assets["foods_banana"]
+		elif sprite_type == "food":
+			sprite_dict = self.data["foods"]
+			sprite_image = self.assets["foods_banana"]
     
 		vel_list = [bob.get_velocity() for bobs in sprite_dict.values() for bob in bobs] if sprite_type == "bob" else []
 		vel_list.append(1)
@@ -411,6 +411,8 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
+							if bob.is_dead():
+								sprite_image = self.assets["dead_bob"]
 							pool.append(threading_pool.submit(add_sprite_to_group, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
 						pool.append(threading_pool.submit(add_sprite_to_group, sprites, 1, 1, sprite_image))
@@ -419,9 +421,11 @@ class Display:
 				for key, sprites in sprite_dict.items():
 					if sprite_type == "bob":
 						for bob in sprites:
-							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image, sprite_type))
+							if bob.is_dead():
+								sprite_image = self.assets["dead_bob"]
+							pool.append(threading_pool.submit(add_sprite_to_group_occlusion, bob, bob.get_mass(), (bob.get_velocity()/velocity_max)*100, sprite_image))
 					else:
-						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image, sprite_type))
+						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image))
 
 			for _ in as_completed(pool):
 				pass			
@@ -763,6 +767,7 @@ class Display:
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Velocity {obj.get_velocity()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 75 + nb_food * height_coef_food))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Perception {obj.get_perception()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 90 + nb_food * height_coef_food))
 				self.screen.blit(pygame.font.Font(None, 20).render(f"- Memory point {obj.get_memory_points()}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 105 + nb_food * height_coef_food))
+				self.screen.blit(pygame.font.Font(None, 20).render(f"- Height {obj.get_world().get_terrain().get_terrain()[obj.get_pos()[0]][obj.get_pos()[1]]}", True, WHITE), (mouse_x - 130, mouse_y + nb_bob * height_coef_bob + 120 + nb_food * height_coef_food)) if self.data["terrain"] else None
 				nb_bob += 1
 			elif isinstance(obj, Food):
 				self.screen.blit(pygame.font.Font(None, 25).render(f"Food {nb_food + 1} :", True, WHITE), (mouse_x - 140, 130 + nb_food * height_coef_food + 10 + nb_bob * height_coef_bob))
