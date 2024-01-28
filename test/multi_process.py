@@ -11,10 +11,10 @@ class API:
         self.process.start()
 
     def run(self):
+        self.shared_data['variable1'] = 42
         while True:
-            # Exécutez votre boucle et stockez les variables dans self.shared_data
-            self.shared_data['variable1'] = 42
             self.shared_data['variable2'] = 'Bonjour'
+            self.shared_data['variable1'] += 1
             time.sleep(1)
 
     def stop(self):
@@ -28,7 +28,6 @@ class DISPLAY:
 
     def start(self):
         while True:
-            # Récupérez les variables depuis self.api.shared_data
             variable1 = self.api.shared_data.get('variable1', None)
             variable2 = self.api.shared_data.get('variable2', None)
 
