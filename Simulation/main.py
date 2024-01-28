@@ -35,18 +35,18 @@ if __name__ == "__main__":
         }
 
 	world = World({
-			"size": 10,
-            "nbFood": 4,
+			"size": 5,
+            "nbFood": 0,
             "Food_energy": 100,
             "bob_max_energy": 200,
-            "bob_energy": 200,
+            "bob_energy": 100,
             "bob_velocity": 1,
             "bob_mass": 1,
             "bob_perception": 0,
             "dayTick": 100,
             "bob_mutation": 0,
             "bob_memory_point": 0,
-            "custom_terrain" : False,
+            "custom_terrain" : True,
             "event_days_rate" : 100,
             "toggle_fonction" : toggle_fonction,
 
@@ -111,8 +111,10 @@ if __name__ == "__main__":
 	# world.spawn_bob(1,velocity=5,mass=1)
 	# world.spawn_bob(1,velocity=10,mass=1)
 
-	save("Test velocity",world)
+	# save("Test height lost energy",world)
 
+	world.spawn_bob(1,velocity=1,mass=1)
+	save("Test height lost energy.pkl",world)
 
 	api = Api(world, 500)
 	ig = Ig_menu()
