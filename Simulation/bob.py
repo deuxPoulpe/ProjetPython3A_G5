@@ -236,30 +236,6 @@ class Bob:
 
 		return perception_list
 
-	def bob_perception_v2(self):
-		"""
-		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
-		"""
-		self.perception_list = []
-
-		distance = round(self.perception)
-		while distance > 0: #On ajoute les objets que voit bob par distance
-
-			self.bob_get_things_by_distance(distance)
-			distance-=1
-		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
-
-		tampon=[]
-		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
-			for j in k:
-				if isinstance(j,food.Food):
-					tampon.append(j)
-					self.perception_list[k].remove(j)
-				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
-				self.perception_list[k].append(tampon)
-				tampon=[]
-
-		return True
 
 	def bob_get_things_by_distance(self,distance):
 			"""
@@ -268,6 +244,8 @@ class Bob:
 			deplacement=0
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
+
+			self.perception_list[distance] = []	
 
 			while x <= self.get_pos()[0]:
 
@@ -291,27 +269,31 @@ class Bob:
 
 				x-=1
 				deplacement+=1
+
+
 	def bob_perception_v2(self):
 		"""
 		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
 		self.perception_list = []
 		distance = round(self.perception)
-		while distance > 0: #On ajoute les objets que voit bob par distance
 
-			self.bob_get_things_by_distance(distance)
-			distance-=1
-		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+		for i in range(0, distance+1):
+			self.bob_get_things_by_distance(i)
 
 		tampon=[]
-		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
-			for j in k:
+		for k in range(0, len(self.perception_list)): #Gestion des foods de même distance mais différentes values
+			for j in self.perception_list[k].copy():
 				if isinstance(j,food.Food):
 					tampon.append(j)
 					self.perception_list[k].remove(j)
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
 				self.perception_list[k].append(tampon)
 				tampon=[]
+
+		self.perception_list.sort(key=lambda x: isinstance(x,food.Food), reverse=True)
+
+		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
 
 		return True
 
