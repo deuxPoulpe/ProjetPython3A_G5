@@ -561,8 +561,6 @@ class Menu:
             "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
         }
-
-        
         
         self.option_values_sim_validate = {
             "size": self.world_size.get(),
@@ -782,6 +780,10 @@ class Ig_menu:
             "move_smart" : False,
             "sexual_reproduction" : False,
             "custom_event" : False,
+            "reproduce" : True,
+            "perception" : False,
+            "memory" : False,
+            "eat_bob" : False,
         }
 
              
@@ -967,20 +969,27 @@ class Ig_menu:
               
         return_button = ttk.Button(self.option_terrain_frame, text="Return", command=self.show_options_menu, width=15)
         return_button.grid(row=len(labels) + 2, column=0, columnspan=3, pady=15, sticky="s")
-        
-        
+               
     def set_up_toggle_fonction_menu(self):
         
         self.toggle_move_smart = tk.BooleanVar(value=self.toggle_fonction["move_smart"])
         self.toggle_sexual_reproduce = tk.BooleanVar(value=self.toggle_fonction["sexual_reproduction"])
         self.toggle_custom_event = tk.BooleanVar(value=self.toggle_fonction["custom_event"])
+        self.toggle_reproduce = tk.BooleanVar(value=self.toggle_fonction["reproduce"])
+        self.toggle_perception = tk.BooleanVar(value=self.toggle_fonction["perception"])
+        self.toggle_memory = tk.BooleanVar(value=self.toggle_fonction["memory"])
+        self.toggle_eat_bob = tk.BooleanVar(value=self.toggle_fonction["eat_bob"])
 
-        labels = ["Move Smart", "Sexual Reproduce", "Custom event"]
+        labels = ["Move Smart", "Sexual Reproduce", "Custom event", "Self Reproduce", "Perception", "Memory", "Eat Bob"]
 
         widget = [ 
                 ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_move_smart),
                 ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_sexual_reproduce),
                 ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_custom_event),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_reproduce),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_perception),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_memory),
+                ttk.Checkbutton(self.toggle_fonction_menu, text="", variable=self.toggle_eat_bob),
                 ]
 
         for i, label_text in enumerate(labels):
@@ -1153,6 +1162,10 @@ class Ig_menu:
             "move_smart" : self.toggle_move_smart.get(),
             "sexual_reproduction" : self.toggle_sexual_reproduce.get(),
             "custom_event" : self.toggle_custom_event.get(),
+            "reproduce" : self.toggle_reproduce.get(),
+            "perception" : self.toggle_perception.get(),
+            "memory" : self.toggle_memory.get(),
+            "eat_bob" : self.toggle_eat_bob.get(),
         }
         
         self.option_values_sim_validate = {

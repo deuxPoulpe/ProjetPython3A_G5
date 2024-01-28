@@ -25,7 +25,7 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 20,
+		"size" : 10,
 		"nbFood" : 10,
 		"dayTick" : 100,
 		"Food_energy" : 100,

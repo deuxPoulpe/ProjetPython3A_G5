@@ -43,33 +43,16 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
-		self.mutation = 0.1
+		self.mutation = self.argDict["bob_mutation"]
 		self.water_level = terrain_config_dict["water_level"]
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
 			self.terrain = None
 
-		self.enable_function = {
-			"custom_event" : True,
-			"reproduce" : True,
-			"sexual_reproduction" : False,
-			"perception" : True,
-			"memory" : True,
-			"eat_bob" : True,
-			"move_smart" : True,
-		}
+		self.enable_function = self.argDict["toggle_fonction"]
 		self.enabled_event = 0
-		self.event_timer_day_tick = 25
-
-		
-
-
-		assert all([type(argDict["size"]) == int ,
-		type(argDict["nbFood"]) == int ,
-		type(argDict["dayTick"]) == int
-		])
-
+		self.event_timer_day_tick = self.argDict["event_days_rate"]
 
 		self.event_type = ["flood","drought"]
 
@@ -105,8 +88,6 @@ class World:
 	#setter
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
-
-	
 
 
 	#methods
@@ -156,18 +137,26 @@ class World:
 		self.nb_food -= 1
 
 
-
-	def spawn_bob(self, num_bobs, energy=100, velocity=1, mass=1, perception=0, memory_points=0, max_energy=200):
+	def spawn_bob(self, num_bobs, energy=-1, velocity=-1, mass=-1, perception=-1, memory_points=-1, max_energy=-1):
 		"""
         Generates a specified number of 'Bob' in the world.
 
         Parameters:
             num_bobs (int): Number of 'Bob' to generate.
         """
+		# If no value is specified, use the default value
+		energy = self.argDict["bob_energy"] if energy == -1 else energy
+		velocity = self.argDict["bob_velocity"] if velocity == -1 else velocity
+		mass = self.argDict["bob_mass"] if mass == -1 else mass
+		perception = self.argDict["bob_perception"] if perception == -1 else perception
+		memory_points = self.argDict["bob_memory_points"] if memory_points == -1 else memory_points
+		max_energy = self.argDict["bob_max_energy"] if max_energy == -1 else max_energy
+
+
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception )
+			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception, memory_points = memory_points, energy=energy, max_energy=max_energy)
 
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
@@ -257,7 +246,15 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+		
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
 
+		self.nb_bob += 1
 
 	def event_update(self):
 		event_type_choice = random.choice(self.event_type)
@@ -316,16 +313,7 @@ class World:
 			for objet in liste_objets:
 				print(objet.get_energy())
 		return event
-	
-	def load(self, file_name):
-		try:
-				with open(file_name, 'rb') as file:
-					loaded_world = pickle.load(file)
-				return loaded_world
-		except FileNotFoundError:
-				print(f"Le fichier {file_name} n'existe pas.")
-				return None
-				
+					
 
 	def change_options(self, arg_dict, terrain_config_dict):
 		"""
@@ -335,6 +323,12 @@ class World:
 			arg_dict (dict): Dictionary of world configuration arguments.
 			terrain_config_dict (dict): Dictionary of terrain configuration.
 		"""
+		
+		if self.argDict["bob_max_energy"] != arg_dict["bob_max_energy"]:
+			for key, bobs in self.get_bobs().items():
+				for bob in bobs:
+					bob.set_max_energy(arg_dict["bob_max_energy"])
+
 		self.argDict = arg_dict
 		self.terrain_config = terrain_config_dict
 		if self.argDict["custom_terrain"]:
@@ -343,10 +337,8 @@ class World:
 			self.terrain = None
 		self.water_level = terrain_config_dict["water_level"]
 
-	def save(self, file_name):
-    	
-		with open(file_name, 'wb') as file:
-        	 pickle.dump(self, file)
+
+
 
     
 

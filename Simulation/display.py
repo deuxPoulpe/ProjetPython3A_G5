@@ -686,12 +686,7 @@ class Display:
 		self.running = False
 		self.api.stop()
 		pygame.quit()
-	
-	
-
-
-
-
+		
 	def show_bob_stats(self):
 		nb_bob = 0
 		nb_food = 0
