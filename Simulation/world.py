@@ -1,7 +1,7 @@
 
 import pickle
 from terrain import Terrain
-from bob import Bob
+from bob import *
 from food import Food
 import random
 import time
@@ -10,6 +10,7 @@ from Utility.time_function_utility import execute_function_after_it
 
 
 class World:
+	
 	"""
     Class representing the world in which 'Bob' and 'Food' objects interact.
 
@@ -42,6 +43,7 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
+		self.mutation = 0.1
 		self.water_level = terrain_config_dict["water_level"]
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
@@ -57,10 +59,10 @@ class World:
 			"eat_bob" : True,
 			"move_smart" : True,
 		}
-
 		self.enabled_event = 0
 		self.event_timer_day_tick = 25
 
+		
 
 
 		assert all([type(argDict["size"]) == int ,
@@ -97,15 +99,18 @@ class World:
 		return self.nb_bob
 	def get_nb_food(self):
 		return self.nb_food
+	def get_mutation(self):
+		return self.mutation
 
 	#setter
 	def setArgDict(self,newArgDict):
 		self.argDict = newArgDict
 
-  
+	
 
 
 	#methods
+	
 	def move_bob(self,bob,old_x,old_y):
 		"""
         Moves a 'Bob' in the world.
@@ -161,7 +166,8 @@ class World:
 		for _ in range(num_bobs):
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
-			bob=Bob(x, y,self,mass=mass, velocity=velocity)
+			bob=Bob(x, y, self, velocity=velocity, mass = mass, perception = perception )
+
 			if (x,y) not in self.bobs:
 				self.bobs[(x,y)]=[]
 			self.bobs[(x,y)].append(bob)
@@ -181,6 +187,9 @@ class World:
 			x = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée X
 			y = random.randint(0,self.argDict["size"]-1)  # Génération aléatoire de la coordonnée Y
 			food=Food(x, y, self, value=self.argDict["Food_energy"])
+
+			 
+
 			if (x,y) not in self.foods:
 				self.foods[(x,y)] = food
 			else:
@@ -195,7 +204,52 @@ class World:
         Parameters:
             mother_bob (Bob): The 'Bob' that is reproducing.
         """
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()*1/4)
+		if random.random() < self.mutation :
+
+			
+			child_velocity = random.uniform(1 - self.mutation, 1 + self.mutation)
+		
+		child_velocity = 1
+		
+		mutation = random.choice([-1, 0, 1])
+		child_perception = mother_bob.get_perception() + mutation
+		child_perception = max(0, child_perception)
+
+		memory_points = random.choice([-1, 0, 1])
+		child_memory = mother_bob.get_memory_points() + memory_points
+		child_memory = max(0, child_memory)
+
+
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity, perception= child_perception, memory_points=child_memory)
+		
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
+
+		self.nb_bob += 1
+		
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
+
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+
+		new_born_pos = new_born.get_pos()
+
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
+
+		self.nb_bob += 1
+		
+
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
@@ -211,7 +265,6 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
-
 
 	def event_update(self):
 		event_type_choice = random.choice(self.event_type)
@@ -270,6 +323,16 @@ class World:
 			for objet in liste_objets:
 				print(objet.get_energy())
 		return event
+	
+	def load(self, file_name):
+		try:
+				with open(file_name, 'rb') as file:
+					loaded_world = pickle.load(file)
+				return loaded_world
+		except FileNotFoundError:
+				print(f"Le fichier {file_name} n'existe pas.")
+				return None
+				
 
 	def change_options(self, arg_dict, terrain_config_dict):
 		"""
@@ -287,3 +350,11 @@ class World:
 			self.terrain = None
 		self.water_level = terrain_config_dict["water_level"]
 
+	def save(self, file_name):
+    	
+		with open(file_name, 'wb') as file:
+        	 pickle.dump(self, file)
+
+    
+
+	

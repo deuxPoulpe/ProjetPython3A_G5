@@ -1,8 +1,8 @@
+import copy
 import random
 import food
-
 from queue import *
-
+from food import *
 class Bob:
 	"""
 	Classe représentant un personnage 'Bob' dans un monde simulé.
@@ -20,7 +20,7 @@ class Bob:
 	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200 ,):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -45,11 +45,15 @@ class Bob:
 		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
+		self.old_position = (x, y)
 		self.en_fuite = False
 		self.world = world
 		self.case_to_move = 0
 		self.velocity_buffer = 0
+		self.tiles_visited = []
 
+		self.name = self.random_name()
+		
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
@@ -63,6 +67,13 @@ class Bob:
 		return self.velocity
 	def get_perception(self):
 		return self.perception
+	def get_name (self) : 
+		return self.name
+	def get_old_pos(self):
+		return self.old_position
+	def get_memory_points(self):
+		return self.memory_points
+
 
 	
 	def eat_food(self):
@@ -83,7 +94,29 @@ class Bob:
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
+			self.energy -= 0.5
+		elif mode == "self_reproduce":
+			self.energy -= 3*self.max_energy/4
 			self.energy -= 0.5	
+	
+	def random_name(self):
+		
+		
+		vowels = 'aeiou'
+		consones = 'bcdfghjklmnpqrstvwxyz'
+		taille_name = random.randint(3, 8)
+		name= ''
+		
+		for i in range (taille_name):
+			if i%2 == 0 : 
+				name += random.choice(consones)
+			else : 
+				name += random.choice(vowels)
+			name = name.capitalize()
+		return name
+			
+		
+
 
 	def move(self):
 		"""
@@ -99,6 +132,7 @@ class Bob:
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
 		self.loose_energy("move")
+
 
 	
 
@@ -125,9 +159,8 @@ class Bob:
             bool: True if reproduction occurs, False otherwise.
         """
 		if self.energy >= self.max_energy:
-			print("try reproduce2")
 			self.world.spawn_reproduce(self)
-			self.energy -= 150
+			self.loose_energy("self_reproduce")
 			return True
 		else:
 			return False
@@ -142,11 +175,12 @@ class Bob:
 
 		if self.die():
 			return None
-		
-		self.mutate_memory_points()
+		#self.mutate_memory_points()
 		self.velocity_manager()
-
+		self.old_position = self.position
+  
 		while self.case_to_move > 0:
+
 			if self.world.enable_function["reproduce"]:
 				if (self.reproduce()):
 					self.loose_energy("stand")
@@ -158,10 +192,11 @@ class Bob:
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
 				self.memory_store()
+
 			if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
 					self.loose_energy("move")
-				self.case_to_move -= 1
+					self.case_to_move -= 1
 
 			else:
 				self.move()
@@ -171,12 +206,10 @@ class Bob:
 			self.world.enable_function["eat_bob"]: (self.eat_bob())
 			self.eat_food()
 
+			if self.die():
+				return None
 
-			
-			
-			
-
-			
+	
 	
 	def velocity_manager(self):
 
@@ -184,7 +217,7 @@ class Bob:
 		self.velocity_buffer += self.velocity-abs(self.velocity)
 		if self.velocity_buffer > 0:
 			self.velocity_buffer -= 1
-			case_to_move += 1
+			self.case_to_move += 1
 	
 	def eat_bob(self):
 		"""
@@ -269,15 +302,16 @@ class Bob:
 			deplacement=0
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
+			self.perception_list.append([])
 
 			while x <= self.get_pos()[0]:
-
+				
 				if (x,y+deplacement) in self.world.get_foods():
 						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
 						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
 
-				x-=1
+				x+=1
 				deplacement+=1
 
 			deplacement=0
@@ -285,6 +319,8 @@ class Bob:
 
 			while x > self.get_pos()[0]:
 
+				print("Ca marche toujours")
+
 				if (x,y+deplacement) in self.world.get_foods():
 						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
@@ -292,6 +328,16 @@ class Bob:
 
 				x-=1
 				deplacement+=1
+	def bob_perception_v2(self):
+		"""
+		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
+		"""
+		self.perception_list = []
+		distance = round(self.perception)
+		while distance > 0: #On ajoute les objets que voit bob par distance
+
+
+
 	def bob_perception_v2(self):
 		"""
 		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
@@ -313,6 +359,10 @@ class Bob:
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
 				self.perception_list[k].append(tampon)
 				tampon=[]
+
+		self.perception_list.sort(key=lambda x: isinstance(x,food.Food), reverse=True)
+
+		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
 
 		return True
 
@@ -351,24 +401,19 @@ class Bob:
 		
 		self.memory_space.sort(key=lambda food: food.value, reverse=True)
 		return True
+	
+
+	# def memoriserCaseVisite(self, oldX, oldY):
+	# 	if (oldX, oldY) not in self.tiles_visited:
+	# 		if len(self.tiles_visited) <= self.memory_points*2:
+	# 			self.tiles_visited.append((oldX, oldY))
+            
+	# 		else:
+            
+	# 			self.tiles_visited.pop(0)
+    #             # Ajouter la nouvelle case mémorisée
+	# 			self.tiles_visited.append((oldX, oldY))
 		
-
-
-
-	def mutate_memory_points(self):
-		
-		"""
-		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
-
-		"""
-
-		values = [-1, 0 , 1]
-
-		mutation = random.choice(values)
-
-		self.memory_points += mutation
-
-		return self.memory_points
 
 	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
 		for j in self.perception_list:
@@ -383,14 +428,18 @@ class Bob:
 						return True
 
 				elif isinstance(k,food.Food):
-					self.move(self.case_ou_aller(k,"aller"))
+					self.move_dest(self.case_ou_aller(k,"aller"))
 					return True
 				
 		for i in self.memory_space:
 			if isinstance(i,food.Food):
 				self.move(self.case_ou_aller(i,"aller"))
+				self.memory_points -= 1
 				return True
-			
+		
+
+
+
 		self.move()
 		return True
 			
@@ -408,7 +457,7 @@ class Bob:
 		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
 						max(0, min(new_y, self.world.get_size() - 1)))
 		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		#self.loose_energy("move")
 
 
 	def case_ou_aller(self, bob , mode):
