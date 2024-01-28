@@ -1,7 +1,6 @@
 import copy
 import random
 import food
-
 from queue import *
 from food import *
 class Bob:
@@ -176,7 +175,6 @@ class Bob:
 
 		if self.die():
 			return None
-		print("1")
 		#self.mutate_memory_points()
 		self.velocity_manager()
 		self.old_position = self.position
@@ -184,31 +182,24 @@ class Bob:
 		while self.case_to_move > 0:
 
 			if self.world.enable_function["reproduce"]:
-				print("2")
 				if (self.reproduce()):
-					print("3")
 					self.loose_energy("stand")
 			elif self.world.enable_function["sexual_reproduction"]:
 				if(self.sexual_reproduction()):
-					print("4")
 					self.loose_energy("stand")
 
 			if self.world.enable_function["perception"]:
-				print("5")
 				self.bob_perception_v2()
 			if self.world.enable_function["memory"]:
 				self.memory_store()
-				print("6")
 
 			if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
-					print("7")
 					self.loose_energy("move")
 					self.case_to_move -= 1
 
 			else:
 				self.move()
-				print("8")
 				self.loose_energy("move")
 				self.case_to_move -= 1
 				
@@ -216,7 +207,6 @@ class Bob:
 			self.eat_food()
 
 			if self.die():
-				print("9")
 				return None
 
 	
@@ -286,7 +276,6 @@ class Bob:
 		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
 		"""
 		self.perception_list = []
-
 		distance = round(self.perception)
 		while distance > 0: #On ajoute les objets que voit bob par distance
 
@@ -305,6 +294,7 @@ class Bob:
 				tampon=[]
 
 		return True
+
 
 	def bob_get_things_by_distance(self,distance):
 			"""
@@ -339,8 +329,6 @@ class Bob:
 
 				x-=1
 				deplacement+=1
-
-
 
 	def bob_perception_v2(self):
 		"""

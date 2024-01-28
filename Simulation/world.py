@@ -156,7 +156,6 @@ class World:
 		self.nb_food -= 1
 
 
-
 	def spawn_bob(self, num_bobs, energy=100, velocity=1, mass=1, perception=0, memory_points=0, max_energy=200):
 		"""
         Generates a specified number of 'Bob' in the world.
@@ -257,7 +256,15 @@ class World:
 		self.bobs[new_born_pos].append(new_born)
 
 		self.nb_bob += 1
+		
+	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=round(((mother_bob.get_mass()+dad_bob.get_mass())/2)),perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+		new_born_pos = new_born.get_pos()
+		if not new_born_pos in self.bobs:
+			self.bobs[new_born_pos] = []
+		self.bobs[new_born_pos].append(new_born)
 
+		self.nb_bob += 1
 
 	def event_update(self):
 		event_type_choice = random.choice(self.event_type)
