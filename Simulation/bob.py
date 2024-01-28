@@ -271,31 +271,6 @@ class Bob:
 
 		return perception_list
 
-	def bob_perception_v2(self):
-		"""
-		Permet à Bob de percevoir son environnement. Mets à jour l'attribut perception_list de bob étant une liste d'objets autour de lui trié par distance décroissante.
-		"""
-		self.perception_list = []
-		distance = round(self.perception)
-		while distance > 0: #On ajoute les objets que voit bob par distance
-
-			self.bob_get_things_by_distance(distance)
-			distance-=1
-		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
-
-		tampon=[]
-		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
-			for j in k:
-				if isinstance(j,food.Food):
-					tampon.append(j)
-					self.perception_list[k].remove(j)
-				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
-				self.perception_list[k].append(tampon)
-				tampon=[]
-
-		return True
-
-
 	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
@@ -306,11 +281,12 @@ class Bob:
 			self.perception_list.append([])
 
 			while x <= self.get_pos()[0]:
-				
+
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
+					self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
+					for bob in self.world.get_bobs()[(x,y-deplacement)]:
+						self.perception_list[distance].append(bob)
 
 				x+=1
 				deplacement+=1
@@ -319,16 +295,15 @@ class Bob:
 			x=self.get_pos()[0]+distance
 
 			while x > self.get_pos()[0]:
-
-				print("Ca marche toujours")
-
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
+					self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
 				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
+					for bob in self.world.get_bobs()[(x,y-deplacement)]:
+						self.perception_list[distance].append(bob)
 
 				x-=1
 				deplacement+=1
+
 
 	def bob_perception_v2(self):
 		"""
@@ -336,15 +311,13 @@ class Bob:
 		"""
 		self.perception_list = []
 		distance = round(self.perception)
-		while distance > 0: #On ajoute les objets que voit bob par distance
 
-			self.bob_get_things_by_distance(distance)
-			distance-=1
-		self.perception_list.reverse() #On inverse la liste pour avoir les objets les plus proches en premier
+		for i in range(0, distance+1):
+			self.bob_get_things_by_distance(i)
 
 		tampon=[]
-		for k in self.perception_list: #Gestion des foods de même distance mais différentes values
-			for j in k:
+		for k in range(0, len(self.perception_list)): #Gestion des foods de même distance mais différentes values
+			for j in self.perception_list[k].copy():
 				if isinstance(j,food.Food):
 					tampon.append(j)
 					self.perception_list[k].remove(j)
@@ -390,22 +363,11 @@ class Bob:
 		for e in self.memory_space:
 			if distance(self,e) < self.perception:
 				self.memory_space.remove(e)
-		
+				self.memory_points -= 1
+
 		self.memory_space.sort(key=lambda food: food.value, reverse=True)
 		return True
 	
-
-	# def memoriserCaseVisite(self, oldX, oldY):
-	# 	if (oldX, oldY) not in self.tiles_visited:
-	# 		if len(self.tiles_visited) <= self.memory_points*2:
-	# 			self.tiles_visited.append((oldX, oldY))
-            
-	# 		else:
-            
-	# 			self.tiles_visited.pop(0)
-    #             # Ajouter la nouvelle case mémorisée
-	# 			self.tiles_visited.append((oldX, oldY))
-		
 
 	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
 		for j in self.perception_list:

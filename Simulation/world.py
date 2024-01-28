@@ -43,33 +43,16 @@ class World:
 		self.population_food = []
 		self.nb_bob = 0
 		self.nb_food = 0
-		self.mutation = 0.1
+		self.mutation = self.argDict["bob_mutation"]
 		self.water_level = terrain_config_dict["water_level"]
 		if self.argDict["custom_terrain"]:
 			self.terrain = Terrain(self.argDict["size"], self.terrain_config)
 		else:
 			self.terrain = None
 
-		self.enable_function = {
-			"custom_event" : True,
-			"reproduce" : True,
-			"sexual_reproduction" : False,
-			"perception" : True,
-			"memory" : True,
-			"eat_bob" : True,
-			"move_smart" : True,
-		}
+		self.enable_function = self.argDict["toggle_fonction"]
 		self.enabled_event = 0
-		self.event_timer_day_tick = 25
-
-		
-
-
-		assert all([type(argDict["size"]) == int ,
-		type(argDict["nbFood"]) == int ,
-		type(argDict["dayTick"]) == int
-		])
-
+		self.event_timer_day_tick = self.argDict["event_days_rate"]
 
 		self.event_type = ["flood","drought"]
 
@@ -323,16 +306,7 @@ class World:
 			for objet in liste_objets:
 				print(objet.get_energy())
 		return event
-	
-	def load(self, file_name):
-		try:
-				with open(file_name, 'rb') as file:
-					loaded_world = pickle.load(file)
-				return loaded_world
-		except FileNotFoundError:
-				print(f"Le fichier {file_name} n'existe pas.")
-				return None
-				
+					
 
 	def change_options(self, arg_dict, terrain_config_dict):
 		"""
