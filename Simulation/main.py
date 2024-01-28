@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
 	world = World({
 		"size" : 100,
-		"nbFood" : 0,
+		"nbFood" : 100,
 		"dayTick" : 100,
 		"Food_energy" : 100,
 		"custom_terrain" : True,
@@ -74,13 +74,14 @@ if __name__ == "__main__":
 	"""
 
 	#Test memory
-	"""
+	
 	print("Test memory")
 	world.enable_function["memory"] = True
 	world.enable_function["move_smart"] = True
 	world.spawn_bob(1,velocity=1,mass=1)
 	world.spawn_bob(1,velocity=1,mass=3)
-	"""
+	bob = Bob(2,3, world)
+	bob1 = Bob(3,3, world)
 
 
 

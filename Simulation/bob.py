@@ -245,7 +245,7 @@ class Bob:
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
 
-			self.perception_list[distance] = []	
+			
 
 			while x <= self.get_pos()[0]:
 
