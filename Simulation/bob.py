@@ -295,6 +295,7 @@ class Bob:
 
 		return True
 
+
 	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
