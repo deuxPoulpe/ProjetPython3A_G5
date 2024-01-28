@@ -7,6 +7,7 @@ import os
 import tkinter as tk
 from ttkthemes import ThemedTk
 from tkinter import filedialog, messagebox, ttk, simpledialog
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import pyplot as plt
 
 from Utility.save_utility import save, load
@@ -529,7 +530,7 @@ class Ig_menu:
         change_sim_button = ttk.Button(self.main_menu_frame, text="Change Simulation\n        Options", command=self.change_the_option, width=15)
         change_sim_button.pack(pady=15)
 
-        graph_button = ttk.Button(self.main_menu_frame, text="Get Graph", command=lambda : print("oui"), width=15)
+        graph_button = ttk.Button(self.main_menu_frame, text="Get Graph", command=self.plot_data, width=15)
         graph_button.pack(pady=15)
         
         options_button = ttk.Button(self.main_menu_frame, text="Simulation Options", command=self.show_options_menu, width=15)
@@ -790,6 +791,29 @@ class Ig_menu:
         if self.is_running:
             self.stop_simulation()
         exit()
+
+    def plot_data(self):
+        shared_data = self.api.get_shared_data()
+
+        shared_tick = shared_data['tick']
+        shared_bob = shared_data['bob_population']
+        shared_food = shared_data['food_population']
+
+        ticks = [i for i in range(shared_tick)]
+        fig = plt.Figure()
+        ax = fig.add_subplot(111)
+        ax.plot(ticks, shared_bob)
+        ax.set_xlabel('Tick')
+        ax.set_ylabel('Number of bobs')
+        #ax.set_ylabel('Number of food')
+        ax.set_title('Number of bobs over time')
+
+
+        new_window = tk.Toplevel(self.root)
+        canvas = FigureCanvasTkAgg(fig, master=new_window)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+
 
 
 
