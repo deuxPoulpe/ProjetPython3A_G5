@@ -107,8 +107,8 @@ class Bob:
 	def random_name(self):
 		
 		
-		vowels = 'aeiou'
-		consones = 'bcdfghjklmnpqrstvwxyz'
+		vowels = 'aeiouy'
+		consones = 'bcdfghjklmnpqrstvwxz'
 		taille_name = random.randint(3, 8)
 		name= ''
 		
