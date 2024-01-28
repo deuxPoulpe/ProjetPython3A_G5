@@ -27,7 +27,6 @@ class Display:
 		self.screen_width = 800
 		self.screen_height = 600
 		self.screen = pygame.display.set_mode((self.screen_width, self.screen_height),pygame.RESIZABLE)
-	
 
 
 		self.data = self.api.get_shared_data()
@@ -69,7 +68,6 @@ class Display:
 			"backforward" : pygame.image.load(os.path.join("assets/UI", "backforward.png")),
 			"fastforward" : pygame.image.load(os.path.join("assets/UI", "fastforward.png")),
 			"option" : pygame.image.load(os.path.join("assets/UI", "option.png")),
-			"playmusic" : pygame.image.load(os.path.join("assets/UI", "music_play.png")),
 		}
 
 		for k in range(0, 12):
@@ -90,22 +88,6 @@ class Display:
 
 		self.sprite_occlusion_cache = {}
 		self.sprite_color_cache = {}
-		
-		pygame.mixer.init()	
-        
-		self.chanson = pygame.mixer.Sound("music2.mp3")
-	
-	def jouer_chanson(self):
-        
-		pygame.mixer.Sound.play(self.chanson, loops=-1)
-	
-	def pause_chanson(self):
-        
-		pygame.mixer.pause()
-	
-	def reprendre_chanson(self):
-        
-		pygame.mixer.unpause()
 
 	def convert_sub_surface_coords_to_screen(self, x, y):
 		grid_x = -self.camera_x + (self.screen_width - self.floor_display_temp.get_size()[0]) // 2
@@ -123,7 +105,6 @@ class Display:
 
 		return screen_x <= mouse_x <= screen_x + int((16*sprite_size)/self.zoom_factor) and screen_y <= mouse_y <= screen_y + int((16*sprite_size)/self.zoom_factor)
 	
-
 	def zoom(self,event):
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4 or pygame.key.get_pressed()[pygame.K_PAGEUP]:
 			self.zoom_factor -= self.zoom_speed
@@ -306,7 +287,7 @@ class Display:
 		bob_color_modified.blit(sub_color_surface, (0, 0), special_flags=pygame.BLEND_RGB_SUB)
 
 		return bob_color_modified.convert_alpha()
-
+	
 	def draw_sprite(self, sprite_type):
 
 		def add_sprite_to_group_occlusion(sprite_obj, sprite_mass, velocity, sprite_image, sprite_type):
@@ -382,6 +363,9 @@ class Display:
 			if self.game_paused and self.is_mouse_on_sprite(sprite.rect.topleft, size):
 				self.object_stats.append(sprite_obj)
 			
+   
+			
+
 
 		sprite_group = pygame.sprite.Group()
 
@@ -424,7 +408,10 @@ class Display:
 						pool.append(threading_pool.submit(add_sprite_to_group_occlusion, sprites, 1, 1, sprite_image, sprite_type))
 
 			for _ in as_completed(pool):
-				pass			
+				pass
+
+
+					
 
 		sprite_group.draw(self.sprite_display)
 
@@ -446,6 +433,8 @@ class Display:
 
 	
 	def render(self):
+		
+
 		self.sprite_display.fill(BLACK)
   
 		self.draw_sprite("food")
@@ -497,23 +486,13 @@ class Display:
 		"""
 
 		def blit_text_info():
-
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Days : {self.data['tick']//self.data['argDict']['dayTick']}", True, BLACK),(20,20))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Ticks : {self.data['tick']}", True, BLACK),(20,40))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Game Ticks : {self.api.get_tick_interval()} ms", True, BLACK),(20,60))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Real Ticks : {self.data['real_tick_time']*1000:.1f} ms", True, BLACK),(20,80))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Bobs : {self.data['nb_bob']}", True, BLACK),(20,100))
 			self.screen.blit(pygame.font.Font(None, 20).render(f"Foods : {self.data['nb_food']}", True, BLACK),(20,120))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"_________________", True, BLACK),(20,140))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Function enable :", True, BLACK),(20,160))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Move smart : {self.data['argDict']['toggle_fonction']['move_smart']}", True, BLACK),(20,180))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Reproduce : {self.data['argDict']['toggle_fonction']['reproduce']}", True, BLACK),(20,200))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Sexual reproduction : {self.data['argDict']['toggle_fonction']['sexual_reproduction']}", True, BLACK),(20,220))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Perception : {self.data['argDict']['toggle_fonction']['perception']}", True, BLACK),(20,240))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Memory : {self.data['argDict']['toggle_fonction']['memory']}", True, BLACK),(20,260))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Custom event : {self.data['argDict']['toggle_fonction']['custom_event']}", True, BLACK),(20,280))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"Eat bob : {self.data['argDict']['toggle_fonction']['eat_bob']}", True, BLACK),(20,300))
-			self.screen.blit(pygame.font.Font(None, 20).render(f"_________________", True, BLACK),(20,310))		
+			
 
 		def change_color_all_ui():
 			pause_button.change_color()
@@ -521,7 +500,6 @@ class Display:
 			fastforward.change_color()
 			backforward.change_color()
 			option_button.change_color()
-			play_buttonmusic.change_color()
    
 		def ui_tick_modification(pos):
 			"""
@@ -530,14 +508,14 @@ class Display:
 			x,y = pos
 			if pause_button.get_rect().collidepoint(x,y):
 				self.api.pause()
-				self.game_paused = True 
+				self.game_paused = True
 				pause_button.set_active(True)
 				play_button.set_active(False)
-				change_color_all_ui()		
+				change_color_all_ui()
 
 			elif play_button.get_rect().collidepoint(x,y):
 				self.api.resume()
-				self.game_paused = False 
+				self.game_paused = False
 				pause_button.set_active(False)
 				play_button.set_active(True)
 				change_color_all_ui()
@@ -589,10 +567,6 @@ class Display:
 		pause_button.set_active(True)
 		play_button = Sprite_UI(self.screen_width - 80, 10, self.assets["play"])
 		play_button.set_active(False)
-		play_buttonmusic = Sprite_UI(self.screen_width - 240, 10, self.assets["playmusic"])
-		play_buttonmusic.set_active(False)
-		music_playing = True
-		
 
 		option_button = Sprite_UI(self.screen_width - 200, 10, self.assets["option"])
 		option_button.set_active(False)
@@ -613,7 +587,6 @@ class Display:
 		ui_element.add(backforward)
 		ui_element.add(fastforward)
 		ui_element.add(option_button)
-		ui_element.add(play_buttonmusic)
 
 		self.draw_better_world(True)
 		self.api.start()
@@ -627,7 +600,7 @@ class Display:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					self.api.resume() 
+					self.api.resume()
 					self.api.stop()
 					self.running = False
 				elif event.type == pygame.VIDEORESIZE:
@@ -635,7 +608,6 @@ class Display:
 					self.screen_width = event.size[0]
 					pause_button.update_position((self.screen_width - 120, 10))
 					play_button.update_position((self.screen_width - 80, 10))
-					play_buttonmusic.update_position((self.screen_width - 240, 10))
 					fastforward.update_position((self.screen_width - 40, 10))
 					backforward.update_position((self.screen_width - 160, 10))
 					option_button.update_position((self.screen_width - 200, 10))
@@ -648,20 +620,6 @@ class Display:
 
 				elif event.type == pygame.MOUSEBUTTONDOWN:
 					ui_tick_modification(event.pos)
-					if play_buttonmusic.get_rect().collidepoint(event.pos):
-           				 # Inverser l'état de la musique
-						music_playing = not music_playing
-
-            			# En fonction de l'état, démarrer ou arrêter la musique
-						if music_playing:
-							play_buttonmusic.set_active(False)
-							play_buttonmusic.change_color()
-							pygame.mixer.unpause()
-						else:
-							pygame.mixer.pause()
-							play_buttonmusic.set_active(True)
-							play_buttonmusic.change_color()
-
 				elif event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_ESCAPE:
 						self.api.pause()
@@ -682,6 +640,7 @@ class Display:
 							pause_button.set_active(True)
 							play_button.set_active(False)
 							change_color_all_ui()
+     
 
   
 				self.zoom(event)
@@ -699,14 +658,14 @@ class Display:
 				regeneration_thread.start()
 				drought_gif_active = execute_function_during_it(self.draw_gif, solar_gif, (0,0), nb_iter = 140)
 				self.api.set_event(None)
-		
+			
 			self.camera()
 			self.screen.fill(BLUE_SKY)
 
 			# Drawing the world and the sprites
 			if rendering:
 				self.render()
-
+		
 			# all fonction that need to be executed after or during a certain number of iteration
 			next(flood_gif_active,None)
 			next(drought_gif_active,None)
@@ -717,7 +676,7 @@ class Display:
 			blit_text_info()
 			ui_element.draw(self.screen)
 			self.show_bob_stats()
-			
+	
 			# Updating the display
 			pygame.display.set_caption(f"Simulation of Bobs\tFPS: {int(clock.get_fps())}")
 			pygame.display.flip()
