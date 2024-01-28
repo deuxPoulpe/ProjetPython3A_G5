@@ -12,9 +12,9 @@ if __name__ == "__main__":
 	# menu.menu_principal()
 
 	terrain_config = {
-		"generate_river" : False,
+		"generate_river" : True,
 		"number_of_river" : 1,
-		"generate_lake" : False,
+		"generate_lake" : True,
 		"number_of_lake" : 1,
 		"size_of_lake" : 20,
 		"max_height" : 10,
@@ -23,11 +23,11 @@ if __name__ == "__main__":
 		}
 
 	world = World({
-		"size" : 3,
-		"nbFood" : 10,
+		"size" : 100,
+		"nbFood" : 0,
 		"dayTick" : 100,
 		"Food_energy" : 100,
-		"custom_terrain" : False,
+		"custom_terrain" : True,
 		}, terrain_config)
 	
 #------------------------BATTERIE DE TESTS------------------------#
@@ -51,12 +51,12 @@ if __name__ == "__main__":
 	"""
 
 	#Test reproduction
-
+	"""
 	print("Test reproduction")
 	world.enable_function["reproduce"] = True
 	world.enable_function["sexual_reproduction"] = False
 	world.spawn_bob(1,velocity=1,mass=1)
-
+	"""
 		#Test perception 
 	"""
 	print("Test perception")
@@ -81,6 +81,9 @@ if __name__ == "__main__":
 	world.spawn_bob(1,velocity=1,mass=1)
 	world.spawn_bob(1,velocity=1,mass=3)
 	"""
+
+
+
 
 	api = Api(world, 500)
 	ig = Ig_menu()
