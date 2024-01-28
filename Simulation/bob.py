@@ -73,6 +73,9 @@ class Bob:
 		return self.old_position
 	def get_memory_points(self):
 		return self.memory_points
+	
+	def set_max_energy(self, max_energy):
+		self.max_energy = max_energy
 
 
 	
