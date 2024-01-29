@@ -373,10 +373,7 @@ class Bob:
 
 		self.perception_list.sort(key=lambda x: isinstance(x, Food), reverse=True)
 
-		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
-		for i in self.perception_list:
-			for k in i:
-				print(k.__class__.__name__, end=" ")
+
 		return True
 
 
@@ -425,24 +422,24 @@ class Bob:
 				if isinstance(k,Bob):
 					if (self.get_mass()/k.get_mass())<(2/3):
 						self.move_dest(self.case_ou_aller(k,"fuir"))
+						print(self.name, "fuit", k.name)
 						return True
-					
+
 					if (self.get_mass()/k.get_mass())>=(3/2):
 						self.move_dest(self.case_ou_aller(k,"aller"))
+						print(self.name, "va vers", k.name)
 						return True
 
 				elif isinstance(k,Food):
 					self.move_dest(self.case_ou_aller(k,"aller"))
+					print(self.name, "va vers", k.position)
 					return True
-				
+
 		for i in self.memory_space:
 			if isinstance(i,Food):
 				self.move_dest(self.case_ou_aller(i,"aller"))
 				self.memory_points -= 1
 				return True
-		
-
-
 
 		self.move()
 		return True
