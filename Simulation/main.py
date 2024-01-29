@@ -35,18 +35,18 @@ if __name__ == "__main__":
         }
 
 	world = World({
-			"size": 5,
+			"size": 2,
             "nbFood": 0,
             "Food_energy": 100,
             "bob_max_energy": 200,
-            "bob_energy": 100,
+            "bob_energy": 200,
             "bob_velocity": 1,
             "bob_mass": 1,
             "bob_perception": 0,
             "dayTick": 100,
             "bob_mutation": 0,
             "bob_memory_point": 0,
-            "custom_terrain" : True,
+            "custom_terrain" : False,
             "event_days_rate" : 100,
             "toggle_fonction" : toggle_fonction,
 
@@ -63,12 +63,12 @@ if __name__ == "__main__":
 	
 
 	
-	# #Test reproduction_sexual
-	# world.enable_function["reproduce"] = False
-	# world.enable_function["sexual_reproduction"] = True
-	# world.enable_function["move_smart"] = True
-	# world.spawn_bob(1,velocity=1,mass=1)
-	# world.spawn_bob(1,velocity=1,mass=1)
+	#Test reproduction_sexual
+	world.enable_function["reproduce"] = False
+	world.enable_function["sexual_reproduction"] = True
+	world.enable_function["move_smart"] = True
+	world.spawn_bob(1,velocity=1,mass=1)
+	world.spawn_bob(1,velocity=1,mass=1)
 	
 
 	# #Test reproduction
@@ -111,9 +111,9 @@ if __name__ == "__main__":
 	# world.spawn_bob(1,velocity=5,mass=1)
 	# world.spawn_bob(1,velocity=10,mass=1)
 
-	# save("Test height lost energy",world)
+	save("Test reproduction_sexual",world)
 
-	world.spawn_bob(1,velocity=1,mass=1)
+	# world.spawn_bob(1,velocity=1,mass=1)
 	# save("Test height lost energy.pkl",world)
 
 	api = Api(world, 500)

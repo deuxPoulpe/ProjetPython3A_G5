@@ -80,6 +80,8 @@ class Bob:
 	
 	def set_max_energy(self, max_energy):
 		self.max_energy = max_energy
+	def set_energy(self, energy):
+		self.energy = energy
 
 
 	
@@ -107,6 +109,8 @@ class Bob:
 			self.energy -= 0.5
 		elif mode == "move_height":
 			self.energy -= self.mass * self.velocity**2 + arg[0] * self.mass
+		elif mode == "sexual_reproduce":
+			self.energy -= 50
 	
 	def random_name(self):
 		
@@ -357,28 +361,35 @@ class Bob:
 		for k in range(0, len(self.perception_list)): #Gestion des foods de même distance mais différentes values
 			for j in self.perception_list[k].copy():
 				if isinstance(j, Food):
-					tampon.append(j)
-					self.perception_list[k].remove(j)
+					try:
+						tampon.append(j)
+						self.perception_list[k].remove(j)
+					except:
+						break
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
-				self.perception_list[k].append(tampon)
+				for l in tampon:
+					self.perception_list[k].append(l)
 				tampon=[]
 
 		self.perception_list.sort(key=lambda x: isinstance(x, Food), reverse=True)
 
 		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
-
+		for i in self.perception_list:
+			for k in i:
+				print(k.__class__.__name__, end=" ")
 		return True
 
 
 	#deux bobs doivent etre dans la meme case pour se reproduire 
 	def sexual_reproduction(self):
 		for partener in self.world.get_bobs()[self.position]:
-			if (self.position == partener.position and self.energy> 150 and partener.energy > 150 ):
-				self.world.spawn_sexuelreproduction(self,partener)
-				self.energy -=100
-				partener.energy -=100
+			if self.energy >= 150 and partener.get_energy() >= 150 and self != partener:
+				print("reproduction")
+				self.world.spawn_sexuelreproduction(self, partener)
+				self.energy -= 100
+				partener.energy -= 100
 				return True
-		return False 
+		return False
 
 
 	def memory_store(self):
@@ -393,8 +404,11 @@ class Bob:
 			for j in k:
 				if isinstance(j, Food):
 					if len(self.memory_space) > self.memory_points*2:
-						self.memory_space.pop(0)
-					self.memory_space.append(j)
+						try:
+							self.memory_space.pop(0)
+						except:
+							pass
+						self.memory_space.append(j)
 					
 		for e in self.memory_space:
 			if distance(self,e) < self.perception:
@@ -437,13 +451,15 @@ class Bob:
 					
 	def move_dest(self,dest):
 		"""
-        Teleport Bob to a destination
+		Teleport Bob to a destination
 
-        Returns:
-            bool: True after Bob's movement.
-        """
+		Returns:
+			bool: True after Bob's movement.
+		"""
 		old_x, old_y = self.position
 		new_x, new_y = dest
+		if not (0<=new_x and new_x<self.world.get_size() and 0<=new_y and new_y<self.world.get_size()):
+			return False
 
 		if self.world.get_terrain() is not None:
 			terrain = self.world.get_terrain().get_terrain()

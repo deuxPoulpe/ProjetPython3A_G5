@@ -756,7 +756,7 @@ class Ig_menu:
             if self.world is None:
                 self.world = World(self.option_values_sim_validate, self.option_value_terrain_validate)
         
-                ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=self.root, minvalue=1, maxvalue=self.world.get_size()**2)
+                ask_number_of_bob = simpledialog.askinteger("Number of bob", "Enter the number of bob you want to spawn", parent=self.root, minvalue=0, maxvalue=self.world.get_size()**2)
                 if ask_number_of_bob is None:
                     return -1
                 

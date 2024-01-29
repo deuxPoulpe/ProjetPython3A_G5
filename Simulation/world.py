@@ -221,10 +221,10 @@ class World:
 		
 	def spawn_sexuelreproduction(self,mother_bob,dad_bob):
 		mass_mutation = random.choice([-1, 0, 1])
-		child_mass = round(((mother_bob.get_mass()+dad_bob.get_mass())/2)) + mass_mutation if self.enable_function["mass_mutation"] else round(((mother_bob.get_mass()+dad_bob.get_mass())/2))
+		child_mass = round(((mother_bob.get_mass()+dad_bob.get_mass())/2)) + mass_mutation
 		child_mass = max(0, child_mass)
 		
-		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=mother_bob.get_energy()//3,mass=child_mass,perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
+		new_born= Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy=100,mass=child_mass,perception=round(((mother_bob.get_perception()+dad_bob.get_perception())/2)))
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:
 			self.bobs[new_born_pos] = []
