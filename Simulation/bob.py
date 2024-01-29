@@ -1,7 +1,6 @@
 import random
-import food
-
-from queue import *
+from food import Food
+from Utility.time_function_utility import execute_function_after_it
 
 class Bob:
 	"""
@@ -20,7 +19,7 @@ class Bob:
 	"""
 
 
-	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200):
+	def __init__(self, x, y, world, energy=100, velocity=1, mass=1, perception=0, memory_points = 0, max_energy=200 ,):
 		"""
 		Initialise une nouvelle instance de Bob.
 
@@ -45,11 +44,16 @@ class Bob:
 		self.perception_list = []
 		self.max_energy = max_energy
 		self.position = (x, y)
+		self.old_position = (x, y)
 		self.en_fuite = False
 		self.world = world
 		self.case_to_move = 0
 		self.velocity_buffer = 0
+		self.tiles_visited = []
+		self.dead = False
 
+		self.name = self.random_name()
+		
 	def __str__(self):
 		return f"Bob {self.position} {self.velocity} {self.mass} {self.energy} {self.perception} {self.memory_space} {self.en_fuite} {self.world} {self.max_energy}"
 
@@ -63,6 +67,20 @@ class Bob:
 		return self.velocity
 	def get_perception(self):
 		return self.perception
+	def get_name (self) : 
+		return self.name
+	def get_old_pos(self):
+		return self.old_position
+	def get_memory_points(self):
+		return self.memory_points
+	def get_world(self):
+		return self.world
+	def is_dead(self):
+		return self.dead
+	
+	def set_max_energy(self, max_energy):
+		self.max_energy = max_energy
+
 
 	
 	def eat_food(self):
@@ -79,12 +97,35 @@ class Bob:
 		else:
 			return False
 
-	def loose_energy(self, mode):
+	def loose_energy(self, mode,*arg):
 		if mode == "move":
 			self.energy -= self.mass * self.velocity**2
 		elif mode == "stand":
+			self.energy -= 0.5
+		elif mode == "self_reproduce":
+			self.energy -= 3*self.max_energy/4
+			self.energy -= 0.5
+		elif mode == "move_height":
+			self.energy -= self.mass * self.velocity**2 + arg[0] * self.mass
+	
+	def random_name(self):
+		
+		
+		vowels = 'aeiouy'
+		consones = 'bcdfghjklmnpqrstvwxz'
+		taille_name = random.randint(3, 8)
+		name= ''
+		
+		for i in range (taille_name):
+			if i%2 == 0 : 
+				name += random.choice(consones)
+			else : 
+				name += random.choice(vowels)
+			name = name.capitalize()
+		return name
+			
+		
 
-			self.energy -= 0.5	
 
 	def move(self):
 		"""
@@ -94,15 +135,33 @@ class Bob:
             bool: True after Bob's movement.
         """
 		old_x, old_y = self.position
-		dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-		new_x, new_y = old_x + dx, old_y + dy
-		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
-						max(0, min(new_y, self.world.get_size() - 1)))
-		self.world.move_bob(self, old_x, old_y)
-		self.loose_energy("move")
+		def choose_random_position(old_x, old_y):
+			dx, dy = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (0, 0)])
+			x, y = old_x + dx, old_y + dy
+			x = max(0, min(x, self.world.get_size() - 1))
+			y = max(0, min(y, self.world.get_size() - 1))
 
+			return x, y
+		
+		if self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			new_x, new_y = choose_random_position(old_x, old_y)
+			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+			while terrain[new_x][new_y] <= self.world.get_water_level():
+				new_x, new_y = choose_random_position(old_x, old_y)
+				height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
 
-	
+		else:
+			new_x, new_y = choose_random_position(old_x, old_y)
+			height_diff = 0
+
+		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass or (new_x, new_y) == (old_x, old_y):
+			self.loose_energy("stand")
+		else:
+			self.position = (new_x, new_y)
+			self.world.move_bob(self, old_x, old_y)
+
+			self.loose_energy("move_height", height_diff)
 
 		return True
 
@@ -114,8 +173,15 @@ class Bob:
             bool: True if Bob dies, False otherwise.
         """
 		if self.energy <= 0:
-			self.world.kill_bob(self)
+			self.make_it_dead = 3
+			self.dead = True
 			return True
+		elif self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			if terrain[self.position[0]][self.position[1]] <= self.world.get_water_level():
+				self.make_it_dead = 3
+				self.dead = True
+				return True
 		else:
 			return False
 
@@ -128,7 +194,7 @@ class Bob:
         """
 		if self.energy >= self.max_energy:
 			self.world.spawn_reproduce(self)
-			self.energy -= 150
+			self.loose_energy("self_reproduce")
 			return True
 		else:
 			return False
@@ -140,39 +206,46 @@ class Bob:
         Returns:
             None
         """
+		if self.dead:
+			self.make_it_dead -= 1
+			if self.make_it_dead <= 0:
+				self.world.kill_bob(self)
+			return None
 
 		if self.die():
 			return None
-		
-		self.mutate_memory_points()
+		#self.mutate_memory_points()
 		self.velocity_manager()
-
+		self.old_position = self.position
+  
 		while self.case_to_move > 0:
 
-			if self.world.enable_function["reproduce"]:
+			#if self.world.enable_function["reproduce"]:
 				if (self.reproduce()):
 					self.loose_energy("stand")
-			elif self.world.enable_function["sexual_reproduction"]:
+			#elif self.world.enable_function["sexual_reproduction"]:
 				if(self.sexual_reproduction()):
 					self.loose_energy("stand")
 
-			if self.world.enable_function["perception"]:
+			#if self.world.enable_function["perception"]:
 				self.bob_perception_v2()
-			if self.world.enable_function["memory"]:
+			#if self.world.enable_function["memory"]:
 				self.memory_store()
 
-			if self.world.enable_function["move_smart"]:
+			#if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
-					self.loose_energy("move")
-				self.case_to_move -= 1
+					self.case_to_move -= 1
 
-			else:
+			#else:
 				self.move()
-				self.loose_energy("move")
 				self.case_to_move -= 1
 				
-			self.world.enable_function["eat_bob"]: (self.eat_bob())
-			self.eat_food()
+			#if self.world.enable_function["eat_bob"]:
+				self.eat_bob()
+				self.eat_food()
+
+				if self.die():
+					return None
 
 	
 	
@@ -182,7 +255,7 @@ class Bob:
 		self.velocity_buffer += self.velocity-abs(self.velocity)
 		if self.velocity_buffer > 0:
 			self.velocity_buffer -= 1
-			case_to_move += 1
+			self.case_to_move += 1
 	
 	def eat_bob(self):
 		"""
@@ -199,7 +272,7 @@ class Bob:
 				if (self.energy + bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())) >= self.max_energy:
 					self.energy = self.max_energy
 				else:
-					self.energy += bob.get_energy()/2*(1-bob.get_mass()/self.get_mass())
+					self.energy += int(bob.get_energy()/2*(1-bob.get_mass()/self.get_mass()))
 				self.world.kill_bob(bob)
 				return True
 		return False
@@ -236,7 +309,6 @@ class Bob:
 
 		return perception_list
 
-
 	def bob_get_things_by_distance(self,distance):
 			"""
 			Permet à Bob de percevoir uniquement les objets à une distance précise de lui.
@@ -244,28 +316,28 @@ class Bob:
 			deplacement=0
 			x=self.get_pos()[0]-distance
 			y=self.get_pos()[1]
-
-			
+			self.perception_list.append([])
 
 			while x <= self.get_pos()[0]:
 
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
-				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
+					self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				# if (x,y-deplacement) in self.world.get_bobs():
+				# 	for bob in self.world.get_bobs()[(x,y-deplacement)]:
+				# 		self.perception_list.append(bob)
 
-				x-=1
+				x+=1
 				deplacement+=1
 
 			deplacement=0
 			x=self.get_pos()[0]+distance
 
 			while x > self.get_pos()[0]:
-
 				if (x,y+deplacement) in self.world.get_foods():
-						self.perception_list[distance].append(self.world.get_foods()[(x,y+deplacement)])
-				if (x,y-deplacement) in self.world.get_bobs():
-						self.perception_list[distance].append(self.world.get_bobs()[(x,y-deplacement)])
+					self.perception_list.append(self.world.get_foods()[(x,y+deplacement)])
+				# if (x,y-deplacement) in self.world.get_bobs():
+				# 	for bob in self.world.get_bobs()[(x,y-deplacement)]:
+				# 		self.perception_list[distance].append(bob)
 
 				x-=1
 				deplacement+=1
@@ -283,15 +355,15 @@ class Bob:
 
 		tampon=[]
 		for k in range(0, len(self.perception_list)): #Gestion des foods de même distance mais différentes values
-			for j in self.perception_list[k].copy():
-				if isinstance(j,food.Food):
+			for j in self.perception_list:
+				if isinstance(j, Food):
 					tampon.append(j)
 					self.perception_list[k].remove(j)
 				tampon = sorted(tampon, key=lambda food: food.value, reverse=True)
-				self.perception_list[k].append(tampon)
+				self.perception_list.append(tampon)
 				tampon=[]
 
-		self.perception_list.sort(key=lambda x: isinstance(x,food.Food), reverse=True)
+		self.perception_list.sort(key=lambda x: isinstance(x, Food), reverse=True)
 
 		#self.perception_list.sort(key=lambda x: x.mass isinstance(x,Bob))
 
@@ -309,8 +381,6 @@ class Bob:
 		return False 
 
 
-
-
 	def memory_store(self):
 
 		"""
@@ -321,7 +391,7 @@ class Bob:
 		
 		for k in self.perception_list:
 			for j in k:
-				if isinstance(j,food.Food):
+				if isinstance(j, Food):
 					if len(self.memory_space) > self.memory_points*2:
 						self.memory_space.pop(0)
 					self.memory_space.append(j)
@@ -330,48 +400,38 @@ class Bob:
 			if distance(self,e) < self.perception:
 				self.memory_space.remove(e)
 				self.memory_points -= 1
-		
+
 		self.memory_space.sort(key=lambda food: food.value, reverse=True)
 		return True
-		
-
-
-	def mutate_memory_points(self):
-		
-		"""
-		Fonction qui modifie de façon aléatoire les points de mémoire du bob. Ce qui lui permet de sauvegarder plus ou moins d'objet dans sa liste de perception.
-
-		"""
-
-		values = [-1, 0 , 1]
-
-		mutation = random.choice(values)
-
-		self.memory_points += mutation
-
-		return self.memory_points
+	
 
 	def move_smart(self): #fonction qui permet à bob de se déplacer de façon intelligente d'une seule case !
 		for j in self.perception_list:
-			for k in j:
-				if isinstance(k,Bob):
-					if (self.get_mass()/k.get_mass())<(2/3):
-						self.move_dest(self.case_ou_aller(k,"fuir"))
-						return True
-					
-					if (self.get_mass()/k.get_mass())>=(3/2):
+			for i in range(len(self.perception_list)-1):
+				print (self.perception_list[i])
+				for k in j:
+					if isinstance(k,Bob):
+						if (self.get_mass()/k.get_mass())<(2/3):
+							self.move_dest(self.case_ou_aller(k,"fuir"))
+							return True
+						
+						if (self.get_mass()/k.get_mass())>=(3/2):
+							self.move_dest(self.case_ou_aller(k,"aller"))
+							return True
+
+					elif isinstance(k,Food):
 						self.move_dest(self.case_ou_aller(k,"aller"))
 						return True
-
-				elif isinstance(k,food.Food):
-					self.move(self.case_ou_aller(k,"aller"))
-					return True
 				
 		for i in self.memory_space:
-			if isinstance(i,food.Food):
-				self.move(self.case_ou_aller(i,"aller"))
+			if isinstance(i,Food):
+				self.move_dest(self.case_ou_aller(i,"aller"))
+				self.memory_points -= 1
 				return True
-			
+		
+
+
+
 		self.move()
 		return True
 			
@@ -386,10 +446,21 @@ class Bob:
         """
 		old_x, old_y = self.position
 		new_x, new_y = dest
-		self.position = (max(0, min(new_x, self.world.get_size() - 1)),
-						max(0, min(new_y, self.world.get_size() - 1)))
-		self.world.move_bob(self, old_x, old_y)
-		#self.loose_energy("move")
+
+		if self.world.get_terrain() is not None:
+			terrain = self.world.get_terrain().get_terrain()
+			height_diff = terrain[new_x][new_y] - terrain[old_x][old_y]
+		else:
+			height_diff = 0
+
+		if self.energy < self.mass * self.velocity**2 + height_diff * self.mass:
+			self.loose_energy("stand")
+
+		else:
+			self.position = (new_x, new_y)
+			self.world.move_bob(self, old_x, old_y)
+			self.loose_energy("move_height", height_diff)
+			return True
 
 
 	def case_ou_aller(self, bob , mode):
