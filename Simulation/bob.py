@@ -198,6 +198,14 @@ class Bob:
 			return True
 		else:
 			return False
+		
+	def velocity_manager(self):
+
+		self.case_to_move += abs(self.velocity)
+		self.velocity_buffer += self.velocity-abs(self.velocity)
+		if self.velocity_buffer > 0:
+			self.velocity_buffer -= 1
+			self.case_to_move += 1
 
 	def update_tick(self):
 		"""
@@ -220,27 +228,27 @@ class Bob:
   
 		while self.case_to_move > 0:
 
-			#if self.world.enable_function["reproduce"]:
+			if self.world.enable_function["reproduce"]:
 				if (self.reproduce()):
 					self.loose_energy("stand")
-			#elif self.world.enable_function["sexual_reproduction"]:
+			elif self.world.enable_function["sexual_reproduction"]:
 				if(self.sexual_reproduction()):
 					self.loose_energy("stand")
 
-			#if self.world.enable_function["perception"]:
+			if self.world.enable_function["perception"]:
 				self.bob_perception_v2()
-			#if self.world.enable_function["memory"]:
+			if self.world.enable_function["memory"]:
 				self.memory_store()
 
-			#if self.world.enable_function["move_smart"]:
+			if self.world.enable_function["move_smart"]:
 				if (self.move_smart()):
 					self.case_to_move -= 1
 
-			#else:
+			else:
 				self.move()
 				self.case_to_move -= 1
 				
-			#if self.world.enable_function["eat_bob"]:
+			if self.world.enable_function["eat_bob"]:
 				self.eat_bob()
 				self.eat_food()
 
@@ -249,13 +257,7 @@ class Bob:
 
 	
 	
-	def velocity_manager(self):
 
-		self.case_to_move += abs(self.velocity)
-		self.velocity_buffer += self.velocity-abs(self.velocity)
-		if self.velocity_buffer > 0:
-			self.velocity_buffer -= 1
-			self.case_to_move += 1
 	
 	def eat_bob(self):
 		"""
@@ -400,6 +402,7 @@ class Bob:
 			if distance(self,e) < self.perception:
 				self.memory_space.remove(e)
 				self.memory_points -= 1
+				self.move_dest(self.case_ou_aller(e,"aller"))
 
 		self.memory_space.sort(key=lambda food: food.value, reverse=True)
 		return True
