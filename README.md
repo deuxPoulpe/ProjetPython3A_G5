@@ -21,6 +21,6 @@ we finna get it done
 
 ### if after all the installation, you encounter an error about tkinter (on linux), you need to execute this command
 
-    ```
-    sudo apt-get install python3-tk
-    ```
+```
+sudo apt-get install python3-tk
+```
