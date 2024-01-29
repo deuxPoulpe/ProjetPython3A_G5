@@ -209,7 +209,7 @@ class World:
 		child_memory = max(0, child_memory)
 
 
-		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = 50, velocity = child_velocity, perception= child_perception, memory_points=child_memory)
+		new_born = Bob(mother_bob.get_pos()[0],mother_bob.get_pos()[1],self,energy = mother_bob.get_energy()//4, velocity = child_velocity, perception= child_perception, memory_points=child_memory)
 		
 		new_born_pos = new_born.get_pos()
 		if not new_born_pos in self.bobs:

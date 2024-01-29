@@ -49,7 +49,7 @@ while True:
             exit()
 
 
-    x += 1
+    x += 5
     sleep(0.1)
     # Mettre à jour la couleur de Bob en fonction de x
     bob_updated = update_bob_color(x)

@@ -277,7 +277,7 @@ class Bob:
 					self.energy = self.max_energy
 				else:
 					self.energy += int(bob.get_energy()/2*(1-bob.get_mass()/self.get_mass()))
-				self.world.kill_bob(bob)
+				bob.energy = -1
 				return True
 		return False
 	
